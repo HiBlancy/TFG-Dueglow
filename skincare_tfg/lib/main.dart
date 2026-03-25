@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:skincare_tfg/screens/about_screen.dart';
+import 'package:skincare_tfg/screens/settings_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/register_screen.dart';
@@ -30,6 +32,8 @@ class MyApp extends StatelessWidget {
         AppConstants.routeHome: (context) => const HomeScreen(),
         AppConstants.routeRegister: (context) => const RegisterScreen(),
         AppConstants.routeProfile: (context) => const ProfileScreen(),
+        AppConstants.routeSettings: (context) => const SettingsScreen(),
+        AppConstants.routeAbout: (context) => const AboutScreen(),
       },
       debugShowCheckedModeBanner: false,
     );
