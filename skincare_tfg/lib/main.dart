@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/register_screen.dart';
+import 'screens/profile_screen.dart';
+import 'constants/app_constants.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,7 +15,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Mi App',
+      title: AppConstants.appName,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
@@ -21,11 +24,12 @@ class MyApp extends StatelessWidget {
           centerTitle: true,
         ),
       ),
-      // Configuración de rutas para navegación profesional
-      initialRoute: '/',
+      initialRoute: AppConstants.routeLogin,
       routes: {
-        '/': (context) => const LoginScreen(),
-        '/home': (context) => const HomeScreen(),
+        AppConstants.routeLogin: (context) => const LoginScreen(),
+        AppConstants.routeHome: (context) => const HomeScreen(),
+        AppConstants.routeRegister: (context) => const RegisterScreen(),
+        AppConstants.routeProfile: (context) => const ProfileScreen(),
       },
       debugShowCheckedModeBanner: false,
     );
