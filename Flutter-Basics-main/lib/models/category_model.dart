@@ -45,6 +45,14 @@ class CategoryModel {
         boxColor: Color(0xffEEA4CE)
       )
     );
+
+    categories.add(
+      CategoryModel(
+        name: 'Smoothies',
+        iconPath: 'assets/icons/orange-snacks.svg',
+        boxColor: Color.fromARGB(255, 173, 238, 164)
+      )
+    );
     
 
     return categories;

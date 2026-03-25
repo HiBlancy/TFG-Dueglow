@@ -1,0 +1,31 @@
+name: skincare_tfg
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.11.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  #almacenamiento local de la sesion
+  shared_preferences: ^2.2.2
+
+  #iconos
+  cupertino_icons: ^1.0.6
+  
+  #manejo de rutas
+  go_router: ^14.0.0
+  
+  #almacenamiento seguro (token de sesion)
+  flutter_secure_storage: ^9.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
