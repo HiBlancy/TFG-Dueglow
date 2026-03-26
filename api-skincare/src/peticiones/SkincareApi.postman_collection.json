@@ -1,0 +1,190 @@
+{
+  "info": {
+    "name": "Users API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Create User (Register)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Juan Pérez\",\n  \"email\": \"juan@example.com\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/users",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/users/:id",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["users", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "67e3a5f1b2c3d4e5f6a7b8c9",
+                  "description": "User ID (MongoDB ObjectId)"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Juan Carlos Pérez\",\n  \"email\": \"juancarlos@example.com\",\n  \"password\": \"newpassword123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/users/:id",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["users", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "67e3a5f1b2c3d4e5f6a7b8c9",
+                  "description": "User ID (MongoDB ObjectId)"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User (Partial - Only Name)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"María González\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/users/:id",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["users", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "67e3a5f1b2c3d4e5f6a7b8c9",
+                  "description": "User ID (MongoDB ObjectId)"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User (Partial - Only Email)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nuevoemail@example.com\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/users/:id",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["users", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "67e3a5f1b2c3d4e5f6a7b8c9",
+                  "description": "User ID (MongoDB ObjectId)"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User (Partial - Only Password)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"newpassword789\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/users/:id",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["users", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "67e3a5f1b2c3d4e5f6a7b8c9",
+                  "description": "User ID (MongoDB ObjectId)"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+}
