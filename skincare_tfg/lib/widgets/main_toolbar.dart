@@ -1,13 +1,11 @@
-// lib/widgets/main_toolbar.dart
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../constants/app_constants.dart';
 
 class CustomAppBar extends StatefulWidget {
   final String title;
-  final Widget child; // Cambiado de 'body' a 'child'
+  final Widget child;
   final List<Widget>? actions;
-  final Color? backgroundColor;
-  final bool centerTitle;
   final bool showDrawer;
   final bool showBackButton;
 
@@ -16,8 +14,6 @@ class CustomAppBar extends StatefulWidget {
     required this.title,
     required this.child,
     this.actions,
-    this.backgroundColor,
-    this.centerTitle = true,
     this.showDrawer = true,
     this.showBackButton = false,
   });
@@ -27,7 +23,6 @@ class CustomAppBar extends StatefulWidget {
 }
 
 class _CustomAppBarState extends State<CustomAppBar> {
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _authService = AuthService();
   String _userName = '';
   String _userEmail = '';
@@ -49,13 +44,6 @@ class _CustomAppBarState extends State<CustomAppBar> {
     }
   }
 
-  void _navigateTo(String route) {
-    _scaffoldKey.currentState?.closeEndDrawer();
-    if (mounted) {
-      Navigator.pushNamed(context, route);
-    }
-  }
-
   void _goBack() {
     if (Navigator.canPop(context)) {
       Navigator.pop(context);
@@ -65,36 +53,32 @@ class _CustomAppBarState extends State<CustomAppBar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
       appBar: AppBar(
-        title: Text(widget.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-        centerTitle: widget.centerTitle,
-        backgroundColor: widget.backgroundColor,
+        title: Text(widget.title),
+        centerTitle: true,
         leading: widget.showBackButton 
             ? IconButton(
                 icon: const Icon(Icons.arrow_back),
                 onPressed: _goBack,
-                tooltip: 'Atrás',
               )
             : null,
         actions: [
           ...?widget.actions,
           if (widget.showDrawer)
-            IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
-              tooltip: 'Menú',
+            Builder(
+              builder: (context) => IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () => Scaffold.of(context).openEndDrawer(),
+              ),
             ),
         ],
       ),
-      endDrawer: widget.showDrawer ? _buildDrawer() : null,
+      endDrawer: widget.showDrawer ? _buildDrawer(context) : null,
       body: widget.child,
     );
   }
 
-  Widget _buildDrawer() {
-    final currentRoute = ModalRoute.of(context)?.settings.name;
-    
+  Widget _buildDrawer(BuildContext context) {
     return Drawer(
       child: SafeArea(
         child: Column(
@@ -102,21 +86,18 @@ class _CustomAppBarState extends State<CustomAppBar> {
             _buildDrawerHeader(),
             Expanded(
               child: ListView(
-                padding: EdgeInsets.zero,
                 children: [
-                  _buildDrawerItem(Icons.home, 'Inicio', '/home', currentRoute == '/home'),
+                  _buildDrawerItem(context, Icons.home, 'Inicio', AppConstants.routeHome),
+                  _buildDrawerItem(context, Icons.person, 'Mi Perfil', AppConstants.routeProfile),
                   const Divider(),
-                  _buildDrawerItem(Icons.person, 'Mi Perfil', '/profile', currentRoute == '/profile'),
-                  _buildDrawerItem(Icons.settings, 'Configuración', '/settings', currentRoute == '/settings'),
-                  _buildDrawerItem(Icons.info, 'Acerca de', '/about', currentRoute == '/about'),
+                  _buildDrawerItem(context, Icons.settings, 'Configuración', AppConstants.routeSettings),
+                  _buildDrawerItem(context, Icons.info, 'Acerca de', AppConstants.routeAbout),
                   const Divider(),
                   _buildDrawerItem(
-                    Icons.logout, 
-                    'Cerrar sesión', 
+                    context,
+                    Icons.logout,
+                    'Cerrar sesión',
                     null,
-                    false,
-                    iconColor: Colors.red,
-                    textColor: Colors.red,
                     isLogout: true,
                   ),
                 ],
@@ -124,7 +105,10 @@ class _CustomAppBarState extends State<CustomAppBar> {
             ),
             Padding(
               padding: const EdgeInsets.all(16),
-              child: Text('Versión 1.0.0', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+              child: Text(
+                'Versión 1.0.0',
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              ),
             ),
           ],
         ),
@@ -146,36 +130,46 @@ class _CustomAppBarState extends State<CustomAppBar> {
             child: Icon(Icons.person, size: 40, color: Colors.blue),
           ),
           const SizedBox(height: 12),
-          Text(_userName, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+          Text(
+            _userName,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 4),
-          Text(_userEmail, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+          Text(
+            _userEmail,
+            style: const TextStyle(color: Colors.white70, fontSize: 12),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildDrawerItem(
+    BuildContext context,
     IconData icon,
     String title,
-    String? route,
-    bool isSelected, {
-    Color? iconColor,
-    Color? textColor,
+    String? route, {
     bool isLogout = false,
   }) {
     return ListTile(
-      leading: Icon(icon, color: iconColor),
-      title: Text(title, style: TextStyle(color: textColor)),
-      tileColor: isSelected ? Colors.grey.shade100 : null,
+      leading: Icon(icon, color: isLogout ? Colors.red : null),
+      title: Text(title, style: TextStyle(color: isLogout ? Colors.red : null)),
       onTap: isLogout
           ? () async {
-              _scaffoldKey.currentState?.closeEndDrawer();
+              Navigator.pop(context); // Cerrar drawer
               await _authService.logout();
               if (mounted) {
-                Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+                Navigator.pushReplacementNamed(context, AppConstants.routeLogin);
               }
             }
-          : () => _navigateTo(route!),
+          : () {
+              Navigator.pop(context); // Cerrar drawer
+              Navigator.pushNamed(context, route!);
+            },
     );
   }
 }

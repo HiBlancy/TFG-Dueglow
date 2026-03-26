@@ -1,86 +1,32 @@
-// lib/widgets/bottom_nav_bar.dart
 import 'package:flutter/material.dart';
 
-class BottomNavBar extends StatefulWidget {
-  final Widget body; // La pantalla actual que se muestra
-  final int initialIndex;
+class BottomNavBar extends StatelessWidget {
+  final int currentIndex;
+  final Widget child;
+  final Function(int) onTap;
 
   const BottomNavBar({
     super.key,
-    required this.body,
-    this.initialIndex = 0,
+    required this.currentIndex,
+    required this.child,
+    required this.onTap,
   });
-
-  @override
-  State<BottomNavBar> createState() => _BottomNavBarState();
-}
-
-class _BottomNavBarState extends State<BottomNavBar> {
-  late int _currentIndex;
-
-  @override
-  void initState() {
-    super.initState();
-    _currentIndex = widget.initialIndex;
-  }
-
-  void _onTap(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-    
-    // Lógica de navegación interna
-    switch (index) {
-      case 0:
-        Navigator.pushReplacementNamed(context, '/profile');
-        break;
-      case 1:
-        Navigator.pushReplacementNamed(context, '/profile');
-        break;
-      case 2:
-        Navigator.pushReplacementNamed(context, '/profile');
-        break;
-      case 3:
-        Navigator.pushReplacementNamed(context, '/profile');
-        break;
-      case 4:
-        Navigator.pushReplacementNamed(context, '/profile');
-        break;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: widget.body,
+      body: child,
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: _onTap,
+        currentIndex: currentIndex,
+        onTap: onTap,
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Theme.of(context).primaryColor,
         unselectedItemColor: Colors.grey,
-        selectedFontSize: 12,
-        unselectedFontSize: 12,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
             activeIcon: Icon(Icons.home),
             label: 'Inicio',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search_outlined),
-            activeIcon: Icon(Icons.search),
-            label: 'Buscar',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.camera_alt_outlined),
-            activeIcon: Icon(Icons.camera_alt_outlined),
-            label: 'Escanear',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite_outline),
-            activeIcon: Icon(Icons.favorite),
-            label: 'Favoritos',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),

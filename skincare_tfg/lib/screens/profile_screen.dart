@@ -1,7 +1,9 @@
-// lib/screens/profile_screen.dart
+// screens/profile_screen.dart
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../widgets/bottom_app_bar.dart';
 import '../widgets/main_toolbar.dart';
+import '../constants/app_constants.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -14,6 +16,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _authService = AuthService();
   String _userName = '';
   String _userEmail = '';
+  int _currentIndex = 1;
 
   @override
   void initState() {
@@ -32,86 +35,78 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return CustomAppBar(
-      title: 'Mi Perfil',
-      showDrawer: true,
-      showBackButton: true,
-      child: ProfileContent(
-        userName: _userName,
-        userEmail: _userEmail,
-      ),
-    );
+  void _onTabTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+    
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, AppConstants.routeHome);
+        break;
+      case 1:
+        // Ya estamos en Profile
+        break;
+    }
   }
-}
-
-
-
-class ProfileContent extends StatelessWidget {
-  final String userName;
-  final String userEmail;
-
-  const ProfileContent({
-    super.key,
-    required this.userName,
-    required this.userEmail,
-  });
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const CircleAvatar(
-            radius: 60,
-            backgroundColor: Colors.blue,
-            child: Icon(
-              Icons.person,
-              size: 70,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            userName,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).primaryColor,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            userEmail,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
-          ),
-          const SizedBox(height: 24),
-          Card(
-            margin: const EdgeInsets.symmetric(horizontal: 24),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  _buildInfoRow(context, Icons.email, 'Correo electrónico', userEmail),
-                  const Divider(),
-                  _buildInfoRow(context, Icons.phone, 'Teléfono', '+34 123 456 789'),
-                  const Divider(),
-                  _buildInfoRow(context, Icons.cake, 'Fecha de nacimiento', '01/01/1990'),
-                ],
+    return BottomNavBar(
+      currentIndex: _currentIndex,
+      onTap: _onTabTapped,
+      child: CustomAppBar(
+        title: 'Mi Perfil',
+        showDrawer: true,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(height: 20),
+              const CircleAvatar(
+                radius: 60,
+                backgroundColor: Colors.blue,
+                child: Icon(Icons.person, size: 70, color: Colors.white),
               ),
-            ),
+              const SizedBox(height: 24),
+              Text(
+                _userName,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _userEmail,
+                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 24),
+              Card(
+                margin: const EdgeInsets.symmetric(horizontal: 24),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      _buildInfoRow(Icons.email, 'Correo electrónico', _userEmail),
+                      const Divider(),
+                      _buildInfoRow(Icons.phone, 'Teléfono', '+34 123 456 789'),
+                      const Divider(),
+                      _buildInfoRow(Icons.cake, 'Fecha de nacimiento', '01/01/1990'),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildInfoRow(BuildContext context, IconData icon, String label, String value) {
+  Widget _buildInfoRow(IconData icon, String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -129,10 +124,7 @@ class ProfileContent extends StatelessWidget {
           const Spacer(),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
           ),
         ],
       ),

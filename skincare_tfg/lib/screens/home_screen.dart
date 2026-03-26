@@ -1,8 +1,9 @@
-// lib/screens/home_screen.dart
+// screens/home_screen.dart
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
-import '../widgets/main_toolbar.dart';
 import '../widgets/bottom_app_bar.dart';
+import '../widgets/main_toolbar.dart';
+import '../constants/app_constants.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,6 +15,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _authService = AuthService();
   String _userName = '';
+  int _currentIndex = 0;
 
   @override
   void initState() {
@@ -30,45 +32,50 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
- @override
-  Widget build(BuildContext context) {
-    // El body que se pasa al BottomNavBar debe ser el contenido de la pantalla actual
-    // El BottomNavBar se encargará de la navegación entre pantallas
-    return BottomNavBar(
-      initialIndex: 0,
-      body: CustomAppBar(
-        title: 'MiAppName',
-        showDrawer: true,
-        showBackButton: false,
-        child: HomeContent(userName: _userName),
-      ),
-    );
+  void _onTabTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+    
+    // Navegar según el índice
+    switch (index) {
+      case 0:
+        // Ya estamos en Home
+        break;
+      case 1:
+        Navigator.pushReplacementNamed(context, AppConstants.routeProfile);
+        break;
+    }
   }
-}
-
-class HomeContent extends StatelessWidget {
-  final String userName;
-
-  const HomeContent({super.key, required this.userName});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Text(
-            '¡Hola $userName!',
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
+    return BottomNavBar(
+      currentIndex: _currentIndex,
+      onTap: _onTabTapped,
+      child: CustomAppBar(
+        title: AppConstants.appName,
+        showDrawer: true,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '¡Hola $_userName!',
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24),
+                child: Text(
+                  'Has iniciado sesión correctamente.\nPróximamente conectaremos con una base de datos.',
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          const Text(
-            'Has iniciado sesión correctamente.\nPróximamente conectaremos con una base de datos.',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-            textAlign: TextAlign.center,
-          ),
-        ],
+        ),
       ),
     );
   }

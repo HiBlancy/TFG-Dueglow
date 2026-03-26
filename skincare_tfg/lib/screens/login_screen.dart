@@ -3,8 +3,7 @@ import 'package:flutter/services.dart';
 import '../services/auth_service.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_button.dart';
-import 'home_screen.dart';
-import 'register_screen.dart';
+import '../screens/home_screen.dart'; 
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -18,7 +17,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authService = AuthService();
-  
+
   bool _isPasswordVisible = false;
   bool _isLoading = false;
 
@@ -31,18 +30,22 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     setState(() => _isLoading = true);
-    
+
     final success = await _authService.login(
       _emailController.text.trim(),
       _passwordController.text,
     );
-    
+
     setState(() => _isLoading = false);
-    
+
     if (success && mounted) {
-      Navigator.pushReplacementNamed(context, '/home');
+      // 👈 Navegar directamente a HomeScreen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
     } else if (mounted) {
       _showErrorDialog();
     }
@@ -122,11 +125,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       obscureText: !_isPasswordVisible,
                       showVisibilityToggle: true,
                       onToggleVisibility: () {
-                        setState(() => _isPasswordVisible = !_isPasswordVisible);
+                        setState(
+                          () => _isPasswordVisible = !_isPasswordVisible,
+                        );
                       },
                       textInputAction: TextInputAction.done,
                       validator: (value) {
-                        if (value?.isEmpty ?? true) return 'Ingrese su contraseña';
+                        if (value?.isEmpty ?? true)
+                          return 'Ingrese su contraseña';
                         if (value!.length < 6) return 'Mínimo 6 caracteres';
                         return null;
                       },
@@ -148,21 +154,21 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildHeader() => const Column(
-        children: [
-          Text(
-            'Skincare App',
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Inicia sesión para continuar',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-          ),
-        ],
-      );
+    children: [
+      Text(
+        'Skincare App',
+        style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+      ),
+      SizedBox(height: 8),
+      Text(
+        'Inicia sesión para continuar',
+        style: TextStyle(fontSize: 16, color: Colors.grey),
+      ),
+    ],
+  );
 
   Widget _buildLoginButton() {
-     return context.primaryButton(
+    return context.primaryButton(
       'Iniciar Sesión',
       _login,
       isLoading: _isLoading,
@@ -170,32 +176,33 @@ class _LoginScreenState extends State<LoginScreen> {
       icon: Icons.person_add,
     );
   }
+
   Widget _buildRegisterButton() {
     return context.secondaryButton(
       'Crear Cuenta',
       () => Navigator.pushNamed(context, '/register'),
       size: ButtonSize.full,
-      );
+    );
   }
 
-  Widget _buildTestCredentials() => Container(
-        margin: const EdgeInsets.only(top: 20),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.blue.shade50,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.blue.shade100),
+   Widget _buildTestCredentials() => Container(
+    margin: const EdgeInsets.only(top: 20),
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: Colors.blue.shade50,
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(color: Colors.blue.shade100),
+    ),
+    child: const Column(
+      children: [
+        Text(
+          '📱 Credenciales de prueba:',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
         ),
-        child: const Column(
-          children: [
-            Text(
-              '📱 Credenciales de prueba:',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-            ),
-            SizedBox(height: 8),
-            Text('Email: usuario@ejemplo.com', style: TextStyle(fontSize: 12)),
-            Text('Contraseña: 123456', style: TextStyle(fontSize: 12)),
-          ],
-        ),
-      );
+        SizedBox(height: 8),
+        Text('Email: usuario@ejemplo.com', style: TextStyle(fontSize: 12)),
+        Text('Contraseña: 123456', style: TextStyle(fontSize: 12)),
+      ],
+    ),
+  );
 }

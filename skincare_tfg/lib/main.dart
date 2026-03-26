@@ -1,3 +1,4 @@
+// main.dart
 import 'package:flutter/material.dart';
 import 'package:skincare_tfg/screens/about_screen.dart';
 import 'package:skincare_tfg/screens/settings_screen.dart';
