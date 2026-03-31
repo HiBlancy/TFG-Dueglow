@@ -89,6 +89,7 @@ let UsersService = class UsersService {
             if (emailExists) {
                 throw new common_1.ConflictException('El email ya está registrado por otro usuario');
             }
+            updateUserDto.email = updateUserDto.email.toLowerCase();
         }
         if (updateUserDto.password) {
             updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);

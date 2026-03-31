@@ -1,4 +1,3 @@
-// screens/settings_screen.dart
 import 'package:flutter/material.dart';
 import '../widgets/main_toolbar.dart';
 

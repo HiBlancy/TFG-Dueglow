@@ -47,6 +47,9 @@ exports.UserSchema = new mongoose_1.Schema({
     },
     password: { type: String, required: true },
     isActive: { type: Boolean, default: true },
+    phone: { type: String, required: false, trim: true },
+    birthDate: { type: String, required: false },
+    profileImage: { type: String, required: false },
 }, { timestamps: true });
 exports.UserSchema.methods.comparePassword = async function (candidatePassword) {
     return bcrypt.compare(candidatePassword, this.password);

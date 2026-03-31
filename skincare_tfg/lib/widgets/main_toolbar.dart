@@ -62,6 +62,7 @@ class CustomAppBar extends StatelessWidget {
                   // _buildDrawerItem(context, Icons.person, 'Mi Perfil', AppConstants.routeProfile),
                   // const Divider(),
                   _buildDrawerItem(context, Icons.settings, 'Configuración', AppConstants.routeSettings),
+                  _buildDrawerItem(context, Icons.edit, 'Editar Perfil', AppConstants.routeEdit),
                   _buildDrawerItem(context, Icons.info, 'Acerca de', AppConstants.routeAbout),
                   const Divider(),
                   _buildDrawerItem(

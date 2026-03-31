@@ -13,11 +13,14 @@ export const UserSchema = new Schema(
     },
     password: { type: String, required: true },
     isActive: { type: Boolean, default: true },
+    phone: { type: String, required: false, trim: true },
+    birthDate: { type: String, required: false },
+    profileImage: { type: String, required: false },
   },
   { timestamps: true },
 );
 
-//comparacion de contrasenas
+// comparación de contraseñas
 UserSchema.methods.comparePassword = async function (
   candidatePassword: string,
 ): Promise<boolean> {

@@ -1,7 +1,11 @@
+// lib/models/user.dart
 class User {
   final String id;
   final String name;
   final String email;
+  final String? phone;
+  final String? birthDate;
+  final String? profileImage;
   final bool isActive;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -10,6 +14,9 @@ class User {
     required this.id,
     required this.name,
     required this.email,
+    this.phone,
+    this.birthDate,
+    this.profileImage,
     required this.isActive,
     required this.createdAt,
     required this.updatedAt,
@@ -20,6 +27,9 @@ class User {
       id: json['_id'] ?? json['id'] ?? '',
       name: json['name'] ?? '',
       email: json['email'] ?? '',
+      phone: json['phone'],
+      birthDate: json['birthDate'],
+      profileImage: json['profileImage'],
       isActive: json['isActive'] ?? true,
       createdAt: json['createdAt'] != null 
           ? DateTime.parse(json['createdAt']) 
@@ -34,26 +44,9 @@ class User {
     return {
       'name': name,
       'email': email,
+      if (phone != null) 'phone': phone,
+      if (birthDate != null) 'birthDate': birthDate,
+      if (profileImage != null) 'profileImage': profileImage,
     };
-  }
-}
-
-class ApiResponse {
-  final bool status;
-  final String message;
-  final dynamic data;
-
-  ApiResponse({
-    required this.status,
-    required this.message,
-    this.data,
-  });
-
-  factory ApiResponse.fromJson(Map<String, dynamic> json) {
-    return ApiResponse(
-      status: json['status'] ?? false,
-      message: json['message'] ?? '',
-      data: json['data'],
-    );
   }
 }

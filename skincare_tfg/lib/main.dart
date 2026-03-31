@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:skincare_tfg/screens/about_screen.dart';
+import 'package:skincare_tfg/screens/edit_screen.dart';
 import 'package:skincare_tfg/screens/settings_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
         AppConstants.routeHome: (context) => const BottomNavBar(),
         AppConstants.routeProfile: (context) => const BottomNavBar(initialIndex: 3),
         AppConstants.routeSettings: (context) => const SettingsScreen(),
+        AppConstants.routeEdit: (context) => const EditScreen(),
         AppConstants.routeAbout: (context) => const AboutScreen(),
       },
       debugShowCheckedModeBanner: false,

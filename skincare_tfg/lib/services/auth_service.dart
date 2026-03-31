@@ -172,7 +172,99 @@ Future<Map<String, dynamic>?> login(String email, String password) async {
       return null;
     }
   }
-  
+
+  // Actualizar usuario
+  Future<Map<String, dynamic>?> updateUser({
+  required String userId,
+  String? name,
+  String? phone,
+  String? birthDate,
+  String? profileImage,
+  String? password,
+}) async {
+  final token = await getToken();
+  if (token == null) return null;
+
+  try {
+    final url = Uri.parse('${ApiConfig.getUserByIdUrl(userId)}');
+    
+    final Map<String, dynamic> updateData = {};
+    if (name != null) updateData['name'] = name;
+    if (phone != null) updateData['phone'] = phone;
+    if (birthDate != null) updateData['birthDate'] = birthDate;
+    if (profileImage != null) updateData['profileImage'] = profileImage;
+    if (password != null && password.isNotEmpty) updateData['password'] = password;
+
+    print('📤 Enviando actualización: $updateData');
+
+    final response = await http.patch(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(updateData),
+    );
+
+    print('📡 Status code: ${response.statusCode}');
+    print('📡 Response: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['status'] == true && data['data'] != null) {
+        final updatedUser = data['data'];
+        final prefs = await _prefs;
+        
+        // Actualizar todos los campos en SharedPreferences
+        if (updatedUser['name'] != null) {
+          await prefs.setString(AppConstants.prefUserName, updatedUser['name']);
+        }
+        if (updatedUser['phone'] != null) {
+          await prefs.setString('user_phone', updatedUser['phone']);
+        }
+        if (updatedUser['birthDate'] != null) {
+          // Guardar en el formato que uses en la app
+          final birthDateValue = updatedUser['birthDate'];
+          if (birthDateValue is String) {
+            // Si viene en ISO, convertir a DD/MM/YYYY para mostrar
+            try {
+              final date = DateTime.parse(birthDateValue);
+              final formattedDate = '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+              await prefs.setString('user_birth_date', formattedDate);
+            } catch (e) {
+              await prefs.setString('user_birth_date', birthDateValue);
+            }
+          }
+        }
+        
+        print('✅ Usuario actualizado correctamente');
+        return updatedUser;
+      } else {
+        print('❌ Error en respuesta: ${data['message']}');
+        return null;
+      }
+    } else {
+      print('❌ Error HTTP: ${response.statusCode}');
+      return null;
+    }
+  } catch (e) {
+    print('❌ Error al actualizar usuario: $e');
+    return null;
+  }
+}
+
+  // Obtener teléfono
+  Future<String?> getUserPhone() async {
+    final prefs = await _prefs;
+    return prefs.getString('user_phone');
+  }
+
+  // Obtener fecha de nacimiento
+  Future<String?> getUserBirthDate() async {
+    final prefs = await _prefs;
+    return prefs.getString('user_birth_date');
+  }
+
   // Cerrar sesión
   Future<void> logout() async {
     final prefs = await _prefs;

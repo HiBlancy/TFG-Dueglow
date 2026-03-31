@@ -6,11 +6,17 @@ export declare const UserSchema: Schema<any, import("mongoose").Model<any, any, 
     email: string;
     password: string;
     isActive: boolean;
+    phone?: string | null | undefined;
+    birthDate?: string | null | undefined;
+    profileImage?: string | null | undefined;
 } & import("mongoose").DefaultTimestampProps, import("mongoose").Document<unknown, {}, {
     name: string;
     email: string;
     password: string;
     isActive: boolean;
+    phone?: string | null | undefined;
+    birthDate?: string | null | undefined;
+    profileImage?: string | null | undefined;
 } & import("mongoose").DefaultTimestampProps, {
     id: string;
 }, Omit<import("mongoose").DefaultSchemaOptions, "timestamps"> & {
@@ -20,6 +26,9 @@ export declare const UserSchema: Schema<any, import("mongoose").Model<any, any, 
     email: string;
     password: string;
     isActive: boolean;
+    phone?: string | null | undefined;
+    birthDate?: string | null | undefined;
+    profileImage?: string | null | undefined;
 } & import("mongoose").DefaultTimestampProps & {
     _id: import("mongoose").Types.ObjectId;
 } & {
@@ -31,6 +40,9 @@ export declare const UserSchema: Schema<any, import("mongoose").Model<any, any, 
     email: string;
     password: string;
     isActive: boolean;
+    phone?: string | null | undefined;
+    birthDate?: string | null | undefined;
+    profileImage?: string | null | undefined;
     createdAt: NativeDate;
     updatedAt: NativeDate;
 } & {

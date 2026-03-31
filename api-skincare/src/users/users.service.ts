@@ -52,33 +52,35 @@ export class UsersService {
 
   // EDITAR
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User | null> {
-    if (updateUserDto.email) {
-      const emailExists = await this.userModel
-        .findOne({
-          email: updateUserDto.email.toLowerCase(),
-          _id: { $ne: id },
-        });
-      if (emailExists) {
-        throw new ConflictException(
-          'El email ya está registrado por otro usuario',
-        );
-      }
+  if (updateUserDto.email) {
+    const emailExists = await this.userModel
+      .findOne({
+        email: updateUserDto.email.toLowerCase(),
+        _id: { $ne: id },
+      });
+    if (emailExists) {
+      throw new ConflictException(
+        'El email ya está registrado por otro usuario',
+      );
     }
-
-    if (updateUserDto.password) {
-      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
-    }
-
-    const updated = await this.userModel
-      .findByIdAndUpdate(id, updateUserDto, { new: true })
-      .select('-password')
-      .exec();
-
-    if (!updated) {
-      throw new NotFoundException(`Usuario ${id} no encontrado`);
-    }
-    return updated;
+    updateUserDto.email = updateUserDto.email.toLowerCase();
   }
+
+  // Si se actualiza password, hashearla
+  if (updateUserDto.password) {
+    updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+  }
+
+  const updated = await this.userModel
+    .findByIdAndUpdate(id, updateUserDto, { new: true })
+    .select('-password')
+    .exec();
+
+  if (!updated) {
+    throw new NotFoundException(`Usuario ${id} no encontrado`);
+  }
+  return updated;
+}
 
   // ELIMINAR
   async delete(id: string): Promise<User | null> {

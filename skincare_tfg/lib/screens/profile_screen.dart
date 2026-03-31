@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
-import '../widgets/custom_button.dart';
 import '../widgets/main_toolbar.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -62,10 +61,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const SizedBox(height: 8),
                     _buildUserEmail(),
                     const SizedBox(height: 24),
-                    _buildInfoCard(),
-                    const SizedBox(height: 20),
-                    _buildEditButton(),
-                    const SizedBox(height: 20),
                   ],
                 ),
               ),
@@ -96,65 +91,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Text(
       _userEmail,
       style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-    );
-  }
-
-  Widget _buildInfoCard() {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 24),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildInfoRow(Icons.email, 'Correo electrónico', _userEmail),
-            const Divider(),
-            _buildInfoRow(Icons.phone, 'Teléfono', '+34 123 456 789'),
-            const Divider(),
-            _buildInfoRow(Icons.cake, 'Fecha de nacimiento', '01/01/1990'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEditButton() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: context.secondaryButton(
-        'Editar Perfil',
-        () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Próximamente')),
-          );
-        },
-        size: ButtonSize.full,
-        icon: Icons.edit,
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(IconData icon, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: Colors.grey[600]),
-          const SizedBox(width: 12),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const Spacer(),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-          ),
-        ],
-      ),
     );
   }
 }

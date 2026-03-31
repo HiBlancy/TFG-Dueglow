@@ -125,8 +125,7 @@ export class UsersController {
     return this.successResponse('Usuario eliminado', deletedUser);
   }
 
-  // ESTE ENDPOINT YA EXISTE EN TU CÓDIGO
-  @Delete('delete/:id') // Nota: es "delete/:id", no solo ":id"
+  @Delete('delete/:id') 
   async deleteWithoutAuth(@Param('id') id: string): Promise<any> {
     try {
       const deletedUser = await this.usersService.delete(id);

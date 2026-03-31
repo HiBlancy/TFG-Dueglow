@@ -15,6 +15,9 @@ class UpdateUserDto {
     name;
     email;
     password;
+    phone;
+    birthDate;
+    profileImage;
 }
 exports.UpdateUserDto = UpdateUserDto;
 __decorate([
@@ -34,4 +37,19 @@ __decorate([
     (0, class_validator_1.MinLength)(6),
     __metadata("design:type", String)
 ], UpdateUserDto.prototype, "password", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateUserDto.prototype, "phone", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], UpdateUserDto.prototype, "birthDate", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateUserDto.prototype, "profileImage", void 0);
 //# sourceMappingURL=update-user.dto.js.map
