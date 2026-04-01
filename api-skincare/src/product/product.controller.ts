@@ -104,6 +104,13 @@ export class ProductController {
     return this.successResponse('Producto marcado como abierto', product);
   }
 
+// NUEVO ENDPOINT: Cerrar producto
+  @Patch(':id/close')
+  async markAsClosed(@Req() req, @Param('id') id: string) {
+    const product = await this.productService.markAsClosed(id, req.user._id);
+    return this.successResponse('Producto marcado como cerrado', product);
+  }
+
   @Post(':id/calculate-expiration')
   async calculateExpiration(@Req() req, @Param('id') id: string) {
     const product = await this.productService.calculateExpirationFromOpening(id, req.user._id);

@@ -7,7 +7,7 @@ exports.ProductSchema = new mongoose_1.Schema({
         type: mongoose_1.Schema.Types.ObjectId,
         ref: 'Users',
         required: true,
-        index: true
+        index: true,
     },
     name: { type: String, required: true, trim: true },
     brand: { type: String, required: true, trim: true },
@@ -19,20 +19,24 @@ exports.ProductSchema = new mongoose_1.Schema({
         type: Number,
         min: 1,
         max: 5,
-        required: false
+        required: false,
     },
     listType: {
         type: String,
         enum: ['wishlist', 'favorites', 'have', 'used', 'deleted'],
-        default: 'have'
+        default: 'have',
     },
     expirationDate: { type: Date, required: false },
     periodAfterOpening: {
         type: String,
         required: false,
-        match: /^\d+\s*[Mm]$/
+        match: /^\d+\s*[Mm]$/,
     },
     openedDate: { type: Date, required: false },
+    isOpened: {
+        type: Boolean,
+        default: false,
+    },
 }, { timestamps: true });
 exports.ProductSchema.index({ userId: 1, barcode: 1, listType: 1 }, { sparse: true });
 exports.ProductSchema.virtual('isExpired').get(function () {

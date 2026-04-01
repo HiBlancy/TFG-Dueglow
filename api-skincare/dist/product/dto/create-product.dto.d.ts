@@ -9,4 +9,5 @@ export declare class CreateProductDto {
     listType?: string;
     expirationDate?: Date | string;
     periodAfterOpening?: string;
+    isOpened?: boolean;
 }

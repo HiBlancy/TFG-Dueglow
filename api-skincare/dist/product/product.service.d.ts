@@ -22,6 +22,6 @@ export declare class ProductService {
     getExpiredProducts(userId: string): Promise<Product[]>;
     getExpiringSoon(userId: string, days?: number): Promise<Product[]>;
     markAsOpened(id: string, userId: string): Promise<Product | null>;
+    markAsClosed(id: string, userId: string): Promise<Product | null>;
     calculateExpirationFromOpening(id: string, userId: string): Promise<Product | null>;
-    updateSimple(id: string, updateData: any): Promise<Product | null>;
 }

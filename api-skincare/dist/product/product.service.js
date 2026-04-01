@@ -22,16 +22,6 @@ let ProductService = class ProductService {
         this.productModel = productModel;
     }
     async create(userId, createProductDto) {
-        if (createProductDto.barcode) {
-            const existing = await this.productModel.findOne({
-                userId,
-                barcode: createProductDto.barcode,
-                listType: createProductDto.listType || 'have'
-            });
-            if (existing) {
-                throw new common_1.ConflictException('Este producto ya está en tu lista');
-            }
-        }
         const newProduct = new this.productModel({
             ...createProductDto,
             userId,
@@ -44,10 +34,7 @@ let ProductService = class ProductService {
         if (listType) {
             filter.listType = listType;
         }
-        return this.productModel
-            .find(filter)
-            .sort({ createdAt: -1 })
-            .exec();
+        return this.productModel.find(filter).sort({ createdAt: -1 }).exec();
     }
     async findById(id, userId) {
         const product = await this.productModel.findById(id).exec();
@@ -64,19 +51,8 @@ let ProductService = class ProductService {
         if (!product) {
             throw new common_1.NotFoundException(`Producto ${id} no encontrado`);
         }
-        if (product.userId.toString() !== userId) {
+        if (product.userId.toString() !== userId.toString()) {
             throw new common_1.ForbiddenException('No puedes modificar este producto');
-        }
-        if (updateProductDto.barcode && updateProductDto.barcode !== product.barcode) {
-            const existing = await this.productModel.findOne({
-                userId,
-                barcode: updateProductDto.barcode,
-                listType: updateProductDto.listType || product.listType,
-                _id: { $ne: id }
-            });
-            if (existing) {
-                throw new common_1.ConflictException('Ya tienes otro producto con este código de barras');
-            }
         }
         const updated = await this.productModel
             .findByIdAndUpdate(id, updateProductDto, { returnDocument: 'after' })
@@ -99,18 +75,8 @@ let ProductService = class ProductService {
         if (!product) {
             throw new common_1.NotFoundException(`Producto ${id} no encontrado`);
         }
-        if (product.userId.toString() !== userId) {
+        if (product.userId.toString() !== userId.toString()) {
             throw new common_1.ForbiddenException('No puedes mover este producto');
-        }
-        if (product.barcode && product.listType !== targetList) {
-            const existing = await this.productModel.findOne({
-                userId,
-                barcode: product.barcode,
-                listType: targetList
-            });
-            if (existing) {
-                throw new common_1.ConflictException(`Este producto ya está en la lista ${targetList}`);
-            }
         }
         const updated = await this.productModel
             .findByIdAndUpdate(id, { listType: targetList }, { returnDocument: 'after' })
@@ -125,9 +91,9 @@ let ProductService = class ProductService {
             have: 0,
             used: 0,
             deleted: 0,
-            total: products.length
+            total: products.length,
         };
-        products.forEach(product => {
+        products.forEach((product) => {
             if (stats[product.listType] !== undefined) {
                 stats[product.listType]++;
             }
@@ -141,7 +107,7 @@ let ProductService = class ProductService {
             .find({
             userId,
             expirationDate: { $lt: today },
-            listType: { $ne: 'deleted' }
+            listType: { $ne: 'deleted' },
         })
             .sort({ expirationDate: 1 })
             .exec();
@@ -156,7 +122,7 @@ let ProductService = class ProductService {
             .find({
             userId,
             expirationDate: { $gte: today, $lte: futureDate },
-            listType: { $ne: 'deleted' }
+            listType: { $ne: 'deleted' },
         })
             .sort({ expirationDate: 1 })
             .exec();
@@ -166,14 +132,38 @@ let ProductService = class ProductService {
         if (!product) {
             throw new common_1.NotFoundException(`Producto ${id} no encontrado`);
         }
-        if (product.userId.toString() !== userId) {
+        console.log('Product userId:', product.userId.toString());
+        console.log('Request userId:', userId.toString());
+        console.log('Are they equal?', product.userId.toString() === userId.toString());
+        if (product.userId.toString() !== userId.toString()) {
             throw new common_1.ForbiddenException('No puedes modificar este producto');
         }
-        if (product.openedDate) {
-            throw new common_1.BadRequestException('El producto ya estaba marcado como abierto');
+        if (product.isOpened) {
+            throw new common_1.BadRequestException('El producto ya está abierto');
         }
         const updated = await this.productModel
-            .findByIdAndUpdate(id, { openedDate: new Date() }, { returnDocument: 'after' })
+            .findByIdAndUpdate(id, {
+            openedDate: new Date(),
+            isOpened: true,
+        }, { returnDocument: 'after' })
+            .exec();
+        return updated;
+    }
+    async markAsClosed(id, userId) {
+        const product = await this.productModel.findById(id).exec();
+        if (!product) {
+            throw new common_1.NotFoundException(`Producto ${id} no encontrado`);
+        }
+        if (product.userId.toString() !== userId.toString()) {
+            throw new common_1.ForbiddenException('No puedes modificar este producto');
+        }
+        if (!product.isOpened) {
+            throw new common_1.BadRequestException('El producto no está abierto');
+        }
+        const updated = await this.productModel
+            .findByIdAndUpdate(id, {
+            isOpened: false,
+        }, { returnDocument: 'after' })
             .exec();
         return updated;
     }
@@ -182,11 +172,14 @@ let ProductService = class ProductService {
         if (!product) {
             throw new common_1.NotFoundException(`Producto ${id} no encontrado`);
         }
-        if (product.userId.toString() !== userId) {
+        if (product.userId.toString() !== userId.toString()) {
             throw new common_1.ForbiddenException('No puedes modificar este producto');
         }
-        if (!product.openedDate) {
+        if (!product.isOpened) {
             throw new common_1.BadRequestException('El producto no ha sido abierto aún');
+        }
+        if (!product.openedDate) {
+            throw new common_1.BadRequestException('El producto no tiene fecha de apertura registrada');
         }
         if (!product.periodAfterOpening) {
             throw new common_1.BadRequestException('El producto no tiene período después de abierto definido');
@@ -200,15 +193,6 @@ let ProductService = class ProductService {
         const updated = await this.productModel
             .findByIdAndUpdate(id, { expirationDate }, { returnDocument: 'after' })
             .exec();
-        return updated;
-    }
-    async updateSimple(id, updateData) {
-        const updated = await this.productModel
-            .findByIdAndUpdate(id, updateData, { returnDocument: 'after' })
-            .exec();
-        if (!updated) {
-            throw new common_1.NotFoundException(`Producto ${id} no encontrado`);
-        }
         return updated;
     }
 };

@@ -6,6 +6,7 @@ export declare const ProductSchema: Schema<any, import("mongoose").Model<any, an
     brand: string;
     categories: string[];
     listType: "wishlist" | "favorites" | "have" | "used" | "deleted";
+    isOpened: boolean;
     userId: import("mongoose").Types.ObjectId;
     imageUrl?: string | null | undefined;
     barcode?: string | null | undefined;
@@ -19,6 +20,7 @@ export declare const ProductSchema: Schema<any, import("mongoose").Model<any, an
     brand: string;
     categories: string[];
     listType: "wishlist" | "favorites" | "have" | "used" | "deleted";
+    isOpened: boolean;
     userId: import("mongoose").Types.ObjectId;
     imageUrl?: string | null | undefined;
     barcode?: string | null | undefined;
@@ -36,6 +38,7 @@ export declare const ProductSchema: Schema<any, import("mongoose").Model<any, an
     brand: string;
     categories: string[];
     listType: "wishlist" | "favorites" | "have" | "used" | "deleted";
+    isOpened: boolean;
     userId: import("mongoose").Types.ObjectId;
     imageUrl?: string | null | undefined;
     barcode?: string | null | undefined;
@@ -55,6 +58,7 @@ export declare const ProductSchema: Schema<any, import("mongoose").Model<any, an
     brand: string;
     categories: string[];
     listType: "wishlist" | "favorites" | "have" | "used" | "deleted";
+    isOpened: boolean;
     userId: import("mongoose").Types.ObjectId;
     imageUrl?: string | null | undefined;
     barcode?: string | null | undefined;

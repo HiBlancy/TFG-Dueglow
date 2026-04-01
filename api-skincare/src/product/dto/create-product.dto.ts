@@ -1,13 +1,14 @@
-import { 
-  IsString, 
-  IsNotEmpty, 
-  IsOptional, 
-  IsUrl, 
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsUrl,
   IsArray,
   IsNumber,
   Min,
   Max,
-  IsIn 
+  IsIn,
+  IsBoolean,
 } from 'class-validator';
 
 export class CreateProductDto {
@@ -52,4 +53,8 @@ export class CreateProductDto {
   @IsOptional()
   @IsString()
   periodAfterOpening?: string; //"12M", "6M", "24M"
+
+  @IsOptional()
+  @IsBoolean()
+  isOpened?: boolean;
 }

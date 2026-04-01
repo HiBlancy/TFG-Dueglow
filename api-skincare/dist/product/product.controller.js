@@ -71,6 +71,10 @@ let ProductController = class ProductController {
         const product = await this.productService.markAsOpened(id, req.user._id);
         return this.successResponse('Producto marcado como abierto', product);
     }
+    async markAsClosed(req, id) {
+        const product = await this.productService.markAsClosed(id, req.user._id);
+        return this.successResponse('Producto marcado como cerrado', product);
+    }
     async calculateExpiration(req, id) {
         const product = await this.productService.calculateExpirationFromOpening(id, req.user._id);
         return this.successResponse('Fecha de caducidad calculada', product);
@@ -157,6 +161,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], ProductController.prototype, "markAsOpened", null);
+__decorate([
+    (0, common_1.Patch)(':id/close'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], ProductController.prototype, "markAsClosed", null);
 __decorate([
     (0, common_1.Post)(':id/calculate-expiration'),
     __param(0, (0, common_1.Req)()),

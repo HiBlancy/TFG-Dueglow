@@ -56,6 +56,11 @@ export declare class ProductController {
         message: string;
         data: any;
     }>;
+    markAsClosed(req: any, id: string): Promise<{
+        status: boolean;
+        message: string;
+        data: any;
+    }>;
     calculateExpiration(req: any, id: string): Promise<{
         status: boolean;
         message: string;

@@ -1,14 +1,15 @@
 // update-product.dto.ts - CORREGIDO
-import { 
-  IsOptional, 
-  IsString, 
-  IsNotEmpty, 
-  IsUrl, 
-  IsArray, 
-  IsNumber, 
-  Min, 
-  Max, 
-  IsIn 
+import {
+  IsOptional,
+  IsString,
+  IsNotEmpty,
+  IsUrl,
+  IsArray,
+  IsNumber,
+  Min,
+  Max,
+  IsIn,
+  IsBoolean,
 } from 'class-validator';
 
 export class UpdateProductDto {
@@ -55,4 +56,8 @@ export class UpdateProductDto {
   @IsOptional()
   @IsString()
   periodAfterOpening?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isOpened?: boolean;
 }

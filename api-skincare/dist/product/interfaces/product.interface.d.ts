@@ -12,6 +12,7 @@ export interface Product {
     expirationDate?: Date;
     periodAfterOpening?: string;
     openedDate?: Date;
+    isOpened: boolean;
     addedAt: Date;
     updatedAt: Date;
 }

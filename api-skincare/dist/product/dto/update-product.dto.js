@@ -22,6 +22,7 @@ class UpdateProductDto {
     listType;
     expirationDate;
     periodAfterOpening;
+    isOpened;
 }
 exports.UpdateProductDto = UpdateProductDto;
 __decorate([
@@ -78,4 +79,9 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateProductDto.prototype, "periodAfterOpening", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], UpdateProductDto.prototype, "isOpened", void 0);
 //# sourceMappingURL=update-product.dto.js.map

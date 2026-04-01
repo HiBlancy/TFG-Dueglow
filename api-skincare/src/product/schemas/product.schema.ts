@@ -6,7 +6,7 @@ export const ProductSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Users',
       required: true,
-      index: true
+      index: true,
     },
     name: { type: String, required: true, trim: true },
     brand: { type: String, required: true, trim: true },
@@ -14,26 +14,30 @@ export const ProductSchema = new Schema(
     barcode: { type: String, required: false, sparse: true, index: true },
     categories: [{ type: String, trim: true }],
     notes: { type: String, required: false },
-    rating: { 
+    rating: {
       type: Number,
       min: 1,
       max: 5,
-      required: false
+      required: false,
     },
     listType: {
       type: String,
       enum: ['wishlist', 'favorites', 'have', 'used', 'deleted'],
-      default: 'have'
+      default: 'have',
     },
     expirationDate: { type: Date, required: false },
     periodAfterOpening: {
       type: String,
       required: false,
-      match: /^\d+\s*[Mm]$/  // Valida formato "12M", "6M", etc.
+      match: /^\d+\s*[Mm]$/, // Valida formato "12M", "6M", etc.
     },
     openedDate: { type: Date, required: false },
+    isOpened: {
+      type: Boolean,
+      default: false,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Índice compuesto para evitar duplicados (mismo producto en misma lista)

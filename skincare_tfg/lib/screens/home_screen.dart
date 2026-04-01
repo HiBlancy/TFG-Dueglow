@@ -30,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _isLoading = true);
     
     final name = await _authService.getUserName();
-    final products = await _productService.getProducts(listType: 'have');
+    final products = await _productService.getProducts(listType: 'wishlist');
 
     if (mounted) {
       setState(() {
