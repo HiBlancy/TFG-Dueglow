@@ -4,6 +4,7 @@ import '../models/beauty_product.dart';
 import '../services/product_service.dart';
 import '../widgets/edit_product_dialog.dart';
 import '../widgets/custom_button.dart';
+import '../widgets/warning_dialog.dart';
 
 class ProductScreen extends StatefulWidget {
   final BeautyProduct product;
@@ -21,13 +22,17 @@ class ProductScreen extends StatefulWidget {
 
 class _ProductScreenState extends State<ProductScreen> {
   final ProductService _productService = ProductService();
-  bool _isAdding = false;
-  bool _isEditing = false;
-  bool _isDeleting = false;
-  bool _isOpening = false;
-  bool _isClosing = false;
-  bool _isCalculating = false;
   late BeautyProduct _currentProduct;
+  
+  // Estados de carga
+  final Map<String, bool> _loadingStates = {
+    'adding': false,
+    'editing': false,
+    'deleting': false,
+    'opening': false,
+    'closing': false,
+    'calculating': false,
+  };
 
   @override
   void initState() {
@@ -35,134 +40,202 @@ class _ProductScreenState extends State<ProductScreen> {
     _currentProduct = widget.product;
   }
 
-  // --- HELPERS PARA REDUCIR CÓDIGO DUPLICADO ---
+  // --- HELPERS ---
+  
+  void _setLoading(String key, bool value) {
+    if (mounted) {
+      setState(() => _loadingStates[key] = value);
+    }
+  }
 
-  void _showSnack(String message, {bool isError = false}) {
+  bool _isLoading(String key) => _loadingStates[key] == true;
+
+  Future<void> _showMessage(String message, {bool isError = false}) async {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.red : Colors.green,
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    
+    if (isError) {
+      await WarningDialog.showInfo(
+        context: context,
+        title: 'Error',
+        content: message,
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
-  Future<bool> _confirmAction(String title, String content, {String confirmText = 'Aceptar', bool isDanger = false}) async {
-    final result = await showDialog<bool>(
+  Future<bool> _confirmAction(String title, String content, {bool isDanger = false}) async {
+    return await WarningDialog.show(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(content),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: isDanger ? ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white) : null,
-            child: Text(isDanger ? 'Eliminar' : confirmText),
-          ),
-        ],
-      ),
+      title: title,
+      content: content,
+      confirmText: isDanger ? 'Eliminar' : 'Aceptar',
+      isDanger: isDanger,
     );
-    return result == true;
   }
 
-  // --- MÉTODOS DE ACCIÓN ---
+  Future<void> _executeAction({
+    required Future<BeautyProduct?> Function() action,
+    required String successMessage,
+    required String loadingKey,
+    VoidCallback? onSuccess,
+  }) async {
+    _setLoading(loadingKey, true);
+    final result = await action();
+    _setLoading(loadingKey, false);
+
+    if (result != null) {
+      setState(() => _currentProduct = result);
+      await _showMessage(successMessage);
+      onSuccess?.call();
+    } else {
+      await _showMessage('Error al realizar la operación', isError: true);
+    }
+  }
+
+  // --- ACCIONES PRINCIPALES ---
 
   Future<void> _addToMyProducts() async {
-    if (!await _confirmAction('Agregar producto', '¿Quieres agregar "${_currentProduct.name}" a tu lista de productos?', confirmText: 'Agregar')) return;
+    if (!await _confirmAction('Agregar producto', '¿Quieres agregar "${_currentProduct.name}" a tu lista de productos?')) return;
 
-    setState(() => _isAdding = true);
-    final added = await _productService.addProductToHave(_currentProduct);
-    setState(() => _isAdding = false);
+    await _executeAction(
+      action: () => _productService.addProductToHave(_currentProduct),
+      successMessage: '✓ "${_currentProduct.name}" agregado a tu lista',
+      loadingKey: 'adding',
+      onSuccess: () {
+        if (widget.isFromSearch && mounted) Navigator.pop(context);
+      },
+    );
+  }
 
-    if (added != null) {
-      setState(() => _currentProduct = added);
-      _showSnack('✓ "${_currentProduct.name}" agregado a tu lista');
-      if (widget.isFromSearch && mounted) Navigator.pop(context);
-    } else {
-      _showSnack('Error al agregar el producto. Intenta de nuevo.', isError: true);
+  Future<void> _editProduct() async {
+    final editedProduct = await showDialog<BeautyProduct>(
+      context: context,
+      builder: (context) => EditProductDialog(product: _currentProduct),
+    );
+
+    if (editedProduct != null && editedProduct != _currentProduct) {
+      final updatedData = <String, dynamic>{
+        'name': editedProduct.name,
+        'brand': editedProduct.brand,
+        'categories': editedProduct.categories,
+        'notes': editedProduct.notes,
+        'rating': editedProduct.rating,
+        'periodAfterOpening': editedProduct.periodAfterOpening,
+        'expirationDate': editedProduct.expirationDate?.toIso8601String(),
+        'openedDate': editedProduct.openedDate?.toIso8601String(),
+      };
+
+      await _executeAction(
+        action: () => _productService.updateProduct(_currentProduct.id!, updatedData),
+        successMessage: '✓ Producto actualizado correctamente',
+        loadingKey: 'editing',
+      );
     }
   }
 
- Future<void> _editProduct() async {
-  final editedProduct = await showDialog<BeautyProduct>(
-    context: context,
-    builder: (context) => EditProductDialog(product: _currentProduct),
-  );
-
-  if (editedProduct != null && editedProduct != _currentProduct) {
-    // ✅ LOG PARA VER QUÉ LLEGA DEL DIÁLOGO
-    print('✏️ Producto editado recibido:');
-    print('   - notes: "${editedProduct.notes}"');
-    print('   - brand: "${editedProduct.brand}"');
-    print('   - periodAfterOpening: "${editedProduct.periodAfterOpening}"');
-    print('   - categories: ${editedProduct.categories}');
-
-    setState(() => _isEditing = true);
-
-    final updatedData = <String, dynamic>{
-      'name': editedProduct.name,
-      'brand': editedProduct.brand,  // ✅ ya puede ser null
-      'categories': editedProduct.categories,  // ✅ ya puede ser null
-      'notes': editedProduct.notes,  // ✅ ya puede ser null
-      'rating': editedProduct.rating,
-      'periodAfterOpening': editedProduct.periodAfterOpening,
-      'expirationDate': editedProduct.expirationDate?.toIso8601String(),
-      'openedDate': editedProduct.openedDate?.toIso8601String(),
-    };
-
-    // ✅ LOG DE LO QUE SE VA A ENVIAR
-    print('📤 Enviando al backend:');
-    //print(jsonEncode(updatedData));
-
-    final updated = await _productService.updateProduct(_currentProduct.id!, updatedData);
-    setState(() => _isEditing = false);
-
-    if (updated != null) {
-      setState(() => _currentProduct = updated);
-      _showSnack('✓ Producto actualizado correctamente');
-    } else {
-      _showSnack('Error al actualizar el producto', isError: true);
-    }
-  }
-}
   Future<void> _deleteProduct() async {
     if (!await _confirmAction('Eliminar producto', '¿Estás seguro de que quieres eliminar "${_currentProduct.name}" de tu lista?', isDanger: true)) return;
 
-    setState(() => _isDeleting = true);
+    _setLoading('deleting', true);
     final deleted = await _productService.deleteProduct(_currentProduct.id!);
-    setState(() => _isDeleting = false);
+    _setLoading('deleting', false);
 
     if (deleted) {
-      _showSnack('✓ "${_currentProduct.name}" eliminado de tu lista');
+      await _showMessage('✓ "${_currentProduct.name}" eliminado de tu lista');
       if (mounted) Navigator.pop(context, true);
     } else {
-      _showSnack('Error al eliminar el producto. Intenta de nuevo.', isError: true);
+      await _showMessage('Error al eliminar el producto', isError: true);
     }
   }
 
-  Future<void> _updateProductState(Future<BeautyProduct?> Function() action, String successMsg, String errorMsg, void Function(bool) setLoading) async {
-    setLoading(true);
-    final updated = await action();
-    setLoading(false);
+  Future<void> _markAsOpened() async {
+    bool useCustomDate = false;
+    DateTime? selectedDate = DateTime.now();
 
-    if (updated != null) {
-      setState(() => _currentProduct = updated);
-      _showSnack(successMsg);
-    } else {
-      _showSnack(errorMsg, isError: true);
-    }
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Abrir producto'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('¿Cuándo abriste este producto?'),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  _buildDateRadio('Hoy', false, useCustomDate, (val) => setDialogState(() => useCustomDate = val)),
+                  _buildDateRadio('Otra fecha', true, useCustomDate, (val) => setDialogState(() => useCustomDate = val)),
+                ],
+              ),
+              if (useCustomDate) ...[
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: selectedDate,
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime.now(),
+                    );
+                    if (picked != null) setDialogState(() => selectedDate = picked);
+                  },
+                  child: Text('Seleccionar fecha: ${_formatDate(selectedDate!)}'),
+                ),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
+            ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('Abrir producto')),
+          ],
+        ),
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    final openedDate = useCustomDate ? selectedDate : DateTime.now();
+    await _executeAction(
+      action: () => _productService.markAsOpened(_currentProduct.id!, openedDate: openedDate),
+      successMessage: '✓ Producto marcado como abierto',
+      loadingKey: 'opening',
+    );
   }
 
-  Future<void> _markAsOpened() => _updateProductState(() => _productService.markAsOpened(_currentProduct.id!), '✓ Producto marcado como abierto', 'Error al marcar como abierto', (val) => setState(() => _isOpening = val));
-  Future<void> _markAsClosed() => _updateProductState(() => _productService.markAsClosed(_currentProduct.id!), '✓ Producto marcado como cerrado', 'Error al marcar como cerrado', (val) => setState(() => _isClosing = val));
-  Future<void> _calculateExpiration() => _updateProductState(() => _productService.calculateExpiration(_currentProduct.id!), '✓ Fecha de caducidad calculada', 'Error al calcular caducidad', (val) => setState(() => _isCalculating = val));
+  Future<void> _markAsClosed() async {
+    if (!await _confirmAction(
+      'Cerrar producto',
+      '¿Estás seguro de que quieres cerrar "${_currentProduct.name}"?\n\n'
+      'Al cerrar el producto:\n'
+      '• Se eliminará la fecha de apertura\n'
+      '• Se eliminará la fecha de caducidad calculada\n'
+      '• Se conservará la duración después de abrir (ej: "6M")\n\n'
+      'Podrás volver a abrirlo más tarde si fue un error.',
+      isDanger: true,
+    )) return;
 
-  // --- CONSTRUCCIÓN DE UI ---
+    await _executeAction(
+      action: () => _productService.markAsClosed(_currentProduct.id!),
+      successMessage: '✓ Producto cerrado correctamente',
+      loadingKey: 'closing',
+    );
+  }
+
+  Future<void> _calculateExpiration() => _executeAction(
+    action: () => _productService.calculateExpiration(_currentProduct.id!),
+    successMessage: '✓ Fecha de caducidad calculada',
+    loadingKey: 'calculating',
+  );
+
+  // --- UI ---
 
   @override
   Widget build(BuildContext context) {
@@ -186,7 +259,7 @@ class _ProductScreenState extends State<ProductScreen> {
             _InfoRow(icon: Icons.qr_code, label: 'Código de barras', value: _currentProduct.barcode.isNotEmpty ? _currentProduct.barcode : '—'),
             if (isProductSaved) _buildProductDetails(),
             const Divider(height: 32),
-            if (_currentProduct.categories != null && _currentProduct.categories!.isNotEmpty) _buildCategories(),
+            if (_currentProduct.categories?.isNotEmpty == true) _buildCategories(),
             const SizedBox(height: 24),
             _buildActionButtons(isProductSaved, showAddButton),
           ],
@@ -199,17 +272,34 @@ class _ProductScreenState extends State<ProductScreen> {
     return [
       if (isProductSaved)
         IconButton(
-          icon: _isEditing ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.edit),
-          onPressed: _isEditing ? null : _editProduct,
+          icon: _isLoading('editing') 
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+              : const Icon(Icons.edit),
+          onPressed: _isLoading('editing') ? null : _editProduct,
           tooltip: 'Editar producto',
         ),
       if (showAddButton)
         IconButton(
-          icon: _isAdding ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.add),
-          onPressed: _isAdding ? null : _addToMyProducts,
+          icon: _isLoading('adding')
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+              : const Icon(Icons.add),
+          onPressed: _isLoading('adding') ? null : _addToMyProducts,
           tooltip: 'Agregar a mis productos',
         ),
     ];
+  }
+
+  Widget _buildDateRadio(String label, bool value, bool groupValue, Function(bool) onChanged) {
+    return Expanded(
+      child: ListTile(
+        title: Text(label),
+        leading: Radio<bool>(
+          value: value,
+          groupValue: groupValue,
+          onChanged: (val) => onChanged(val!),
+        ),
+      ),
+    );
   }
 
   Widget _buildProductImage() {
@@ -217,7 +307,12 @@ class _ProductScreenState extends State<ProductScreen> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: _currentProduct.imageUrl?.isNotEmpty == true
-            ? Image.network(_currentProduct.imageUrl!, height: 220, fit: BoxFit.contain, errorBuilder: (_, __, ___) => const _PlaceholderImage())
+            ? Image.network(
+                _currentProduct.imageUrl!,
+                height: 220,
+                fit: BoxFit.contain,
+                errorBuilder: (_, __, ___) => const _PlaceholderImage(),
+              )
             : const _PlaceholderImage(),
       ),
     );
@@ -227,15 +322,33 @@ class _ProductScreenState extends State<ProductScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (_currentProduct.brand != null && _currentProduct.brand!.isNotEmpty)
-  Text(_currentProduct.brand!.toUpperCase(), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.primary, letterSpacing: 1.2)),
+        if (_currentProduct.brand?.isNotEmpty == true)
+          Text(
+            _currentProduct.brand!.toUpperCase(),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: Theme.of(context).colorScheme.primary,
+              letterSpacing: 1.2,
+            ),
+          ),
         const SizedBox(height: 6),
-        Text(_currentProduct.name.isNotEmpty ? _currentProduct.name : 'Sin nombre', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+        Text(
+          _currentProduct.name.isNotEmpty ? _currentProduct.name : 'Sin nombre',
+          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+        ),
         if (_currentProduct.rating != null) ...[
           const SizedBox(height: 16),
           Row(
             children: [
-              ...List.generate(5, (index) => Icon(index < _currentProduct.rating! ? Icons.star : Icons.star_border, color: Colors.amber, size: 20)),
+              ...List.generate(
+                5,
+                (index) => Icon(
+                  index < _currentProduct.rating! ? Icons.star : Icons.star_border,
+                  color: Colors.amber,
+                  size: 20,
+                ),
+              ),
               const SizedBox(width: 8),
               Text('${_currentProduct.rating}/5', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
             ],
@@ -246,13 +359,29 @@ class _ProductScreenState extends State<ProductScreen> {
   }
 
   Widget _buildProductDetails() {
+    final isReallyOpened = _currentProduct.isOpened == true && _currentProduct.openedDate != null;
+    final hasExpirationInfo = (_currentProduct.periodAfterOpening?.isNotEmpty == true) || (_currentProduct.expirationDate != null);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (_currentProduct.addedAt != null) ...[const SizedBox(height: 12), _InfoRow(icon: Icons.calendar_today, label: 'Agregado', value: _formatDate(_currentProduct.addedAt!))],
-        if (_currentProduct.expirationDate != null) ...[const SizedBox(height: 12), _InfoRow(icon: Icons.warning_amber, label: 'Caducidad', value: _formatDate(_currentProduct.expirationDate!))],
-        if (_currentProduct.periodAfterOpening?.isNotEmpty == true) ...[const SizedBox(height: 12), _InfoRow(icon: Icons.timer, label: 'Duración después de abrir', value: _currentProduct.periodAfterOpening!)],
-        if (_currentProduct.openedDate != null) ...[const SizedBox(height: 12), _InfoRow(icon: Icons.open_in_new, label: 'Abierto el', value: _formatDate(_currentProduct.openedDate!))],
+        if (_currentProduct.addedAt != null) ...[
+          const SizedBox(height: 12),
+          _InfoRow(icon: Icons.calendar_today, label: 'Agregado', value: _formatDate(_currentProduct.addedAt!)),
+        ],
+        if (_currentProduct.expirationDate != null) ...[
+          const SizedBox(height: 12),
+          _InfoRow(icon: Icons.warning_amber, label: 'Caducidad', value: _formatDate(_currentProduct.expirationDate!)),
+        ],
+        if (isReallyOpened && _currentProduct.openedDate != null) ...[
+          const SizedBox(height: 12),
+          _InfoRow(icon: Icons.open_in_new, label: 'Abierto el', value: _formatDate(_currentProduct.openedDate!)),
+        ],
+        if (isReallyOpened && _currentProduct.periodAfterOpening?.isNotEmpty == true) ...[
+          const SizedBox(height: 12),
+          _InfoRow(icon: Icons.timer, label: 'Duración después de abrir', value: _currentProduct.periodAfterOpening!),
+        ],
+        if (isReallyOpened && !hasExpirationInfo) _buildExpirationWarning(),
         if (_currentProduct.notes?.isNotEmpty == true) ...[
           const Divider(height: 32),
           Text('Notas', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.outline)),
@@ -263,59 +392,130 @@ class _ProductScreenState extends State<ProductScreen> {
     );
   }
 
-  Widget _buildCategories() {
-  // ✅ Verificar que categories no sea null
-  if (_currentProduct.categories == null || _currentProduct.categories!.isEmpty) {
-    return const SizedBox.shrink();
-  }
-  
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text('Categorías', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.outline)),
-      const SizedBox(height: 10),
-      Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: _currentProduct.categories!.take(6).map((cat) => 
-          Chip(
-            label: Text(cat, style: const TextStyle(fontSize: 12)), 
-            padding: EdgeInsets.zero, 
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap
-          )
-        ).toList(),
+  Widget _buildExpirationWarning() {
+    return Container(
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.orange.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.orange.shade200),
       ),
-    ],
-  );
-}
+      child: Row(
+        children: [
+          Icon(Icons.warning_amber, color: Colors.orange.shade700, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('⚠️ Sin información de caducidad', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                const SizedBox(height: 4),
+                Text(
+                  'Edita el producto para añadir su duración después de abierto (ej: "6M") o una fecha de caducidad.',
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
+  Widget _buildCategories() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Categorías', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.outline)),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: _currentProduct.categories!.take(6).map((cat) => Chip(
+            label: Text(cat, style: const TextStyle(fontSize: 12)),
+            padding: EdgeInsets.zero,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          )).toList(),
+        ),
+      ],
+    );
+  }
 
   Widget _buildActionButtons(bool isProductSaved, bool showAddButton) {
+    final isReallyOpened = _currentProduct.isOpened == true && _currentProduct.openedDate != null;
+    final canCalculateExpiration = isReallyOpened && 
+                                   _currentProduct.periodAfterOpening?.isNotEmpty == true && 
+                                   _currentProduct.expirationDate == null;
+
     return Column(
       children: [
         if (isProductSaved) ...[
-          CustomButton(text: 'Eliminar producto', onPressed: _isDeleting ? () {} : _deleteProduct, type: ButtonType.danger, size: ButtonSize.full, icon: Icons.delete, isLoading: _isDeleting, isEnabled: !_isDeleting),
+          CustomButton(
+            text: 'Eliminar producto',
+            onPressed: _isLoading('deleting') ? () {} : _deleteProduct,
+            type: ButtonType.danger,
+            size: ButtonSize.full,
+            icon: Icons.delete,
+            isLoading: _isLoading('deleting'),
+            isEnabled: !_isLoading('deleting'),
+          ),
           const SizedBox(height: 12),
         ],
-        if (isProductSaved && _currentProduct.isOpened == false) ...[
-          CustomButton(text: 'Abrir producto', onPressed: _isEditing ? () {} : _markAsOpened, type: ButtonType.primary, size: ButtonSize.full, icon: Icons.open_in_new, isLoading: _isOpening, isEnabled: !_isOpening && !_isEditing),
+        if (isProductSaved && !isReallyOpened) ...[
+          CustomButton(
+            text: 'Abrir producto',
+            onPressed: _isLoading('opening') ? () {} : _markAsOpened,
+            type: ButtonType.primary,
+            size: ButtonSize.full,
+            icon: Icons.open_in_new,
+            isLoading: _isLoading('opening'),
+            isEnabled: !_isLoading('opening') && !_isLoading('editing'),
+          ),
           const SizedBox(height: 12),
         ],
-        if (isProductSaved && _currentProduct.isOpened == true) ...[
-          CustomButton(text: 'Cerrar producto', onPressed: _isEditing ? () {} : _markAsClosed, type: ButtonType.secondary, size: ButtonSize.full, icon: Icons.close, isLoading: _isClosing, isEnabled: !_isClosing && !_isEditing),
+        if (isProductSaved && isReallyOpened) ...[
+          CustomButton(
+            text: 'Cerrar producto',
+            onPressed: _isLoading('closing') ? () {} : _markAsClosed,
+            type: ButtonType.secondary,
+            size: ButtonSize.full,
+            icon: Icons.close,
+            isLoading: _isLoading('closing'),
+            isEnabled: !_isLoading('closing') && !_isLoading('editing'),
+          ),
           const SizedBox(height: 12),
         ],
-        if (isProductSaved && _currentProduct.isOpened == true && _currentProduct.periodAfterOpening?.isNotEmpty == true) ...[
-          CustomButton(text: 'Calcular caducidad', onPressed: _isEditing ? () {} : _calculateExpiration, type: ButtonType.secondary, size: ButtonSize.full, icon: Icons.calculate, isLoading: _isCalculating, isEnabled: !_isCalculating && !_isEditing),
+        if (canCalculateExpiration) ...[
+          CustomButton(
+            text: 'Calcular caducidad',
+            onPressed: _isLoading('calculating') ? () {} : _calculateExpiration,
+            type: ButtonType.secondary,
+            size: ButtonSize.full,
+            icon: Icons.calculate,
+            isLoading: _isLoading('calculating'),
+            isEnabled: !_isLoading('calculating') && !_isLoading('editing'),
+          ),
           const SizedBox(height: 12),
         ],
-        if (showAddButton) CustomButton(text: 'Agregar a mis productos', onPressed: _isAdding ? () {} : _addToMyProducts, type: ButtonType.primary, size: ButtonSize.full, icon: Icons.add, isLoading: _isAdding, isEnabled: !_isAdding),
+        if (showAddButton)
+          CustomButton(
+            text: 'Agregar a mis productos',
+            onPressed: _isLoading('adding') ? () {} : _addToMyProducts,
+            type: ButtonType.primary,
+            size: ButtonSize.full,
+            icon: Icons.add,
+            isLoading: _isLoading('adding'),
+            isEnabled: !_isLoading('adding'),
+          ),
       ],
     );
   }
 
   String _formatDate(DateTime date) => '${date.day}/${date.month}/${date.year}';
 }
+
+// --- COMPONENTES REUTILIZABLES ---
 
 class _InfoRow extends StatelessWidget {
   final IconData icon;
@@ -345,7 +545,10 @@ class _PlaceholderImage extends StatelessWidget {
     return Container(
       height: 220,
       width: double.infinity,
-      decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceVariant, borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceVariant,
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Icon(Icons.spa_outlined, size: 72, color: Theme.of(context).colorScheme.outline),
     );
   }

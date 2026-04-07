@@ -195,17 +195,24 @@ Future<BeautyProduct?> updateProduct(String id, Map<String, dynamic> productData
     }
   }
 
-  Future<BeautyProduct?> markAsOpened(String id) async {
+
+Future<BeautyProduct?> markAsOpened(String id, {DateTime? openedDate}) async {
   try {
     final token = await _authService.getToken();
     if (token == null) return null;
 
+    // Si no se proporciona fecha, usar la fecha actual
+    final dateToSend = openedDate ?? DateTime.now();
+    
     final response = await http.patch(
       Uri.parse('${ApiConfig.getProductsUrl()}/$id/open'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      body: jsonEncode({
+        'openedDate': dateToSend.toIso8601String(),
+      }),
     );
 
     if (response.statusCode == 200) {
@@ -225,13 +232,19 @@ Future<BeautyProduct?> markAsClosed(String id) async {
   try {
     final token = await _authService.getToken();
     if (token == null) return null;
-
+    
     final response = await http.patch(
       Uri.parse('${ApiConfig.getProductsUrl()}/$id/close'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
+      body: jsonEncode({
+        'isOpened': false,
+        'openedDate': null,     // Limpiar fecha de apertura
+        'expirationDate': null, // Limpiar fecha de caducidad calculada
+        // NOTA: NO tocamos periodAfterOpening, se conserva
+      }),
     );
 
     if (response.statusCode == 200) {

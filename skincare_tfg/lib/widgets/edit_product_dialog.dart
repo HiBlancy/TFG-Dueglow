@@ -81,53 +81,37 @@ class _EditProductDialogState extends State<EditProductDialog> {
   }
 
   void _saveProduct() {
-    if (_nameController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('El nombre es obligatorio')));
-      return;
-    }
-
-    // Leer valores actuales
-    final currentName = _nameController.text.trim();
-    final currentBrand = _brandController.text.trim();
-    final currentNotes = _notesController.text.trim();
-    final currentPeriod = _periodAfterOpeningController.text.trim();
-
-    print('🔍 CONSTRUYENDO PRODUCTO:');
-    print('  - notes actual: "$currentNotes"');
-    print('  - notes será: ${currentNotes.isEmpty ? "null" : currentNotes}');
-    print('  - brand actual: "$currentBrand"');
-    print('  - brand será: ${currentBrand.isEmpty ? "null" : currentBrand}');
-    print('  - categories actual: $_categories');
-    print('  - categories será: ${_categories.isEmpty ? "null" : _categories}');
-
-    // ✅ Construir el producto (ahora acepta nulls)
-    final updatedProduct = BeautyProduct(
-      id: widget.product.id,
-      barcode: widget.product.barcode,
-      name: currentName,
-      brand: currentBrand.isEmpty ? null : currentBrand, // ✅ Ahora funciona
-      imageUrl: widget.product.imageUrl,
-      categories: _categories.isEmpty ? null : _categories, // ✅ Ahora funciona
-      notes: currentNotes.isEmpty ? null : currentNotes,
-      rating: _rating,
-      listType: widget.product.listType,
-      expirationDate: _expirationDate,
-      periodAfterOpening: currentPeriod.isEmpty ? null : currentPeriod,
-      openedDate: _openedDate,
-      addedAt: widget.product.addedAt,
-      isOpened: widget.product.isOpened,
+  if (_nameController.text.trim().isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('El nombre es obligatorio'))
     );
-
-    print('📦 PRODUCTO FINAL:');
-    print('  - notes: ${updatedProduct.notes}');
-    print('  - brand: ${updatedProduct.brand}');
-    print('  - categories: ${updatedProduct.categories}');
-    print('  - rating: ${updatedProduct.rating}');
-
-    Navigator.pop(context, updatedProduct);
+    return;
   }
+
+  // 🔴 IMPORTANTE: Si no hay fecha de apertura, el producto NO está abierto
+  final hasOpenedDate = _openedDate != null;
+  
+  final updatedProduct = BeautyProduct(
+    id: widget.product.id,
+    barcode: widget.product.barcode,
+    name: _nameController.text.trim(),
+    brand: _brandController.text.trim().isEmpty ? null : _brandController.text.trim(),
+    imageUrl: widget.product.imageUrl,
+    categories: _categories.isEmpty ? null : _categories,
+    notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+    rating: _rating,
+    listType: widget.product.listType,
+    expirationDate: _expirationDate,
+    periodAfterOpening: _periodAfterOpeningController.text.trim().isEmpty 
+        ? null 
+        : _periodAfterOpeningController.text.trim(),
+    openedDate: _openedDate,  // Puede ser null
+    addedAt: widget.product.addedAt,
+    isOpened: hasOpenedDate,  // 🔴 Sincronizar isOpened con openedDate
+  );
+
+  Navigator.pop(context, updatedProduct);
+}
 
   @override
   Widget build(BuildContext context) {
