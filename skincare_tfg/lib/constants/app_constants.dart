@@ -12,6 +12,7 @@ class AppConstants {
   static const String routeSettings = '/settings';
   static const String routeAbout = '/about';
   static const String routeEdit = '/edit';
+  static const String routeMyProducts = '/my_products';
   
   // SharedPreferences keys
   static const String prefUserEmail = 'user_email';

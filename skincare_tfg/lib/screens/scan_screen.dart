@@ -22,36 +22,86 @@ class _ScanScreenState extends State<ScanScreen> {
     super.dispose();
   }
 
-void _onBarcodeDetected(BarcodeCapture capture) async {
-  if (_isNavigating) return;
+  void _onBarcodeDetected(BarcodeCapture capture) async {
+    if (_isNavigating) return;
 
-  final barcode = capture.barcodes.firstOrNull;
-  if (barcode == null || barcode.rawValue == null) return;
+    final barcode = capture.barcodes.firstOrNull;
+    if (barcode == null || barcode.rawValue == null) return;
 
-  setState(() => _isNavigating = true);
-  _cameraController.stop();
+    setState(() => _isNavigating = true);
+    _cameraController.stop();
 
-  final product = await BeautyApiService.getProductByBarcode(barcode.rawValue!);
+    final product = await BeautyApiService.getProductByBarcode(barcode.rawValue!);
 
-  if (!mounted) return;
+    if (!mounted) return;
 
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => ProductScreen(
-        product: product ?? BeautyProduct(
-          barcode: barcode.rawValue!,
-          name: 'Producto desconocido',
-          brand: '',
-          addedAt: DateTime(DateTime.april)
+    if (product != null) {
+      // Producto encontrado - pasar isFromSearch = true para mostrar botón de añadir
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ProductScreen(
+            product: product,
+            isFromSearch: true, // Esto activa el botón "Agregar a mis productos"
+          ),
         ),
-      ),
-    ),
-  ).then((_) {
-    setState(() => _isNavigating = false);
-    _cameraController.start();
-  });
-}
+      ).then((_) {
+        setState(() => _isNavigating = false);
+        _cameraController.start();
+      });
+    } else {
+      // Producto no encontrado - mostrar diálogo para crear producto manual
+      final shouldCreate = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Producto no encontrado'),
+          content: Text(
+            'No se encontró información para el código de barras: ${barcode.rawValue}\n\n'
+            '¿Quieres crear un nuevo producto manualmente?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Crear producto'),
+            ),
+          ],
+        ),
+      );
+
+      if (!mounted) return;
+
+      if (shouldCreate == true) {
+        // Crear producto básico con el código de barras
+        final newProduct = BeautyProduct(
+          barcode: barcode.rawValue!,
+          name: 'Nuevo producto',
+          brand: '',
+          addedAt: DateTime.now(),
+        );
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ProductScreen(
+              product: newProduct,
+              isFromSearch: true, // Esto activa el botón "Agregar a mis productos"
+            ),
+          ),
+        ).then((_) {
+          setState(() => _isNavigating = false);
+          _cameraController.start();
+        });
+      } else {
+        // Usuario canceló, reiniciar cámara
+        setState(() => _isNavigating = false);
+        _cameraController.start();
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +126,7 @@ void _onBarcodeDetected(BarcodeCapture capture) async {
                 border: Border.all(color: Colors.white, width: 2.5),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Stack(
+              child: const Stack(
                 children: [
                   // Esquinas decorativas
                   _Corner(Alignment.topLeft),
@@ -100,7 +150,7 @@ void _onBarcodeDetected(BarcodeCapture capture) async {
                 color: Colors.white,
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
-                shadows: [Shadow(blurRadius: 4, color: Colors.black54)],
+                shadows: const [Shadow(blurRadius: 4, color: Colors.black54)],
               ),
             ),
           ),

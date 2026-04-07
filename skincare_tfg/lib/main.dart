@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:skincare_tfg/screens/about_screen.dart';
-import 'package:skincare_tfg/screens/edit_screen.dart';
-import 'package:skincare_tfg/screens/settings_screen.dart';
+import 'screens/about_screen.dart';
+import 'screens/edit_screen.dart';
+import 'screens/settings_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
+import 'screens/my_products_screen.dart';
 import 'widgets/bottom_app_bar.dart';
 import 'constants/app_constants.dart';
 
@@ -35,6 +36,7 @@ class MyApp extends StatelessWidget {
         AppConstants.routeSettings: (context) => const SettingsScreen(),
         AppConstants.routeEdit: (context) => const EditScreen(),
         AppConstants.routeAbout: (context) => const AboutScreen(),
+         AppConstants.routeMyProducts: (context) => const MyProductsScreen(),
       },
       debugShowCheckedModeBanner: false,
     );

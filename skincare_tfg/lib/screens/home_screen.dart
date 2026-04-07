@@ -1,6 +1,7 @@
-// lib/screens/home_screen.dart (actualizado)
+// lib/screens/home_screen.dart (corregido)
 
 import 'package:flutter/material.dart';
+import '../constants/app_constants.dart'; // ✅ Importar AppConstants
 import '../models/beauty_product.dart';
 import '../services/auth_service.dart';
 import '../services/product_service.dart';
@@ -47,19 +48,15 @@ class _HomeScreenState extends State<HomeScreen> {
     await _loadUserData();
   }
 
-  // ✅ Nuevo método para navegar al detalle del producto y esperar resultado
+  // Método para navegar al detalle del producto y esperar resultado
   Future<void> _navigateToProduct(BeautyProduct product) async {
-    // Navegar a la pantalla de producto
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            ProductScreen(product: product, isFromSearch: false),
+        builder: (context) => ProductScreen(product: product, isFromSearch: false),
       ),
     );
-
-    // ✅ Cuando el usuario regrese (presione back), recargar los datos
-    // Esto asegura que cualquier cambio hecho (editar/eliminar) se refleje
+    // Recargar los datos cuando el usuario regrese
     await _loadUserData();
   }
 
@@ -107,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 32),
                     _buildQuickActions(),
                     const SizedBox(height: 24),
-                    _buildProductList(),
+                    _buildExpiringSoonProducts(),
                   ],
                 ),
               ),
@@ -124,24 +121,20 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Expanded(
                 child: _buildActionCard(
-                  Icons.shopping_bag,
+                  Icons.shopping_bag_outlined,
                   'Mis productos',
                   'Ver todos',
                   () {
-                    // Por ahora solo mostramos los que ya tenemos en home
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Ya estás viendo tus productos'),
-                      ),
-                    );
+                    // Navegar a la pantalla de todos los productos
+                    Navigator.pushNamed(context, AppConstants.routeMyProducts);
                   },
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: _buildActionCard(
-                  Icons.favorite,
-                  'Favoritos',
+                  Icons.face_retouching_natural_outlined,
+                  'Rutinas',
                   'Próximamente',
                   () {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -157,8 +150,8 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Expanded(
                 child: _buildActionCard(
-                  Icons.watch_later,
-                  'Wishlist',
+                  Icons.category_outlined,
+                  'Categorías',
                   'Próximamente',
                   () {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -187,24 +180,32 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildProductList() {
-    if (_products.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
+  Widget _buildExpiringSoonProducts() {
+    // Filtrar productos que tienen fecha de caducidad y están próximos (30 días)
+    final now = DateTime.now();
+    final expiringSoon = _products.where((product) {
+      if (product.expirationDate == null) return false;
+      final daysUntilExpiration = product.expirationDate!.difference(now).inDays;
+      return daysUntilExpiration >= 0 && daysUntilExpiration <= 30;
+    }).toList();
+
+    if (expiringSoon.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 24),
         child: Card(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(24),
             child: Column(
               children: [
-                Icon(Icons.inbox_outlined, size: 48, color: Colors.grey[400]),
-                const SizedBox(height: 12),
-                const Text(
-                  'No tienes productos aún',
-                  style: TextStyle(fontSize: 16),
+                Icon(Icons.check_circle_outline, size: 48, color: Colors.green),
+                SizedBox(height: 12),
+                Text(
+                  '¡Todo en orden!',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Agrega tus primeros productos escaneando\ncódigos de barras o buscando en la base de datos',
+                SizedBox(height: 8),
+                Text(
+                  'No hay productos próximos a caducar',
                   style: TextStyle(fontSize: 14, color: Colors.grey),
                   textAlign: TextAlign.center,
                 ),
@@ -224,12 +225,15 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'Mis productos',
+                'Próximos a caducar',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              Text(
-                '${_products.length} productos',
-                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              TextButton(
+                onPressed: () {
+                  // Navegar a la pantalla de productos
+                  Navigator.pushNamed(context, AppConstants.routeMyProducts);
+                },
+                child: const Text('Ver todos'),
               ),
             ],
           ),
@@ -238,21 +242,23 @@ class _HomeScreenState extends State<HomeScreen> {
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: _products.length,
+          itemCount: expiringSoon.length > 5 ? 5 : expiringSoon.length,
           itemBuilder: (context, index) {
-            final product = _products[index];
-            return _buildProductCard(product);
+            final product = expiringSoon[index];
+            return _buildExpiringProductCard(product);
           },
         ),
       ],
     );
   }
 
-  Widget _buildProductCard(BeautyProduct product) {
+  Widget _buildExpiringProductCard(BeautyProduct product) {
+    final daysUntilExpiration = product.expirationDate!.difference(DateTime.now()).inDays;
+    
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: InkWell(
-        onTap: () => _navigateToProduct(product), // ✅ Usar el nuevo método
+        onTap: () => _navigateToProduct(product),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -288,7 +294,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
               ),
               const SizedBox(width: 12),
-
+              
               // Información del producto
               Expanded(
                 child: Column(
@@ -304,36 +310,43 @@ class _HomeScreenState extends State<HomeScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      product.brand ?? '',
-                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                    ),
-                    if (product.categories != null &&
-                        product.categories!.isNotEmpty) ...[
-                      const SizedBox(height: 4),
+                    if (product.brand != null && product.brand!.isNotEmpty)
                       Text(
-                        product.categories!.take(2).join(', '),
-                        style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        product.brand!,
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                       ),
-                    ],
                   ],
                 ),
               ),
-
-              // Rating si existe
-              if (product.rating != null)
-                Row(
+              
+              // Indicador de días restantes
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: daysUntilExpiration <= 7 ? Colors.red[100] : Colors.orange[100],
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
                   children: [
-                    const Icon(Icons.star, color: Colors.amber, size: 16),
                     Text(
-                      ' ${product.rating}',
-                      style: const TextStyle(fontSize: 12),
+                      '$daysUntilExpiration',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: daysUntilExpiration <= 7 ? Colors.red[700] : Colors.orange[700],
+                      ),
+                    ),
+                    Text(
+                      'días',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: daysUntilExpiration <= 7 ? Colors.red[700] : Colors.orange[700],
+                      ),
                     ),
                   ],
                 ),
-
+              ),
+              
               const Icon(Icons.chevron_right, color: Colors.grey),
             ],
           ),

@@ -65,7 +65,7 @@ __decorate([
 ], CreateProductDto.prototype, "rating", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsIn)(['wishlist', 'favorites', 'have', 'used', 'deleted']),
+    (0, class_validator_1.IsIn)(['wishlist', 'favorites', 'have', 'used']),
     __metadata("design:type", String)
 ], CreateProductDto.prototype, "listType", void 0);
 __decorate([

@@ -23,7 +23,7 @@ exports.ProductSchema = new mongoose_1.Schema({
     },
     listType: {
         type: String,
-        enum: ['wishlist', 'favorites', 'have', 'used', 'deleted'],
+        enum: ['wishlist', 'favorites', 'have', 'used'],
         default: 'have',
     },
     expirationDate: { type: Date, required: false },

@@ -49,7 +49,7 @@ export class UpdateProductDto {
   rating?: number | null; // ✅ Permitir null (para limpiar)
 
   @IsOptional()
-  @IsIn(['wishlist', 'favorites', 'have', 'used', 'deleted'])
+  @IsIn(['wishlist', 'favorites', 'have', 'used'])
   listType?: string;
 
   @IsOptional()
