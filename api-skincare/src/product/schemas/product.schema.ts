@@ -37,7 +37,7 @@ export const ProductSchema = new Schema(
       default: false,
     },
   },
-  { timestamps: true },
+  { timestamps: true, strict: false },
 );
 
 // Índice compuesto para evitar duplicados (mismo producto en misma lista)

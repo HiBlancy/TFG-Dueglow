@@ -1,11 +1,10 @@
-// lib/models/beauty_product.dart
 class BeautyProduct {
   // Campos básicos (para búsqueda externa)
   final String barcode;
   final String name;
-  final String brand;
+  final String? brand;  // ✅ Cambiado a nullable
   final String? imageUrl;
-  final List<String> categories;
+  final List<String>? categories;  // ✅ Cambiado a nullable
   
   // Campos adicionales (para productos guardados en tu backend)
   final String? id;
@@ -16,13 +15,14 @@ class BeautyProduct {
   final String? periodAfterOpening;
   final DateTime? openedDate;
   final DateTime? addedAt;
+  final bool? isOpened;
 
   const BeautyProduct({
     required this.barcode,
     required this.name,
-    required this.brand,
+    this.brand,  // ✅ Ya no es required
     this.imageUrl,
-    this.categories = const [],
+    this.categories,  // ✅ Ya no es required
     this.id,
     this.notes,
     this.rating,
@@ -31,6 +31,7 @@ class BeautyProduct {
     this.periodAfterOpening,
     this.openedDate,
     this.addedAt,
+    this.isOpened,
   });
 
   // Factory para productos desde Open Beauty Facts (API externa)
@@ -40,28 +41,27 @@ class BeautyProduct {
     return BeautyProduct(
       barcode: json['code']?.toString() ?? '',
       name: json['product_name']?.toString().trim() ?? '',
-      brand: json['brands']?.toString().trim() ?? '',
+      brand: json['brands']?.toString().trim(),  // ✅ Puede ser null
       imageUrl: json['image_front_small_url']?.toString() ??
                 json['image_front_url']?.toString(),
       categories: rawCategories
           .map((c) => c.toString().replaceAll('en:', '').replaceAll('-', ' '))
           .toList(),
+      isOpened: false,
     );
   }
 
   // Factory para productos desde tu backend
   factory BeautyProduct.fromBackend(Map<String, dynamic> json) {
-    final rawCategories = json['categories'] as List<dynamic>? ?? [];
+    final rawCategories = json['categories'] as List<dynamic>?;
     
     return BeautyProduct(
       id: json['_id']?.toString(),
       barcode: json['barcode']?.toString() ?? '',
       name: json['name']?.toString().trim() ?? '',
-      brand: json['brand']?.toString().trim() ?? '',
+      brand: json['brand']?.toString().trim(),
       imageUrl: json['imageUrl']?.toString(),
-      categories: rawCategories
-          .map((c) => c.toString().replaceAll('en:', '').replaceAll('-', ' '))
-          .toList(),
+      categories: rawCategories?.map((c) => c.toString().replaceAll('en:', '').replaceAll('-', ' ')).toList(),
       notes: json['notes']?.toString(),
       rating: json['rating'] as int?,
       listType: json['listType']?.toString(),
@@ -75,6 +75,7 @@ class BeautyProduct {
       addedAt: json['createdAt'] != null 
           ? DateTime.parse(json['createdAt']) 
           : null,
+      isOpened: json['isOpened'] as bool?,
     );
   }
 
@@ -82,16 +83,17 @@ class BeautyProduct {
   Map<String, dynamic> toBackendJson() {
     return {
       'name': name,
-      'brand': brand,
+      'brand': brand,  // ✅ Puede ser null
       'barcode': barcode,
       'imageUrl': imageUrl,
-      'categories': categories,
+      'categories': categories,  // ✅ Puede ser null
       'notes': notes,
       'rating': rating,
       'listType': listType ?? 'have',
       'expirationDate': expirationDate?.toIso8601String(),
       'periodAfterOpening': periodAfterOpening,
       'openedDate': openedDate?.toIso8601String(),
+      'isOpened': isOpened,
     };
   }
 
@@ -110,21 +112,23 @@ class BeautyProduct {
     String? periodAfterOpening,
     DateTime? openedDate,
     DateTime? addedAt,
+    bool? isOpened,
   }) {
     return BeautyProduct(
       barcode: barcode ?? this.barcode,
       name: name ?? this.name,
-      brand: brand ?? this.brand,
+      brand: brand,  // ✅ Asignar directamente (puede ser null)
       imageUrl: imageUrl ?? this.imageUrl,
-      categories: categories ?? this.categories,
+      categories: categories,  // ✅ Asignar directamente (puede ser null)
       id: id ?? this.id,
-      notes: notes ?? this.notes,
-      rating: rating ?? this.rating,
+      notes: notes,  // ✅ Asignar directamente
+      rating: rating,  // ✅ Asignar directamente
       listType: listType ?? this.listType,
-      expirationDate: expirationDate ?? this.expirationDate,
-      periodAfterOpening: periodAfterOpening ?? this.periodAfterOpening,
-      openedDate: openedDate ?? this.openedDate,
+      expirationDate: expirationDate,  // ✅ Asignar directamente
+      periodAfterOpening: periodAfterOpening,  // ✅ Asignar directamente
+      openedDate: openedDate,  // ✅ Asignar directamente
       addedAt: addedAt ?? this.addedAt,
+      isOpened: isOpened ?? this.isOpened,
     );
   }
 }

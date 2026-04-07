@@ -30,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadUserData() async {
     setState(() => _isLoading = true);
-    
+
     final name = await _authService.getUserName();
     final products = await _productService.getProducts();
 
@@ -49,44 +49,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ✅ Nuevo método para navegar al detalle del producto y esperar resultado
   Future<void> _navigateToProduct(BeautyProduct product) async {
-    final result = await Navigator.push(
+    // Navegar a la pantalla de producto
+    await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ProductScreen(
-          product: product,
-          isFromSearch: false,
-        ),
+        builder: (context) =>
+            ProductScreen(product: product, isFromSearch: false),
       ),
     );
-    
-    // ✅ Si el resultado es true, significa que se eliminó el producto
-    if (result == true) {
-      // Recargar la lista de productos
-      await _loadUserData();
-      
-      // Mostrar mensaje opcional
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Lista de productos actualizada'),
-            backgroundColor: Colors.grey,
-            duration: Duration(seconds: 1),
-          ),
-        );
-      }
-    } else if (result is BeautyProduct) {
-      // Producto actualizado
-      await _loadUserData();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Producto actualizado correctamente'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-    }
+
+    // ✅ Cuando el usuario regrese (presione back), recargar los datos
+    // Esto asegura que cualquier cambio hecho (editar/eliminar) se refleje
+    await _loadUserData();
   }
 
   @override
@@ -120,7 +94,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             padding: EdgeInsets.symmetric(horizontal: 24),
                             child: Text(
                               'Bienvenido a Skincare App.\nTu aplicación para el cuidado de la piel.',
-                              style: TextStyle(fontSize: 16, color: Colors.grey),
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
+                              ),
                               textAlign: TextAlign.center,
                             ),
                           ),
@@ -153,7 +130,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   () {
                     // Por ahora solo mostramos los que ya tenemos en home
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Ya estás viendo tus productos')),
+                      const SnackBar(
+                        content: Text('Ya estás viendo tus productos'),
+                      ),
                     );
                   },
                 ),
@@ -217,11 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.all(24),
             child: Column(
               children: [
-                Icon(
-                  Icons.inbox_outlined,
-                  size: 48,
-                  color: Colors.grey[400],
-                ),
+                Icon(Icons.inbox_outlined, size: 48, color: Colors.grey[400]),
                 const SizedBox(height: 12),
                 const Text(
                   'No tienes productos aún',
@@ -250,17 +225,11 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               const Text(
                 'Mis productos',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               Text(
                 '${_products.length} productos',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
             ],
           ),
@@ -319,7 +288,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
               ),
               const SizedBox(width: 12),
-              
+
               // Información del producto
               Expanded(
                 child: Column(
@@ -336,20 +305,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      product.brand,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
+                      product.brand ?? '',
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                     ),
-                    if (product.categories.isNotEmpty) ...[
+                    if (product.categories != null &&
+                        product.categories!.isNotEmpty) ...[
                       const SizedBox(height: 4),
                       Text(
-                        product.categories.take(2).join(', '),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[500],
-                        ),
+                        product.categories!.take(2).join(', '),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[500]),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -357,7 +321,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-              
+
               // Rating si existe
               if (product.rating != null)
                 Row(
@@ -369,11 +333,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
-              
-              const Icon(
-                Icons.chevron_right,
-                color: Colors.grey,
-              ),
+
+              const Icon(Icons.chevron_right, color: Colors.grey),
             ],
           ),
         ),
@@ -381,7 +342,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildActionCard(IconData icon, String title, String subtitle, VoidCallback onTap) {
+  Widget _buildActionCard(
+    IconData icon,
+    String title,
+    String subtitle,
+    VoidCallback onTap,
+  ) {
     return Card(
       child: InkWell(
         onTap: onTap,
@@ -392,10 +358,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Icon(icon, size: 40, color: Theme.of(context).primaryColor),
               const SizedBox(height: 8),
-              Text(
-                title,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
+              Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
               Text(
                 subtitle,

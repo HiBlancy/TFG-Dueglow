@@ -68,32 +68,45 @@ class ProductService {
     }
   }
 
-  Future<BeautyProduct?> updateProduct(String id, Map<String, dynamic> productData) async {
-    try {
-      final token = await _authService.getToken();
-      if (token == null) return null;
+Future<BeautyProduct?> updateProduct(String id, Map<String, dynamic> productData) async {
+  try {
+    final token = await _authService.getToken();
+    if (token == null) return null;
 
-      final response = await http.patch(
-        Uri.parse('${ApiConfig.getProductsUrl()}/$id'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode(productData),
-      );
+    // ✅ Limpiar el mapa: mantener TODOS los valores (incluyendo nulls)
+    final Map<String, dynamic> cleanedData = {};
+    productData.forEach((key, value) {
+      // ✅ Enviar el valor tal cual, sea null o no
+      cleanedData[key] = value;
+      print('📦 Campo $key: ${value == null ? 'null' : value}');
+    });
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data['status'] == true && data['data'] != null) {
-          return BeautyProduct.fromBackend(data['data']);
-        }
+    print('📤 Enviando al backend: ${jsonEncode(cleanedData)}');
+
+    final response = await http.patch(
+      Uri.parse('${ApiConfig.getProductsUrl()}/$id'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(cleanedData),
+    );
+
+    print('📡 Response status: ${response.statusCode}');
+    print('📡 Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['status'] == true && data['data'] != null) {
+        return BeautyProduct.fromBackend(data['data']);
       }
-      return null;
-    } catch (e) {
-      print('❌ Error actualizando producto: $e');
-      return null;
     }
+    return null;
+  } catch (e) {
+    print('❌ Error actualizando producto: $e');
+    return null;
   }
+}
 
   Future<bool> deleteProduct(String id) async {
     try {
@@ -181,4 +194,82 @@ class ProductService {
       return null;
     }
   }
+
+  Future<BeautyProduct?> markAsOpened(String id) async {
+  try {
+    final token = await _authService.getToken();
+    if (token == null) return null;
+
+    final response = await http.patch(
+      Uri.parse('${ApiConfig.getProductsUrl()}/$id/open'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['status'] == true && data['data'] != null) {
+        return BeautyProduct.fromBackend(data['data']);
+      }
+    }
+    return null;
+  } catch (e) {
+    print('❌ Error marcando como abierto: $e');
+    return null;
+  }
+}
+
+Future<BeautyProduct?> markAsClosed(String id) async {
+  try {
+    final token = await _authService.getToken();
+    if (token == null) return null;
+
+    final response = await http.patch(
+      Uri.parse('${ApiConfig.getProductsUrl()}/$id/close'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['status'] == true && data['data'] != null) {
+        return BeautyProduct.fromBackend(data['data']);
+      }
+    }
+    return null;
+  } catch (e) {
+    print('❌ Error marcando como cerrado: $e');
+    return null;
+  }
+}
+
+Future<BeautyProduct?> calculateExpiration(String id) async {
+  try {
+    final token = await _authService.getToken();
+    if (token == null) return null;
+
+    final response = await http.post(
+      Uri.parse('${ApiConfig.getProductsUrl()}/$id/calculate-expiration'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['status'] == true && data['data'] != null) {
+        return BeautyProduct.fromBackend(data['data']);
+      }
+    }
+    return null;
+  } catch (e) {
+    print('❌ Error calculando caducidad: $e');
+    return null;
+  }
+}
 }

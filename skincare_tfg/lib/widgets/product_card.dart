@@ -75,17 +75,20 @@ class ProductCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      product.brand,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
+                    // ✅ Mostrar brand solo si no es null y no está vacío
+                    if (product.brand != null && product.brand!.isNotEmpty)
+                      Text(
+                        product.brand!,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
                       ),
-                    ),
-                    if (product.categories.isNotEmpty) ...[
+                    // ✅ Mostrar categorías solo si no es null y no está vacío
+                    if (product.categories != null && product.categories!.isNotEmpty) ...[
                       const SizedBox(height: 4),
                       Text(
-                        product.categories.take(2).join(', '),
+                        product.categories!.take(2).join(', '),
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey[500],

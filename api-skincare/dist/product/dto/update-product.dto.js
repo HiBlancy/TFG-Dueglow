@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateProductDto = void 0;
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 class UpdateProductDto {
     name;
     brand;
@@ -22,6 +23,7 @@ class UpdateProductDto {
     listType;
     expirationDate;
     periodAfterOpening;
+    openedDate;
     isOpened;
 }
 exports.UpdateProductDto = UpdateProductDto;
@@ -35,35 +37,35 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
-    __metadata("design:type", String)
+    __metadata("design:type", Object)
 ], UpdateProductDto.prototype, "brand", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsUrl)(),
-    __metadata("design:type", String)
+    __metadata("design:type", Object)
 ], UpdateProductDto.prototype, "imageUrl", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
+    __metadata("design:type", Object)
 ], UpdateProductDto.prototype, "barcode", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.IsString)({ each: true }),
-    __metadata("design:type", Array)
+    __metadata("design:type", Object)
 ], UpdateProductDto.prototype, "categories", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
+    __metadata("design:type", Object)
 ], UpdateProductDto.prototype, "notes", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(1),
     (0, class_validator_1.Max)(5),
-    __metadata("design:type", Number)
+    __metadata("design:type", Object)
 ], UpdateProductDto.prototype, "rating", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
@@ -72,16 +74,24 @@ __decorate([
 ], UpdateProductDto.prototype, "listType", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Date),
+    (0, class_validator_1.IsDate)(),
     __metadata("design:type", Object)
 ], UpdateProductDto.prototype, "expirationDate", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
+    __metadata("design:type", Object)
 ], UpdateProductDto.prototype, "periodAfterOpening", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Date),
+    (0, class_validator_1.IsDate)(),
+    __metadata("design:type", Object)
+], UpdateProductDto.prototype, "openedDate", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsBoolean)(),
-    __metadata("design:type", Boolean)
+    __metadata("design:type", Object)
 ], UpdateProductDto.prototype, "isOpened", void 0);
 //# sourceMappingURL=update-product.dto.js.map

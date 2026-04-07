@@ -1,13 +1,14 @@
 import { Schema } from 'mongoose';
 export declare const ProductSchema: Schema<any, import("mongoose").Model<any, any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
+    strict: false;
 }, {
+    userId: import("mongoose").Types.ObjectId;
     name: string;
     brand: string;
     categories: string[];
     listType: "wishlist" | "favorites" | "have" | "used" | "deleted";
     isOpened: boolean;
-    userId: import("mongoose").Types.ObjectId;
     imageUrl?: string | null | undefined;
     barcode?: string | null | undefined;
     notes?: string | null | undefined;
@@ -16,12 +17,12 @@ export declare const ProductSchema: Schema<any, import("mongoose").Model<any, an
     periodAfterOpening?: string | null | undefined;
     openedDate?: NativeDate | null | undefined;
 } & import("mongoose").DefaultTimestampProps, import("mongoose").Document<unknown, {}, {
+    userId: import("mongoose").Types.ObjectId;
     name: string;
     brand: string;
     categories: string[];
     listType: "wishlist" | "favorites" | "have" | "used" | "deleted";
     isOpened: boolean;
-    userId: import("mongoose").Types.ObjectId;
     imageUrl?: string | null | undefined;
     barcode?: string | null | undefined;
     notes?: string | null | undefined;
@@ -31,15 +32,16 @@ export declare const ProductSchema: Schema<any, import("mongoose").Model<any, an
     openedDate?: NativeDate | null | undefined;
 } & import("mongoose").DefaultTimestampProps, {
     id: string;
-}, Omit<import("mongoose").DefaultSchemaOptions, "timestamps"> & {
+}, Omit<import("mongoose").DefaultSchemaOptions, "timestamps" | "strict"> & {
     timestamps: true;
+    strict: false;
 }> & Omit<{
+    userId: import("mongoose").Types.ObjectId;
     name: string;
     brand: string;
     categories: string[];
     listType: "wishlist" | "favorites" | "have" | "used" | "deleted";
     isOpened: boolean;
-    userId: import("mongoose").Types.ObjectId;
     imageUrl?: string | null | undefined;
     barcode?: string | null | undefined;
     notes?: string | null | undefined;
@@ -54,12 +56,12 @@ export declare const ProductSchema: Schema<any, import("mongoose").Model<any, an
 }, "id"> & {
     id: string;
 }, unknown, {
+    userId: import("mongoose").Types.ObjectId;
     name: string;
     brand: string;
     categories: string[];
     listType: "wishlist" | "favorites" | "have" | "used" | "deleted";
     isOpened: boolean;
-    userId: import("mongoose").Types.ObjectId;
     imageUrl?: string | null | undefined;
     barcode?: string | null | undefined;
     notes?: string | null | undefined;

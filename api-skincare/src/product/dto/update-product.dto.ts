@@ -1,4 +1,4 @@
-// update-product.dto.ts - CORREGIDO
+// update-product.dto.ts - ACTUALIZADO para aceptar nulls
 import {
   IsOptional,
   IsString,
@@ -10,7 +10,9 @@ import {
   Max,
   IsIn,
   IsBoolean,
+  IsDate,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class UpdateProductDto {
   @IsOptional()
@@ -21,43 +23,50 @@ export class UpdateProductDto {
   @IsOptional()
   @IsString()
   @IsNotEmpty()
-  brand?: string;
+  brand?: string | null; // ✅ Permitir null
 
   @IsOptional()
   @IsUrl()
-  imageUrl?: string;
+  imageUrl?: string | null; // ✅ Permitir null
 
   @IsOptional()
   @IsString()
-  barcode?: string;
+  barcode?: string | null; // ✅ Permitir null
 
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  categories?: string[];
+  categories?: string[] | null; // ✅ Permitir null
 
   @IsOptional()
   @IsString()
-  notes?: string;
+  notes?: string | null; // ✅ Permitir null (para limpiar)
 
   @IsOptional()
   @IsNumber()
   @Min(1)
   @Max(5)
-  rating?: number;
+  rating?: number | null; // ✅ Permitir null (para limpiar)
 
   @IsOptional()
   @IsIn(['wishlist', 'favorites', 'have', 'used', 'deleted'])
   listType?: string;
 
   @IsOptional()
-  expirationDate?: Date | string;
+  @Type(() => Date)
+  @IsDate()
+  expirationDate?: Date | string | null; // ✅ Permitir null (para limpiar)
 
   @IsOptional()
   @IsString()
-  periodAfterOpening?: string;
+  periodAfterOpening?: string | null; // ✅ Permitir null (para limpiar)
+
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  openedDate?: Date | string | null; // ✅ Permitir null (para limpiar)
 
   @IsOptional()
   @IsBoolean()
-  isOpened?: boolean;
+  isOpened?: boolean | null; // ✅ Permitir null
 }

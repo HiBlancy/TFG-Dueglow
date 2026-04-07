@@ -224,9 +224,9 @@ class _ProductTile extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
       ),
-      subtitle: product.brand.isNotEmpty
+      subtitle: product.brand != null && product.brand!.isNotEmpty
           ? Text(
-              product.brand,
+              product.brand!,
               style: TextStyle(
                 fontSize: 12,
                 color: Theme.of(context).colorScheme.primary,

@@ -37,7 +37,7 @@ exports.ProductSchema = new mongoose_1.Schema({
         type: Boolean,
         default: false,
     },
-}, { timestamps: true });
+}, { timestamps: true, strict: false });
 exports.ProductSchema.index({ userId: 1, barcode: 1, listType: 1 }, { sparse: true });
 exports.ProductSchema.virtual('isExpired').get(function () {
     if (!this.expirationDate)

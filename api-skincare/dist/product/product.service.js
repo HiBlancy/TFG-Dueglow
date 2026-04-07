@@ -31,16 +31,14 @@ let ProductService = class ProductService {
     }
     async findAllByUser(userId, listType) {
         const filter = { userId };
-        if (listType) {
+        if (listType)
             filter.listType = listType;
-        }
         return this.productModel.find(filter).sort({ createdAt: -1 }).exec();
     }
     async findById(id, userId) {
         const product = await this.productModel.findById(id).exec();
-        if (!product) {
+        if (!product)
             return null;
-        }
         if (product.userId.toString() !== userId) {
             throw new common_1.ForbiddenException('No tienes permiso para ver este producto');
         }
@@ -48,130 +46,101 @@ let ProductService = class ProductService {
     }
     async update(id, userId, updateProductDto) {
         const product = await this.productModel.findById(id).exec();
-        if (!product) {
+        if (!product)
             throw new common_1.NotFoundException(`Producto ${id} no encontrado`);
-        }
         if (product.userId.toString() !== userId.toString()) {
             throw new common_1.ForbiddenException('No puedes modificar este producto');
         }
+        const updateData = {};
+        const fields = ['name', 'brand', 'imageUrl', 'barcode', 'categories', 'notes', 'rating', 'listType', 'isOpened'];
+        for (const field of fields) {
+            if (updateProductDto[field] !== undefined) {
+                updateData[field] = updateProductDto[field];
+            }
+        }
+        if (updateProductDto.expirationDate !== undefined) {
+            updateData.expirationDate = updateProductDto.expirationDate;
+        }
+        if (updateProductDto.periodAfterOpening !== undefined) {
+            updateData.periodAfterOpening = updateProductDto.periodAfterOpening;
+        }
+        if (updateProductDto.openedDate !== undefined) {
+            updateData.openedDate = updateProductDto.openedDate;
+        }
+        if (product.isOpened && updateData.periodAfterOpening !== undefined) {
+            const newExpiration = this.calculateExpirationDate(updateData.openedDate || product.openedDate, updateData.periodAfterOpening || product.periodAfterOpening, updateData.expirationDate !== undefined ? updateData.expirationDate : product.expirationDate);
+            if (newExpiration)
+                updateData.expirationDate = newExpiration;
+        }
         const updated = await this.productModel
-            .findByIdAndUpdate(id, updateProductDto, { returnDocument: 'after' })
+            .findByIdAndUpdate(id, updateData, { returnDocument: 'after', runValidators: false })
             .exec();
         return updated;
     }
     async delete(id, userId) {
         const product = await this.productModel.findById(id).exec();
-        if (!product) {
+        if (!product)
             throw new common_1.NotFoundException(`Producto ${id} no encontrado`);
-        }
         if (product.userId.toString() !== userId.toString()) {
             throw new common_1.ForbiddenException('No puedes eliminar este producto');
         }
-        const deleted = await this.productModel.findByIdAndDelete(id).exec();
-        return deleted;
+        return this.productModel.findByIdAndDelete(id).exec();
     }
     async moveToList(id, userId, targetList) {
         const product = await this.productModel.findById(id).exec();
-        if (!product) {
+        if (!product)
             throw new common_1.NotFoundException(`Producto ${id} no encontrado`);
-        }
         if (product.userId.toString() !== userId.toString()) {
             throw new common_1.ForbiddenException('No puedes mover este producto');
         }
-        const updated = await this.productModel
+        return this.productModel
             .findByIdAndUpdate(id, { listType: targetList }, { returnDocument: 'after' })
-            .exec();
-        return updated;
-    }
-    async getStats(userId) {
-        const products = await this.productModel.find({ userId }).exec();
-        const stats = {
-            wishlist: 0,
-            favorites: 0,
-            have: 0,
-            used: 0,
-            deleted: 0,
-            total: products.length,
-        };
-        products.forEach((product) => {
-            if (stats[product.listType] !== undefined) {
-                stats[product.listType]++;
-            }
-        });
-        return stats;
-    }
-    async getExpiredProducts(userId) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        return this.productModel
-            .find({
-            userId,
-            expirationDate: { $lt: today },
-            listType: { $ne: 'deleted' },
-        })
-            .sort({ expirationDate: 1 })
-            .exec();
-    }
-    async getExpiringSoon(userId, days = 30) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const futureDate = new Date();
-        futureDate.setDate(today.getDate() + days);
-        futureDate.setHours(23, 59, 59, 999);
-        return this.productModel
-            .find({
-            userId,
-            expirationDate: { $gte: today, $lte: futureDate },
-            listType: { $ne: 'deleted' },
-        })
-            .sort({ expirationDate: 1 })
             .exec();
     }
     async markAsOpened(id, userId) {
         const product = await this.productModel.findById(id).exec();
-        if (!product) {
+        if (!product)
             throw new common_1.NotFoundException(`Producto ${id} no encontrado`);
-        }
-        console.log('Product userId:', product.userId.toString());
-        console.log('Request userId:', userId.toString());
-        console.log('Are they equal?', product.userId.toString() === userId.toString());
         if (product.userId.toString() !== userId.toString()) {
             throw new common_1.ForbiddenException('No puedes modificar este producto');
         }
         if (product.isOpened) {
             throw new common_1.BadRequestException('El producto ya está abierto');
         }
+        const openedDate = new Date();
+        let finalExpiration = product.expirationDate;
+        if (product.periodAfterOpening) {
+            const calculatedExpiration = this.calculateExpirationFromPeriod(openedDate, product.periodAfterOpening);
+            if (finalExpiration && calculatedExpiration) {
+                finalExpiration = calculatedExpiration < finalExpiration ? calculatedExpiration : finalExpiration;
+            }
+            else if (calculatedExpiration) {
+                finalExpiration = calculatedExpiration;
+            }
+        }
         const updated = await this.productModel
-            .findByIdAndUpdate(id, {
-            openedDate: new Date(),
-            isOpened: true,
-        }, { returnDocument: 'after' })
+            .findByIdAndUpdate(id, { openedDate, isOpened: true, expirationDate: finalExpiration }, { returnDocument: 'after' })
             .exec();
         return updated;
     }
     async markAsClosed(id, userId) {
         const product = await this.productModel.findById(id).exec();
-        if (!product) {
+        if (!product)
             throw new common_1.NotFoundException(`Producto ${id} no encontrado`);
-        }
         if (product.userId.toString() !== userId.toString()) {
             throw new common_1.ForbiddenException('No puedes modificar este producto');
         }
         if (!product.isOpened) {
             throw new common_1.BadRequestException('El producto no está abierto');
         }
-        const updated = await this.productModel
-            .findByIdAndUpdate(id, {
-            isOpened: false,
-        }, { returnDocument: 'after' })
+        return this.productModel
+            .findByIdAndUpdate(id, { isOpened: false }, { returnDocument: 'after' })
             .exec();
-        return updated;
     }
     async calculateExpirationFromOpening(id, userId) {
         const product = await this.productModel.findById(id).exec();
-        if (!product) {
+        if (!product)
             throw new common_1.NotFoundException(`Producto ${id} no encontrado`);
-        }
         if (product.userId.toString() !== userId.toString()) {
             throw new common_1.ForbiddenException('No puedes modificar este producto');
         }
@@ -184,16 +153,73 @@ let ProductService = class ProductService {
         if (!product.periodAfterOpening) {
             throw new common_1.BadRequestException('El producto no tiene período después de abierto definido');
         }
-        const months = parseInt(product.periodAfterOpening);
-        if (isNaN(months)) {
-            throw new common_1.BadRequestException('Período después de abierto inválido');
-        }
-        const expirationDate = new Date(product.openedDate);
-        expirationDate.setMonth(expirationDate.getMonth() + months);
-        const updated = await this.productModel
-            .findByIdAndUpdate(id, { expirationDate }, { returnDocument: 'after' })
+        const newExpiration = this.calculateExpirationDate(product.openedDate, product.periodAfterOpening, product.expirationDate);
+        return this.productModel
+            .findByIdAndUpdate(id, { expirationDate: newExpiration }, { returnDocument: 'after' })
             .exec();
-        return updated;
+    }
+    async getStats(userId) {
+        const products = await this.productModel.find({ userId }).exec();
+        const stats = { wishlist: 0, favorites: 0, have: 0, used: 0, deleted: 0, total: products.length };
+        products.forEach((product) => {
+            if (stats[product.listType] !== undefined)
+                stats[product.listType]++;
+        });
+        return stats;
+    }
+    async getExpiredProducts(userId) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return this.productModel
+            .find({ userId, expirationDate: { $lt: today }, listType: { $ne: 'deleted' } })
+            .sort({ expirationDate: 1 })
+            .exec();
+    }
+    async getExpiringSoon(userId, days = 30) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const futureDate = new Date();
+        futureDate.setDate(today.getDate() + days);
+        futureDate.setHours(23, 59, 59, 999);
+        return this.productModel
+            .find({ userId, expirationDate: { $gte: today, $lte: futureDate }, listType: { $ne: 'deleted' } })
+            .sort({ expirationDate: 1 })
+            .exec();
+    }
+    calculateExpirationDate(baseDate, period, fixedExpiration) {
+        if (!baseDate || !period)
+            return fixedExpiration || null;
+        const calculated = this.calculateExpirationFromPeriod(baseDate, period);
+        if (!calculated)
+            return fixedExpiration || null;
+        if (fixedExpiration) {
+            const fixed = new Date(fixedExpiration);
+            return calculated < fixed ? calculated : fixed;
+        }
+        return calculated;
+    }
+    calculateExpirationFromPeriod(baseDate, period) {
+        const months = this.parsePeriodToMonths(period);
+        if (!months)
+            return null;
+        const expiration = new Date(baseDate);
+        expiration.setMonth(expiration.getMonth() + months);
+        return expiration;
+    }
+    parsePeriodToMonths(period) {
+        if (!period)
+            return null;
+        const cleaned = period.trim().toUpperCase();
+        const mMatch = cleaned.match(/^(\d+)\s*M$/);
+        if (mMatch)
+            return parseInt(mMatch[1]);
+        const monthMatch = cleaned.match(/^(\d+)\s*MES(?:ES)?$/);
+        if (monthMatch)
+            return parseInt(monthMatch[1]);
+        const numberMatch = cleaned.match(/^(\d+)$/);
+        if (numberMatch)
+            return parseInt(numberMatch[1]);
+        return null;
     }
 };
 exports.ProductService = ProductService;

@@ -1,13 +1,14 @@
 export declare class UpdateProductDto {
     name?: string;
-    brand?: string;
-    imageUrl?: string;
-    barcode?: string;
-    categories?: string[];
-    notes?: string;
-    rating?: number;
+    brand?: string | null;
+    imageUrl?: string | null;
+    barcode?: string | null;
+    categories?: string[] | null;
+    notes?: string | null;
+    rating?: number | null;
     listType?: string;
-    expirationDate?: Date | string;
-    periodAfterOpening?: string;
-    isOpened?: boolean;
+    expirationDate?: Date | string | null;
+    periodAfterOpening?: string | null;
+    openedDate?: Date | string | null;
+    isOpened?: boolean | null;
 }
