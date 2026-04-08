@@ -1,7 +1,5 @@
-// lib/screens/home_screen.dart (corregido)
-
 import 'package:flutter/material.dart';
-import '../constants/app_constants.dart'; // ✅ Importar AppConstants
+import '../constants/app_constants.dart';
 import '../models/beauty_product.dart';
 import '../services/auth_service.dart';
 import '../services/product_service.dart';
@@ -53,7 +51,8 @@ class _HomeScreenState extends State<HomeScreen> {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ProductScreen(product: product, isFromSearch: false),
+        builder: (context) =>
+            ProductScreen(product: product, isFromSearch: false),
       ),
     );
     // Recargar los datos cuando el usuario regrese
@@ -63,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return CustomAppBar(
-      title: 'Skincare App',
+      title: 'DueGlow',
       showDrawer: true,
       showBackButton: false,
       child: RefreshIndicator(
@@ -81,22 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           Text(
                             '¡Hola $_userName!',
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 24),
-                            child: Text(
-                              'Bienvenido a Skincare App.\nTu aplicación para el cuidado de la piel.',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
+                            style: Theme.of(context).textTheme.titleLarge,
                           ),
                         ],
                       ),
@@ -185,7 +169,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final now = DateTime.now();
     final expiringSoon = _products.where((product) {
       if (product.expirationDate == null) return false;
-      final daysUntilExpiration = product.expirationDate!.difference(now).inDays;
+      final daysUntilExpiration = product.expirationDate!
+          .difference(now)
+          .inDays;
       return daysUntilExpiration >= 0 && daysUntilExpiration <= 30;
     }).toList();
 
@@ -224,16 +210,21 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Próximos a caducar',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.headlineSmall,
               ),
               TextButton(
                 onPressed: () {
                   // Navegar a la pantalla de productos
                   Navigator.pushNamed(context, AppConstants.routeMyProducts);
                 },
-                child: const Text('Ver todos'),
+                child: Text(
+                  'Ver todos',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.tertiary,
+                  ),
+                ),
               ),
             ],
           ),
@@ -253,8 +244,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildExpiringProductCard(BeautyProduct product) {
-    final daysUntilExpiration = product.expirationDate!.difference(DateTime.now()).inDays;
-    
+    final daysUntilExpiration = product.expirationDate!
+        .difference(DateTime.now())
+        .inDays;
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: InkWell(
@@ -294,7 +287,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
               ),
               const SizedBox(width: 12),
-              
+
               // Información del producto
               Expanded(
                 child: Column(
@@ -318,12 +311,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-              
+
               // Indicador de días restantes
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
-                  color: daysUntilExpiration <= 7 ? Colors.red[100] : Colors.orange[100],
+                  color: daysUntilExpiration <= 7
+                      ? Colors.red[100]
+                      : Colors.orange[100],
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Column(
@@ -333,20 +331,24 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: daysUntilExpiration <= 7 ? Colors.red[700] : Colors.orange[700],
+                        color: daysUntilExpiration <= 7
+                            ? Colors.red[700]
+                            : Colors.orange[700],
                       ),
                     ),
                     Text(
                       'días',
                       style: TextStyle(
                         fontSize: 10,
-                        color: daysUntilExpiration <= 7 ? Colors.red[700] : Colors.orange[700],
+                        color: daysUntilExpiration <= 7
+                            ? Colors.red[700]
+                            : Colors.orange[700],
                       ),
                     ),
                   ],
                 ),
               ),
-              
+
               const Icon(Icons.chevron_right, color: Colors.grey),
             ],
           ),
@@ -371,11 +373,11 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Icon(icon, size: 40, color: Theme.of(context).primaryColor),
               const SizedBox(height: 8),
-              Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text(title, style: Theme.of(context).textTheme.bodyMedium),
               const SizedBox(height: 4),
               Text(
                 subtitle,
-                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                style: Theme.of(context).textTheme.bodySmall,
                 textAlign: TextAlign.center,
               ),
             ],

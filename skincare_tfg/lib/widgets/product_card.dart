@@ -17,10 +17,21 @@ class ProductCard extends StatelessWidget {
     this.onMove,
   }) : super(key: key);
 
-  @override
+@override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+    
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      color: theme.colorScheme.surface, // ✅ Usar color del tema
+      elevation: isDarkMode ? 1 : 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: isDarkMode 
+            ? BorderSide(color: Colors.grey[800]!)
+            : BorderSide.none,
+      ),
       child: InkWell(
         onTap: onTap,
         onLongPress: onLongPress,
@@ -35,7 +46,7 @@ class ProductCard extends StatelessWidget {
                 height: 60,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
-                  color: Colors.grey[200],
+                  color: isDarkMode ? Colors.grey[800] : Colors.grey[200],
                 ),
                 child: product.imageUrl != null && product.imageUrl!.isNotEmpty
                     ? ClipRRect(
@@ -46,7 +57,7 @@ class ProductCard extends StatelessWidget {
                           errorBuilder: (context, error, stackTrace) {
                             return Icon(
                               Icons.image_not_supported,
-                              color: Colors.grey[400],
+                              color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
                               size: 30,
                             );
                           },
@@ -54,7 +65,7 @@ class ProductCard extends StatelessWidget {
                       )
                     : Icon(
                         Icons.face_rounded,
-                        color: Colors.grey[400],
+                        color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
                         size: 30,
                       ),
               ),
@@ -67,31 +78,24 @@ class ProductCard extends StatelessWidget {
                   children: [
                     Text(
                       product.name,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: theme.textTheme.titleMedium, // ✅ Usar tema
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
-                    // ✅ Mostrar brand solo si no es null y no está vacío
                     if (product.brand != null && product.brand!.isNotEmpty)
                       Text(
                         product.brand!,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
                         ),
                       ),
-                    // ✅ Mostrar categorías solo si no es null y no está vacío
                     if (product.categories != null && product.categories!.isNotEmpty) ...[
                       const SizedBox(height: 4),
                       Text(
                         product.categories!.take(2).join(', '),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[500],
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: isDarkMode ? Colors.grey[500] : Colors.grey[500],
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -107,7 +111,10 @@ class ProductCard extends StatelessWidget {
                 children: [
                   if (onMove != null)
                     IconButton(
-                      icon: const Icon(Icons.swap_horiz),
+                      icon: Icon(
+                        Icons.swap_horiz,
+                        color: theme.colorScheme.primary,
+                      ),
                       onPressed: onMove,
                       tooltip: 'Mover a otra lista',
                     ),
@@ -116,11 +123,11 @@ class ProductCard extends StatelessWidget {
                       icon: const Icon(Icons.delete_outline),
                       onPressed: onDelete,
                       tooltip: 'Eliminar',
-                      color: Colors.red,
+                      color: theme.colorScheme.error,
                     ),
-                  const Icon(
+                  Icon(
                     Icons.chevron_right,
-                    color: Colors.grey,
+                    color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
                   ),
                 ],
               ),

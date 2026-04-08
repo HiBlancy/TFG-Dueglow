@@ -9,6 +9,7 @@ class CustomAppBar extends StatelessWidget {
   final bool showDrawer;
   final bool showBackButton;
   final PreferredSizeWidget? bottom;
+  final Color? appBarColor;
 
   const CustomAppBar({
     super.key,
@@ -18,15 +19,19 @@ class CustomAppBar extends StatelessWidget {
     this.showDrawer = true,
     this.showBackButton = false,
     this.bottom,
+    this.appBarColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final color = theme.colorScheme.primary;
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
         centerTitle: true,
-        leading: showBackButton 
+        backgroundColor: color,
+        leading: showBackButton
             ? IconButton(
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () => Navigator.pop(context),
@@ -58,12 +63,24 @@ class CustomAppBar extends StatelessWidget {
             Expanded(
               child: ListView(
                 children: [
-                  // ANADIR COSAS SI SE QUIERE NAVEGAR DESDE EL LATERAL
-                  // _buildDrawerItem(context, Icons.person, 'Mi Perfil', AppConstants.routeProfile),
-                  // const Divider(),
-                  _buildDrawerItem(context, Icons.settings, 'Configuración', AppConstants.routeSettings),
-                  _buildDrawerItem(context, Icons.edit, 'Editar Perfil', AppConstants.routeEdit),
-                  _buildDrawerItem(context, Icons.info, 'Acerca de', AppConstants.routeAbout),
+                  _buildDrawerItem(
+                    context,
+                    Icons.settings,
+                    'Configuración',
+                    AppConstants.routeSettings,
+                  ),
+                  _buildDrawerItem(
+                    context,
+                    Icons.edit,
+                    'Editar Perfil',
+                    AppConstants.routeEdit,
+                  ),
+                  _buildDrawerItem(
+                    context,
+                    Icons.info,
+                    'Acerca de',
+                    AppConstants.routeAbout,
+                  ),
                   const Divider(),
                   _buildDrawerItem(
                     context,
@@ -89,31 +106,37 @@ class CustomAppBar extends StatelessWidget {
   }
 
   Widget _buildDrawerHeader(BuildContext context) {
+    final theme = Theme.of(context);
+
     return FutureBuilder<Map<String, String?>>(
       future: _getUserData(),
       builder: (context, snapshot) {
         final userName = snapshot.data?['name'] ?? 'Usuario';
         final userEmail = snapshot.data?['email'] ?? '';
-        
+
         return Container(
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor,
+            color: theme.colorScheme.primary, // ✅ Usar color del tema
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const CircleAvatar(
+              CircleAvatar(
                 radius: 30,
-                backgroundColor: Colors.white,
-                child: Icon(Icons.person, size: 40, color: Colors.blue),
+                backgroundColor: theme.colorScheme.onPrimary,
+                child: Icon(
+                  Icons.person,
+                  size: 40,
+                  color: theme.colorScheme.primary,
+                ),
               ),
               const SizedBox(height: 12),
               Text(
                 userName,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: theme.colorScheme.onPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -121,7 +144,10 @@ class CustomAppBar extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 userEmail,
-                style: const TextStyle(color: Colors.white70, fontSize: 12),
+                style: TextStyle(
+                  color: theme.colorScheme.onPrimary.withOpacity(0.7),
+                  fontSize: 12,
+                ),
               ),
             ],
           ),
@@ -134,10 +160,7 @@ class CustomAppBar extends StatelessWidget {
     final authService = AuthService();
     final name = await authService.getUserName();
     final email = await authService.getUserEmail();
-    return {
-      'name': name,
-      'email': email,
-    };
+    return {'name': name, 'email': email};
   }
 
   Widget _buildDrawerItem(
@@ -148,7 +171,7 @@ class CustomAppBar extends StatelessWidget {
     bool isLogout = false,
   }) {
     final authService = AuthService();
-    
+
     return ListTile(
       leading: Icon(icon, color: isLogout ? Colors.red : null),
       title: Text(title, style: TextStyle(color: isLogout ? Colors.red : null)),
@@ -158,9 +181,9 @@ class CustomAppBar extends StatelessWidget {
               await authService.logout();
               if (context.mounted) {
                 Navigator.pushNamedAndRemoveUntil(
-                  context, 
-                  AppConstants.routeLogin, 
-                  (route) => false
+                  context,
+                  AppConstants.routeLogin,
+                  (route) => false,
                 );
               }
             }

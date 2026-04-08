@@ -46,30 +46,31 @@ class _BottomNavBarState extends State<BottomNavBar> {
 
   @override
   Widget build(BuildContext context) {
-    final defaultItems = const [
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
+    final defaultItems = [
       BottomNavigationBarItem(
-        icon: Icon(Icons.home_outlined),
-        activeIcon: Icon(Icons.home),
+        icon: const Icon(Icons.home_outlined),
+        activeIcon: const Icon(Icons.home),
         label: 'Inicio',
       ),
       BottomNavigationBarItem(
-        icon: Icon(Icons.search),
-        activeIcon: Icon(Icons.search),
+        icon: const Icon(Icons.search),
+        activeIcon: const Icon(Icons.search),
         label: 'Búsqueda',
       ),
       BottomNavigationBarItem(
-        icon: Icon(Icons.camera_alt_outlined),
-        activeIcon: Icon(Icons.camera_alt),
+        icon: const Icon(Icons.camera_alt_outlined),
+        activeIcon: const Icon(Icons.camera_alt),
         label: 'Cámara',
       ),
       BottomNavigationBarItem(
-        icon: Icon(Icons.person_outline),
-        activeIcon: Icon(Icons.person),
+        icon: const Icon(Icons.person_outline),
+        activeIcon: const Icon(Icons.person),
         label: 'Perfil',
       ),
     ];
 
-    // Si se proporciona un child, usarlo, si no usar la navegación interna
     final body = widget.child ?? _screens[_currentIndex];
 
     return Scaffold(
@@ -78,8 +79,11 @@ class _BottomNavBarState extends State<BottomNavBar> {
         currentIndex: _currentIndex,
         onTap: _onTap,
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: Theme.of(context).primaryColor,
-        unselectedItemColor: Colors.grey,
+        // ✅ Usar colores del tema
+        selectedItemColor: Theme.of(context).colorScheme.primary,
+        unselectedItemColor: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        elevation: 8,
         showSelectedLabels: widget.showLabels,
         showUnselectedLabels: widget.showLabels,
         items: widget.items ?? defaultItems,

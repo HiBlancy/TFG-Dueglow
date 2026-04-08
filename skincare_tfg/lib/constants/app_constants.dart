@@ -1,5 +1,5 @@
 class AppConstants {
-  static const String appName = 'Skincare App';
+  static const String appName = 'DueGlow';
   static const String version = '1.0.0';
   
   // Rutas

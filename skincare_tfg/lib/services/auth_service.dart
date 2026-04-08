@@ -32,7 +32,6 @@ class AuthService {
   Future<String?> getUserName() async {
     final prefs = await _prefs;
     final name = prefs.getString(AppConstants.prefUserName);
-    print('📛 Obteniendo nombre de usuario: $name');
     return name;
   }
   
@@ -40,7 +39,6 @@ class AuthService {
   Future<String?> getUserEmail() async {
     final prefs = await _prefs;
     final email = prefs.getString(AppConstants.prefUserEmail);
-    print('📧 Obteniendo email de usuario: $email');
     return email;
   }
   
@@ -64,8 +62,7 @@ class AuthService {
   try {
     final url = Uri.parse(ApiConfig.getRegisterUrl());
     
-    // IMPORTANTE: Enviar la contraseña en texto plano, NO hasheada
-    final cleanPassword = password; // No aplicar ningún hash
+    final cleanPassword = password;
     
     final response = await http.post(
       url,
@@ -73,7 +70,7 @@ class AuthService {
       body: jsonEncode({
         'name': name,
         'email': email,
-        'password': cleanPassword, // Enviar texto plano
+        'password': cleanPassword,
       }),
     ).timeout(const Duration(seconds: 10));
       
@@ -92,16 +89,10 @@ class AuthService {
       return null;
     }
   }
-  
-  // Iniciar sesión con JWT
-// Iniciar sesión con JWT
+
 Future<Map<String, dynamic>?> login(String email, String password) async {
   try {
     final url = Uri.parse(ApiConfig.getLoginUrl());
-    
-    print('🌐 URL: $url');
-    print('📧 Email: $email');
-    print('🔑 Password length: ${password.length}');
     
     final response = await http.post(
       url,
@@ -115,10 +106,7 @@ Future<Map<String, dynamic>?> login(String email, String password) async {
       }),
     ).timeout(const Duration(seconds: 10));
     
-    print('📡 Status code: ${response.statusCode}');
-    print('📡 Response body: ${response.body}');
-    
-    // ✅ ACEPTAR TANTO 200 COMO 201
+
     if (response.statusCode == 200 || response.statusCode == 201) {
       final data = jsonDecode(response.body);
       print('📦 Parsed data: $data');
@@ -185,7 +173,7 @@ Future<Map<String, dynamic>?> login(String email, String password) async {
   if (token == null) return null;
 
   try {
-    final url = Uri.parse('${ApiConfig.baseUrl}/users/me');
+    final url = Uri.parse(ApiConfig.getProfileUrl());
     
     final Map<String, dynamic> updateData = {};
     if (name != null && name.isNotEmpty) updateData['name'] = name;
@@ -193,8 +181,6 @@ Future<Map<String, dynamic>?> login(String email, String password) async {
     if (birthDate != null && birthDate.isNotEmpty) updateData['birthDate'] = birthDate;
     if (profileImage != null && profileImage.isNotEmpty) updateData['profileImage'] = profileImage;
     if (password != null && password.isNotEmpty) updateData['password'] = password;
-
-    print('📤 Enviando actualización a /me: $updateData');
 
     final response = await http.patch(
       url,
@@ -204,9 +190,6 @@ Future<Map<String, dynamic>?> login(String email, String password) async {
       },
       body: jsonEncode(updateData),
     );
-
-    print('📡 Status code: ${response.statusCode}');
-    print('📡 Response: ${response.body}');
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);

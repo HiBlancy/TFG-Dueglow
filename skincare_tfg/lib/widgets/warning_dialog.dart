@@ -1,3 +1,4 @@
+// warning_dialog.dart (adaptado)
 import 'package:flutter/material.dart';
 
 class WarningDialog {
@@ -9,33 +10,53 @@ class WarningDialog {
     String cancelText = 'Cancelar',
     bool isDanger = false,
   }) async {
+    final theme = Theme.of(context);
+    
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: theme.colorScheme.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
         title: Row(
           children: [
             Icon(
               isDanger ? Icons.warning_amber : Icons.info_outline,
-              color: isDanger ? Colors.orange : Colors.blue,
+              color: isDanger ? theme.colorScheme.error : theme.colorScheme.primary,
             ),
             const SizedBox(width: 8),
-            Text(title),
+            Text(
+              title,
+              style: theme.textTheme.titleLarge,
+            ),
           ],
         ),
-        content: Text(content),
+        content: Text(
+          content,
+          style: theme.textTheme.bodyMedium,
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(cancelText),
+            child: Text(
+              cancelText,
+              style: TextStyle(color: theme.colorScheme.primary),
+            ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: isDanger 
-                ? ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    foregroundColor: Colors.white,
-                  )
-                : null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isDanger 
+                  ? theme.colorScheme.error
+                  : theme.colorScheme.primary,
+              foregroundColor: isDanger
+                  ? theme.colorScheme.onError
+                  : theme.colorScheme.onPrimary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
             child: Text(confirmText),
           ),
         ],
@@ -49,21 +70,39 @@ class WarningDialog {
     required String title,
     required String content,
   }) async {
+    final theme = Theme.of(context);
+    
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: theme.colorScheme.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
         title: Row(
           children: [
-            const Icon(Icons.check_circle, color: Colors.green),
+            Icon(
+              Icons.check_circle,
+              color: theme.colorScheme.primary,
+            ),
             const SizedBox(width: 8),
-            Text(title),
+            Text(
+              title,
+              style: theme.textTheme.titleLarge,
+            ),
           ],
         ),
-        content: Text(content),
+        content: Text(
+          content,
+          style: theme.textTheme.bodyMedium,
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Entendido'),
+            child: Text(
+              'Entendido',
+              style: TextStyle(color: theme.colorScheme.primary),
+            ),
           ),
         ],
       ),

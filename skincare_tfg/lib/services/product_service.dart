@@ -73,15 +73,11 @@ Future<BeautyProduct?> updateProduct(String id, Map<String, dynamic> productData
     final token = await _authService.getToken();
     if (token == null) return null;
 
-    // ✅ Limpiar el mapa: mantener TODOS los valores (incluyendo nulls)
     final Map<String, dynamic> cleanedData = {};
     productData.forEach((key, value) {
-      // ✅ Enviar el valor tal cual, sea null o no
       cleanedData[key] = value;
       print('📦 Campo $key: ${value == null ? 'null' : value}');
     });
-
-    print('📤 Enviando al backend: ${jsonEncode(cleanedData)}');
 
     final response = await http.patch(
       Uri.parse('${ApiConfig.getProductsUrl()}/$id'),
@@ -91,9 +87,6 @@ Future<BeautyProduct?> updateProduct(String id, Map<String, dynamic> productData
       },
       body: jsonEncode(cleanedData),
     );
-
-    print('📡 Response status: ${response.statusCode}');
-    print('📡 Response body: ${response.body}');
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);

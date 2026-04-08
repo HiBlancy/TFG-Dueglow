@@ -81,37 +81,41 @@ class _EditProductDialogState extends State<EditProductDialog> {
   }
 
   void _saveProduct() {
-  if (_nameController.text.trim().isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('El nombre es obligatorio'))
+    if (_nameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('El nombre es obligatorio')));
+      return;
+    }
+
+    // 🔴 IMPORTANTE: Si no hay fecha de apertura, el producto NO está abierto
+    final hasOpenedDate = _openedDate != null;
+
+    final updatedProduct = BeautyProduct(
+      id: widget.product.id,
+      barcode: widget.product.barcode,
+      name: _nameController.text.trim(),
+      brand: _brandController.text.trim().isEmpty
+          ? null
+          : _brandController.text.trim(),
+      imageUrl: widget.product.imageUrl,
+      categories: _categories.isEmpty ? null : _categories,
+      notes: _notesController.text.trim().isEmpty
+          ? null
+          : _notesController.text.trim(),
+      rating: _rating,
+      listType: widget.product.listType,
+      expirationDate: _expirationDate,
+      periodAfterOpening: _periodAfterOpeningController.text.trim().isEmpty
+          ? null
+          : _periodAfterOpeningController.text.trim(),
+      openedDate: _openedDate, // Puede ser null
+      addedAt: widget.product.addedAt,
+      isOpened: hasOpenedDate, // 🔴 Sincronizar isOpened con openedDate
     );
-    return;
+
+    Navigator.pop(context, updatedProduct);
   }
-
-  // 🔴 IMPORTANTE: Si no hay fecha de apertura, el producto NO está abierto
-  final hasOpenedDate = _openedDate != null;
-  
-  final updatedProduct = BeautyProduct(
-    id: widget.product.id,
-    barcode: widget.product.barcode,
-    name: _nameController.text.trim(),
-    brand: _brandController.text.trim().isEmpty ? null : _brandController.text.trim(),
-    imageUrl: widget.product.imageUrl,
-    categories: _categories.isEmpty ? null : _categories,
-    notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
-    rating: _rating,
-    listType: widget.product.listType,
-    expirationDate: _expirationDate,
-    periodAfterOpening: _periodAfterOpeningController.text.trim().isEmpty 
-        ? null 
-        : _periodAfterOpeningController.text.trim(),
-    openedDate: _openedDate,  // Puede ser null
-    addedAt: widget.product.addedAt,
-    isOpened: hasOpenedDate,  // 🔴 Sincronizar isOpened con openedDate
-  );
-
-  Navigator.pop(context, updatedProduct);
-}
 
   @override
   Widget build(BuildContext context) {
@@ -233,30 +237,28 @@ class _EditProductDialogState extends State<EditProductDialog> {
   // --- MÉTODOS DE CONSTRUCCIÓN DE UI (Extract Widgets) ---
 
   Widget _buildHeader() {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary,
+        color: theme.colorScheme.primary,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Row(
         children: [
-          Icon(Icons.edit, color: Theme.of(context).colorScheme.onPrimary),
+          Icon(Icons.edit, color: theme.colorScheme.onPrimary),
           const SizedBox(width: 12),
           Text(
             'Editar producto',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onPrimary,
+              color: theme.colorScheme.onPrimary,
             ),
           ),
           const Spacer(),
           IconButton(
-            icon: Icon(
-              Icons.close,
-              color: Theme.of(context).colorScheme.onPrimary,
-            ),
+            icon: Icon(Icons.close, color: theme.colorScheme.onPrimary),
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -288,10 +290,15 @@ class _EditProductDialogState extends State<EditProductDialog> {
   }
 
   Widget _buildRatingSection() {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(
+          color: isDarkMode ? Colors.grey[800]! : Colors.grey.shade300,
+        ),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -300,9 +307,12 @@ class _EditProductDialogState extends State<EditProductDialog> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Calificación',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                ),
               ),
               if (_rating != null)
                 TextButton(
@@ -312,9 +322,12 @@ class _EditProductDialogState extends State<EditProductDialog> {
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  child: const Text(
+                  child: Text(
                     'Limpiar',
-                    style: TextStyle(fontSize: 11, color: Colors.red),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: theme.colorScheme.error,
+                    ),
                   ),
                 ),
             ],
@@ -337,13 +350,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
               ),
               const SizedBox(width: 8),
               if (_rating != null)
-                Text(
-                  '$_rating/5',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                Text('$_rating/5', style: theme.textTheme.bodyMedium),
             ],
           ),
         ],
@@ -360,12 +367,17 @@ class _EditProductDialogState extends State<EditProductDialog> {
     required VoidCallback onTap,
     required VoidCallback onClear,
   }) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return InkWell(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300),
+          border: Border.all(
+            color: isDarkMode ? Colors.grey[800]! : Colors.grey.shade300,
+          ),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -375,18 +387,29 @@ class _EditProductDialogState extends State<EditProductDialog> {
             Expanded(
               child: Text(
                 text,
-                style: TextStyle(color: isActive ? Colors.black : Colors.grey),
+                style: TextStyle(
+                  color: isActive
+                      ? theme.textTheme.bodyMedium?.color
+                      : (isDarkMode ? Colors.grey[600] : Colors.grey[500]),
+                ),
               ),
             ),
             if (isActive)
               IconButton(
-                icon: const Icon(Icons.clear, size: 20),
+                icon: Icon(
+                  Icons.clear,
+                  size: 20,
+                  color: theme.colorScheme.error,
+                ),
                 onPressed: onClear,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 tooltip: 'Eliminar fecha',
               ),
-            const Icon(Icons.calendar_today),
+            Icon(
+              Icons.calendar_today,
+              color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+            ),
           ],
         ),
       ),
@@ -394,9 +417,14 @@ class _EditProductDialogState extends State<EditProductDialog> {
   }
 
   Widget _buildCategoriesSection() {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(
+          color: isDarkMode ? Colors.grey[800]! : Colors.grey.shade300,
+        ),
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.all(12),
@@ -406,9 +434,12 @@ class _EditProductDialogState extends State<EditProductDialog> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Categorías',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                ),
               ),
               if (_categories.isNotEmpty)
                 TextButton(
@@ -418,9 +449,12 @@ class _EditProductDialogState extends State<EditProductDialog> {
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  child: const Text(
+                  child: Text(
                     'Eliminar todas',
-                    style: TextStyle(fontSize: 11, color: Colors.red),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: theme.colorScheme.error,
+                    ),
                   ),
                 ),
             ],
@@ -433,7 +467,14 @@ class _EditProductDialogState extends State<EditProductDialog> {
                 .map(
                   (cat) => Chip(
                     label: Text(cat),
-                    deleteIcon: const Icon(Icons.close, size: 18),
+                    backgroundColor: isDarkMode
+                        ? Colors.grey[800]
+                        : Colors.grey[100],
+                    deleteIcon: Icon(
+                      Icons.close,
+                      size: 18,
+                      color: theme.colorScheme.error,
+                    ),
                     onDeleted: () => setState(() => _categories.remove(cat)),
                   ),
                 )
@@ -452,9 +493,8 @@ class _EditProductDialogState extends State<EditProductDialog> {
               ),
               const SizedBox(width: 8),
               IconButton(
-                icon: const Icon(Icons.add_circle),
+                icon: Icon(Icons.add_circle, color: theme.colorScheme.primary),
                 onPressed: _addCategory,
-                color: Theme.of(context).colorScheme.primary,
                 iconSize: 32,
               ),
             ],

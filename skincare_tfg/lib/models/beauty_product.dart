@@ -20,9 +20,9 @@ class BeautyProduct {
   const BeautyProduct({
     required this.barcode,
     required this.name,
-    this.brand,  // ✅ Ya no es required
+    this.brand,
     this.imageUrl,
-    this.categories,  // ✅ Ya no es required
+    this.categories,
     this.id,
     this.notes,
     this.rating,
@@ -41,7 +41,7 @@ class BeautyProduct {
     return BeautyProduct(
       barcode: json['code']?.toString() ?? '',
       name: json['product_name']?.toString().trim() ?? '',
-      brand: json['brands']?.toString().trim(),  // ✅ Puede ser null
+      brand: json['brands']?.toString().trim(),
       imageUrl: json['image_front_small_url']?.toString() ??
                 json['image_front_url']?.toString(),
       categories: rawCategories
@@ -117,16 +117,16 @@ class BeautyProduct {
     return BeautyProduct(
       barcode: barcode ?? this.barcode,
       name: name ?? this.name,
-      brand: brand,  // ✅ Asignar directamente (puede ser null)
+      brand: brand,
       imageUrl: imageUrl ?? this.imageUrl,
-      categories: categories,  // ✅ Asignar directamente (puede ser null)
+      categories: categories,
       id: id ?? this.id,
-      notes: notes,  // ✅ Asignar directamente
-      rating: rating,  // ✅ Asignar directamente
+      notes: notes,
+      rating: rating,
       listType: listType ?? this.listType,
-      expirationDate: expirationDate,  // ✅ Asignar directamente
-      periodAfterOpening: periodAfterOpening,  // ✅ Asignar directamente
-      openedDate: openedDate,  // ✅ Asignar directamente
+      expirationDate: expirationDate,
+      periodAfterOpening: periodAfterOpening,
+      openedDate: openedDate,
       addedAt: addedAt ?? this.addedAt,
       isOpened: isOpened ?? this.isOpened,
     );
