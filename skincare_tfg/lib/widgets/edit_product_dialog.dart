@@ -1,4 +1,4 @@
-// lib/widgets/edit_product_dialog.dart (simplificado)
+// lib/widgets/edit_product_dialog.dart (adaptado)
 
 import 'package:flutter/material.dart';
 import '../models/beauty_product.dart';
@@ -55,7 +55,6 @@ class _EditProductDialogState extends State<EditProductDialog> {
     super.dispose();
   }
 
-  // Lógica unificada para seleccionar fechas
   Future<void> _selectDate({
     required DateTime? initialDate,
     required DateTime firstDate,
@@ -82,36 +81,29 @@ class _EditProductDialogState extends State<EditProductDialog> {
 
   void _saveProduct() {
     if (_nameController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('El nombre es obligatorio')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('El nombre es obligatorio'))
+      );
       return;
     }
 
-    // 🔴 IMPORTANTE: Si no hay fecha de apertura, el producto NO está abierto
     final hasOpenedDate = _openedDate != null;
 
     final updatedProduct = BeautyProduct(
       id: widget.product.id,
       barcode: widget.product.barcode,
       name: _nameController.text.trim(),
-      brand: _brandController.text.trim().isEmpty
-          ? null
-          : _brandController.text.trim(),
+      brand: _brandController.text.trim().isEmpty ? null : _brandController.text.trim(),
       imageUrl: widget.product.imageUrl,
       categories: _categories.isEmpty ? null : _categories,
-      notes: _notesController.text.trim().isEmpty
-          ? null
-          : _notesController.text.trim(),
+      notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
       rating: _rating,
       listType: widget.product.listType,
       expirationDate: _expirationDate,
-      periodAfterOpening: _periodAfterOpeningController.text.trim().isEmpty
-          ? null
-          : _periodAfterOpeningController.text.trim(),
-      openedDate: _openedDate, // Puede ser null
+      periodAfterOpening: _periodAfterOpeningController.text.trim().isEmpty ? null : _periodAfterOpeningController.text.trim(),
+      openedDate: _openedDate, 
       addedAt: widget.product.addedAt,
-      isOpened: hasOpenedDate, // 🔴 Sincronizar isOpened con openedDate
+      isOpened: hasOpenedDate, 
     );
 
     Navigator.pop(context, updatedProduct);
@@ -119,8 +111,13 @@ class _EditProductDialogState extends State<EditProductDialog> {
 
   @override
   Widget build(BuildContext context) {
+    // Definimos colores sutiles reutilizables basados en el tema actual
+    final theme = Theme.of(context);
+    final subtleBorder = theme.colorScheme.onSurface.withOpacity(0.1);
+
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      backgroundColor: theme.colorScheme.surface, // Fondo adaptativo
       child: Container(
         constraints: BoxConstraints(
           maxHeight: MediaQuery.of(context).size.height * 0.9,
@@ -140,9 +137,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
                       label: 'Nombre del producto *',
                       prefixIcon: Icons.spa,
                       hint: 'Ej: Crema hidratante facial',
-                      validator: (v) => v?.trim().isEmpty == true
-                          ? 'El nombre es obligatorio'
-                          : null,
+                      validator: (v) => v?.trim().isEmpty == true ? 'El nombre es obligatorio' : null,
                     ),
                     const SizedBox(height: 16),
                     CustomTextField(
@@ -154,7 +149,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
                     const SizedBox(height: 16),
                     _buildBarcodeField(),
                     const SizedBox(height: 16),
-                    _buildRatingSection(),
+                    _buildRatingSection(subtleBorder),
                     const SizedBox(height: 16),
                     _buildDateSelector(
                       icon: Icons.warning_amber,
@@ -163,12 +158,11 @@ class _EditProductDialogState extends State<EditProductDialog> {
                           ? 'Caducidad: ${_formatDate(_expirationDate!)}'
                           : 'Añadir fecha de caducidad',
                       isActive: _expirationDate != null,
+                      borderColor: subtleBorder,
                       onTap: () => _selectDate(
                         initialDate: _expirationDate,
                         firstDate: DateTime.now(),
-                        lastDate: DateTime.now().add(
-                          const Duration(days: 365 * 5),
-                        ),
+                        lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
                         onDateSelected: (date) => _expirationDate = date,
                       ),
                       onClear: () => setState(() => _expirationDate = null),
@@ -178,87 +172,78 @@ class _EditProductDialogState extends State<EditProductDialog> {
                       controller: _periodAfterOpeningController,
                       label: 'Duración después de abrir',
                       prefixIcon: Icons.timer,
-                      hint: 'Ej: 6 meses, 12M (dejar vacío para eliminar)',
+                      hint: 'Ej: 6 meses, 12M',
                     ),
                     const SizedBox(height: 16),
                     _buildDateSelector(
                       icon: Icons.open_in_new,
-                      iconColor: Colors.black54,
+                      iconColor: theme.colorScheme.onSurface.withOpacity(0.6), // Adaptativo
                       text: _openedDate != null
                           ? 'Abierto el: ${_formatDate(_openedDate!)}'
                           : 'Añadir fecha de apertura',
                       isActive: _openedDate != null,
+                      borderColor: subtleBorder,
                       onTap: () => _selectDate(
                         initialDate: _openedDate,
-                        firstDate: DateTime.now().subtract(
-                          const Duration(days: 365 * 2),
-                        ),
+                        firstDate: DateTime.now().subtract(const Duration(days: 365 * 2)),
                         lastDate: DateTime.now(),
                         onDateSelected: (date) => _openedDate = date,
                       ),
                       onClear: () => setState(() => _openedDate = null),
                     ),
                     const SizedBox(height: 16),
-                    _buildCategoriesSection(),
+                    _buildCategoriesSection(subtleBorder),
                     const SizedBox(height: 16),
                     CustomTextField(
                       controller: _notesController,
                       label: 'Notas adicionales',
                       prefixIcon: Icons.note,
-                      hint:
-                          'Añade información adicional (dejar vacío para eliminar)',
+                      hint: 'Añade información adicional',
                       keyboardType: TextInputType.multiline,
-                    ),
-                    // En el build del diálogo, después de los campos
-                    ElevatedButton(
-                      onPressed: () {
-                        print('🔴 VALORES ACTUALES EN EL DIÁLOGO:');
-                        print('  notes controller: "${_notesController.text}"');
-                        print('  brand controller: "${_brandController.text}"');
-                        print(
-                          '  period controller: "${_periodAfterOpeningController.text}"',
-                        );
-                        print('  rating: $_rating');
-                        print('  categories: $_categories');
-                      },
-                      child: Text('DEBUG - Ver valores actuales'),
                     ),
                   ],
                 ),
               ),
             ),
-            _buildActionButtons(),
+            _buildActionButtons(subtleBorder),
           ],
         ),
       ),
     );
   }
 
-  // --- MÉTODOS DE CONSTRUCCIÓN DE UI (Extract Widgets) ---
+  // --- MÉTODOS DE CONSTRUCCIÓN DE UI ---
 
   Widget _buildHeader() {
     final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+    
+    // En claro usamos el primary (ciruela oscuro). En oscuro usamos un gris oscuro tintado con texto rosa.
+    final bgColor = isDarkMode ? theme.colorScheme.surface : theme.colorScheme.primary;
+    final fgColor = isDarkMode ? theme.colorScheme.primary : theme.colorScheme.onPrimary;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primary,
+        color: bgColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        border: isDarkMode ? Border(bottom: BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.1))) : null,
       ),
       child: Row(
         children: [
-          Icon(Icons.edit, color: theme.colorScheme.onPrimary),
+          Icon(Icons.edit, color: fgColor),
           const SizedBox(width: 12),
           Text(
             'Editar producto',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: theme.colorScheme.onPrimary,
+              color: fgColor,
             ),
           ),
           const Spacer(),
           IconButton(
-            icon: Icon(Icons.close, color: theme.colorScheme.onPrimary),
+            icon: Icon(Icons.close, color: fgColor),
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -267,38 +252,40 @@ class _EditProductDialogState extends State<EditProductDialog> {
   }
 
   Widget _buildBarcodeField() {
+    final theme = Theme.of(context);
+    final subtleBg = theme.colorScheme.onSurface.withOpacity(0.05);
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        color: Colors.grey.shade100,
+        color: subtleBg,
       ),
       child: TextFormField(
         controller: _barcodeController,
+        style: theme.textTheme.bodyMedium,
         decoration: InputDecoration(
           labelText: 'Código de barras',
-          prefixIcon: const Icon(Icons.qr_code),
+          prefixIcon: Icon(Icons.qr_code, color: theme.colorScheme.onSurface.withOpacity(0.6)),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
           ),
           filled: true,
-          fillColor: Colors.grey.shade100,
+          fillColor: subtleBg,
         ),
         readOnly: true,
       ),
     );
   }
 
-  Widget _buildRatingSection() {
+  Widget _buildRatingSection(Color borderColor) {
     final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
+    final subtleText = theme.colorScheme.onSurface.withOpacity(0.6);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        border: Border.all(
-          color: isDarkMode ? Colors.grey[800]! : Colors.grey.shade300,
-        ),
+        border: Border.all(color: borderColor),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -307,13 +294,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Calificación',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                ),
-              ),
+              Text('Calificación', style: TextStyle(fontSize: 12, color: subtleText)),
               if (_rating != null)
                 TextButton(
                   onPressed: () => setState(() => _rating = null),
@@ -322,13 +303,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  child: Text(
-                    'Limpiar',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: theme.colorScheme.error,
-                    ),
-                  ),
+                  child: Text('Limpiar', style: TextStyle(fontSize: 11, color: theme.colorScheme.error)),
                 ),
             ],
           ),
@@ -358,26 +333,25 @@ class _EditProductDialogState extends State<EditProductDialog> {
     );
   }
 
-  // Componente reutilizable para Fechas (Apertura y Caducidad)
   Widget _buildDateSelector({
     required IconData icon,
     required Color iconColor,
     required String text,
     required bool isActive,
+    required Color borderColor,
     required VoidCallback onTap,
     required VoidCallback onClear,
   }) {
     final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
+    final subtleText = theme.colorScheme.onSurface.withOpacity(0.6);
 
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         decoration: BoxDecoration(
-          border: Border.all(
-            color: isDarkMode ? Colors.grey[800]! : Colors.grey.shade300,
-          ),
+          border: Border.all(color: borderColor),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -388,43 +362,33 @@ class _EditProductDialogState extends State<EditProductDialog> {
               child: Text(
                 text,
                 style: TextStyle(
-                  color: isActive
-                      ? theme.textTheme.bodyMedium?.color
-                      : (isDarkMode ? Colors.grey[600] : Colors.grey[500]),
+                  color: isActive ? theme.colorScheme.onSurface : subtleText,
                 ),
               ),
             ),
             if (isActive)
               IconButton(
-                icon: Icon(
-                  Icons.clear,
-                  size: 20,
-                  color: theme.colorScheme.error,
-                ),
+                icon: Icon(Icons.clear, size: 20, color: theme.colorScheme.error),
                 onPressed: onClear,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 tooltip: 'Eliminar fecha',
               ),
-            Icon(
-              Icons.calendar_today,
-              color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-            ),
+            Icon(Icons.calendar_today, color: subtleText),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCategoriesSection() {
+  Widget _buildCategoriesSection(Color borderColor) {
     final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
+    final subtleText = theme.colorScheme.onSurface.withOpacity(0.6);
+    final chipBg = theme.colorScheme.onSurface.withOpacity(0.08);
 
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(
-          color: isDarkMode ? Colors.grey[800]! : Colors.grey.shade300,
-        ),
+        border: Border.all(color: borderColor),
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.all(12),
@@ -434,13 +398,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Categorías',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                ),
-              ),
+              Text('Categorías', style: TextStyle(fontSize: 12, color: subtleText)),
               if (_categories.isNotEmpty)
                 TextButton(
                   onPressed: () => setState(() => _categories.clear()),
@@ -449,13 +407,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  child: Text(
-                    'Eliminar todas',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: theme.colorScheme.error,
-                    ),
-                  ),
+                  child: Text('Eliminar todas', style: TextStyle(fontSize: 11, color: theme.colorScheme.error)),
                 ),
             ],
           ),
@@ -466,15 +418,10 @@ class _EditProductDialogState extends State<EditProductDialog> {
             children: _categories
                 .map(
                   (cat) => Chip(
-                    label: Text(cat),
-                    backgroundColor: isDarkMode
-                        ? Colors.grey[800]
-                        : Colors.grey[100],
-                    deleteIcon: Icon(
-                      Icons.close,
-                      size: 18,
-                      color: theme.colorScheme.error,
-                    ),
+                    label: Text(cat, style: theme.textTheme.bodySmall),
+                    backgroundColor: chipBg,
+                    side: BorderSide.none,
+                    deleteIcon: Icon(Icons.close, size: 18, color: theme.colorScheme.error),
                     onDeleted: () => setState(() => _categories.remove(cat)),
                   ),
                 )
@@ -504,11 +451,11 @@ class _EditProductDialogState extends State<EditProductDialog> {
     );
   }
 
-  Widget _buildActionButtons() {
+  Widget _buildActionButtons(Color borderColor) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: Colors.grey.shade200)),
+        border: Border(top: BorderSide(color: borderColor)),
       ),
       child: Row(
         children: [
@@ -523,7 +470,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
           const SizedBox(width: 16),
           Expanded(
             child: CustomButton(
-              text: 'Guardar cambios',
+              text: 'Guardar',
               onPressed: _saveProduct,
               type: ButtonType.primary,
               size: ButtonSize.full,

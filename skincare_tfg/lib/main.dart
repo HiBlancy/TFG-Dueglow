@@ -12,6 +12,7 @@ import 'screens/my_products_screen.dart';
 import 'themes.dart';
 import 'widgets/bottom_app_bar.dart';
 import 'constants/app_constants.dart';
+import '../l10n/app_localizations.dart';
 
 void main() {
   runApp(
@@ -49,6 +50,7 @@ class MyApp extends StatelessWidget {
           ],
           localizationsDelegates: const [
             // Aquí irán tus delegates de traducción
+            AppLocalizations.delegate,
             // Por ahora usamos los básicos
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,

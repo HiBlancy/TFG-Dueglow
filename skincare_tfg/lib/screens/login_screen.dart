@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import '../services/auth_service.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_button.dart';
-import '../widgets/bottom_app_bar.dart';  // Cambiar esta importación
+import '../widgets/bottom_app_bar.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -21,11 +21,10 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isPasswordVisible = false;
   bool _isLoading = false;
 
-//ELIMINAR AL TERMINAR TESTEO
   @override
   void initState() {
     super.initState();
-    // Precargar credenciales para desarrollo
+    // Precargar credenciales para desarrollo (ELIMINAR AL TERMINAR TESTEO)
     _emailController.text = 'blancy@gmail.com';
     _passwordController.text = '123456';
   }
@@ -51,7 +50,6 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => _isLoading = false);
 
       if (authData != null && mounted) {
-        // Cambiar aquí: navegar a BottomNavBar en lugar de HomeScreen
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const BottomNavBar()),
@@ -68,15 +66,23 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _showErrorDialog([String? customMessage]) {
+    final theme = Theme.of(context);
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Error de inicio de sesión'),
-        content: Text(customMessage ?? 'Usuario o contraseña incorrectos'),
+        backgroundColor: theme.colorScheme.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text('Error', style: theme.textTheme.titleLarge),
+        content: Text(
+          customMessage ?? 'Usuario o contraseña incorrectos',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurface.withOpacity(0.7)
+          )
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Aceptar'),
+            child: Text('Aceptar', style: TextStyle(color: theme.colorScheme.primary)),
           ),
         ],
       ),
@@ -85,21 +91,30 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return WillPopScope(
       onWillPop: () async {
         final confirm = await showDialog<bool>(
           context: context,
           builder: (_) => AlertDialog(
-            title: const Text('Salir de la app'),
-            content: const Text('¿Quieres salir de la aplicación?'),
+            backgroundColor: theme.colorScheme.surface,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            title: Text('Salir de la app', style: theme.textTheme.titleLarge),
+            content: Text(
+              '¿Quieres salir de la aplicación?',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface.withOpacity(0.7)
+              )
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancelar'),
+                child: Text('Cancelar', style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6))),
               ),
               TextButton(
                 onPressed: () => SystemNavigator.pop(),
-                child: const Text('Salir'),
+                child: Text('Salir', style: TextStyle(color: theme.colorScheme.error)),
               ),
             ],
           ),
@@ -117,7 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const SizedBox(height: 50),
-                    _buildHeader(),
+                    _buildHeader(theme),
                     const SizedBox(height: 40),
                     CustomTextField(
                       controller: _emailController,
@@ -141,14 +156,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       obscureText: !_isPasswordVisible,
                       showVisibilityToggle: true,
                       onToggleVisibility: () {
-                        setState(
-                          () => _isPasswordVisible = !_isPasswordVisible,
-                        );
+                        setState(() => _isPasswordVisible = !_isPasswordVisible);
                       },
                       textInputAction: TextInputAction.done,
                       validator: (value) {
-                        if (value?.isEmpty ?? true)
-                          return 'Ingrese su contraseña';
+                        if (value?.isEmpty ?? true) return 'Ingrese su contraseña';
                         if (value!.length < 6) return 'Mínimo 6 caracteres';
                         return null;
                       },
@@ -167,17 +179,15 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildHeader() => const Column(
+  Widget _buildHeader(ThemeData theme) => Column(
     children: [
       Text(
-        'Skincare App',
-        style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+        'DueGlow',
+        style: theme.textTheme.displayLarge?.copyWith(
+          color: theme.colorScheme.primary, // Toma el color magenta/ciruela
+        ),
       ),
-      SizedBox(height: 8),
-      Text(
-        'Inicia sesión para continuar',
-        style: TextStyle(fontSize: 16, color: Colors.grey),
-      ),
+//LOGOOOOOO CUANDO LO TENGAAA
     ],
   );
 

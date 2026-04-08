@@ -7,6 +7,9 @@ class AboutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final subtleText = theme.colorScheme.onSurface.withOpacity(0.6);
+
     return CustomAppBar(
       title: 'Acerca de',
       showDrawer: true,
@@ -17,22 +20,59 @@ class AboutScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.soap, size: 80, color: Colors.blue),
-              const SizedBox(height: 20),
+              // Icono principal con el estilo de tu marca
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.spa, // Encaja perfecto con Skincare
+                  size: 80, 
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+              const SizedBox(height: 24),
+              
+              // Título de la App (DueGlow)
               Text(
                 AppConstants.appName,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.primary,
+                  letterSpacing: -0.5,
+                ),
               ),
-              const SizedBox(height: 10),
-              const Text(
+              const SizedBox(height: 8),
+              
+              // Versión
+              Text(
                 'Versión 1.0.0',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: subtleText,
+                ),
               ),
-              const SizedBox(height: 20),
-              const Text(
-                'Aplicación para el cuidado de la piel',
+              const SizedBox(height: 32),
+              
+              // Descripción
+              Text(
+                'Aplicación para el cuidado de la piel y \nseguimiento de tus rutinas de belleza.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14),
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onSurface.withOpacity(0.8),
+                  height: 1.5,
+                ),
+              ),
+              
+              const SizedBox(height: 48),
+              
+              // Footer / Copyright
+              Text(
+                '© ${DateTime.now().year} ${AppConstants.appName}',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: subtleText,
+                ),
               ),
             ],
           ),

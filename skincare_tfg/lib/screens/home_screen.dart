@@ -5,6 +5,7 @@ import '../services/auth_service.dart';
 import '../services/product_service.dart';
 import '../widgets/main_toolbar.dart';
 import 'product_screen.dart';
+import '../l10n/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -46,7 +47,6 @@ class _HomeScreenState extends State<HomeScreen> {
     await _loadUserData();
   }
 
-  // Método para navegar al detalle del producto y esperar resultado
   Future<void> _navigateToProduct(BeautyProduct product) async {
     await Navigator.push(
       context,
@@ -55,12 +55,13 @@ class _HomeScreenState extends State<HomeScreen> {
             ProductScreen(product: product, isFromSearch: false),
       ),
     );
-    // Recargar los datos cuando el usuario regrese
     await _loadUserData();
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return CustomAppBar(
       title: 'DueGlow',
       showDrawer: true,
@@ -79,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Column(
                         children: [
                           Text(
-                            '¡Hola $_userName!',
+                            l10n.helloUser(_userName),
                             style: Theme.of(context).textTheme.titleLarge,
                           ),
                         ],
@@ -97,6 +98,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildQuickActions() {
+    final l10n = AppLocalizations.of(context)!;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
@@ -106,10 +109,9 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 child: _buildActionCard(
                   Icons.shopping_bag_outlined,
-                  'Mis productos',
-                  'Ver todos',
+                  l10n.myProducts, 
+                  l10n.seeAll,
                   () {
-                    // Navegar a la pantalla de todos los productos
                     Navigator.pushNamed(context, AppConstants.routeMyProducts);
                   },
                 ),
@@ -118,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 child: _buildActionCard(
                   Icons.face_retouching_natural_outlined,
-                  'Rutinas',
+                  l10n.routines,
                   'Próximamente',
                   () {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -135,7 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 child: _buildActionCard(
                   Icons.category_outlined,
-                  'Categorías',
+                  l10n.categories,
                   'Próximamente',
                   () {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -165,34 +167,44 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildExpiringSoonProducts() {
-    // Filtrar productos que tienen fecha de caducidad y están próximos (30 días)
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+    final subtleText = theme.colorScheme.onSurface.withOpacity(0.6);
+    final borderColor = theme.colorScheme.onSurface.withOpacity(0.1);
+
     final now = DateTime.now();
     final expiringSoon = _products.where((product) {
       if (product.expirationDate == null) return false;
-      final daysUntilExpiration = product.expirationDate!
-          .difference(now)
-          .inDays;
+      final daysUntilExpiration = product.expirationDate!.difference(now).inDays;
       return daysUntilExpiration >= 0 && daysUntilExpiration <= 30;
     }).toList();
 
+    final l10n = AppLocalizations.of(context)!;
+
     if (expiringSoon.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 24),
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Card(
+          elevation: isDarkMode ? 0 : 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: isDarkMode ? BorderSide(color: borderColor) : BorderSide.none,
+          ),
           child: Padding(
-            padding: EdgeInsets.all(24),
+            padding: const EdgeInsets.all(24),
             child: Column(
               children: [
-                Icon(Icons.check_circle_outline, size: 48, color: Colors.green),
-                SizedBox(height: 12),
+                // Usamos el primary color en lugar del verde fijo para mantener la marca
+                Icon(Icons.check_circle_outline, size: 48, color: theme.colorScheme.primary),
+                const SizedBox(height: 12),
                 Text(
-                  '¡Todo en orden!',
+                  l10n.allFine,
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
-                  'No hay productos próximos a caducar',
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                  l10n.noProdExpiring,
+                  style: TextStyle(fontSize: 14, color: subtleText),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -211,18 +223,17 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Próximos a caducar',
-                style: Theme.of(context).textTheme.headlineSmall,
+                l10n.expiringSoon,
+                style: theme.textTheme.headlineSmall,
               ),
               TextButton(
                 onPressed: () {
-                  // Navegar a la pantalla de productos
                   Navigator.pushNamed(context, AppConstants.routeMyProducts);
                 },
                 child: Text(
-                  'Ver todos',
+                  l10n.seeAll,
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.tertiary,
+                    color: theme.colorScheme.primary, // Cambiado de tertiary a primary para asegurar consistencia
                   ),
                 ),
               ),
@@ -244,12 +255,35 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildExpiringProductCard(BeautyProduct product) {
-    final daysUntilExpiration = product.expirationDate!
-        .difference(DateTime.now())
-        .inDays;
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+    
+    final subtleBg = theme.colorScheme.onSurface.withOpacity(0.05);
+    final subtleIcon = theme.colorScheme.onSurface.withOpacity(0.4);
+    final subtitleColor = theme.colorScheme.onSurface.withOpacity(0.6);
+    final borderColor = theme.colorScheme.onSurface.withOpacity(0.1);
+
+    final daysUntilExpiration = product.expirationDate!.difference(DateTime.now()).inDays;
+    final isDanger = daysUntilExpiration <= 7;
+
+    // Colores dinámicos para la etiqueta de caducidad
+    final badgeBgColor = isDanger
+        ? theme.colorScheme.error.withOpacity(0.15)
+        : Colors.orange.withOpacity(0.15);
+        
+    final badgeTextColor = isDanger
+        ? (isDarkMode ? Colors.red[300] : theme.colorScheme.error)
+        : (isDarkMode ? Colors.orange[300] : Colors.orange[800]);
+
+    final l10n = AppLocalizations.of(context)!;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      elevation: isDarkMode ? 0 : 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: isDarkMode ? BorderSide(color: borderColor) : BorderSide.none,
+      ),
       child: InkWell(
         onTap: () => _navigateToProduct(product),
         borderRadius: BorderRadius.circular(12),
@@ -263,7 +297,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 60,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
-                  color: Colors.grey[200],
+                  color: subtleBg,
                 ),
                 child: product.imageUrl != null && product.imageUrl!.isNotEmpty
                     ? ClipRRect(
@@ -272,19 +306,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           product.imageUrl!,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
-                            return Icon(
-                              Icons.face_rounded,
-                              color: Colors.grey[400],
-                              size: 30,
-                            );
+                            return Icon(Icons.face_rounded, color: subtleIcon, size: 30);
                           },
                         ),
                       )
-                    : Icon(
-                        Icons.face_rounded,
-                        color: Colors.grey[400],
-                        size: 30,
-                      ),
+                    : Icon(Icons.face_rounded, color: subtleIcon, size: 30),
               ),
               const SizedBox(width: 12),
 
@@ -295,10 +321,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Text(
                       product.name,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: theme.textTheme.titleMedium,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -306,7 +329,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     if (product.brand != null && product.brand!.isNotEmpty)
                       Text(
                         product.brand!,
-                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                        style: theme.textTheme.bodySmall?.copyWith(color: subtitleColor),
                       ),
                   ],
                 ),
@@ -314,14 +337,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
               // Indicador de días restantes
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: daysUntilExpiration <= 7
-                      ? Colors.red[100]
-                      : Colors.orange[100],
+                  color: badgeBgColor,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Column(
@@ -331,25 +349,22 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: daysUntilExpiration <= 7
-                            ? Colors.red[700]
-                            : Colors.orange[700],
+                        color: badgeTextColor,
                       ),
                     ),
                     Text(
-                      'días',
+                      l10n.days,
                       style: TextStyle(
                         fontSize: 10,
-                        color: daysUntilExpiration <= 7
-                            ? Colors.red[700]
-                            : Colors.orange[700],
+                        color: badgeTextColor,
                       ),
                     ),
                   ],
                 ),
               ),
 
-              const Icon(Icons.chevron_right, color: Colors.grey),
+              const SizedBox(width: 8),
+              Icon(Icons.chevron_right, color: subtleIcon),
             ],
           ),
         ),
@@ -363,21 +378,35 @@ class _HomeScreenState extends State<HomeScreen> {
     String subtitle,
     VoidCallback onTap,
   ) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+    final borderColor = theme.colorScheme.onSurface.withOpacity(0.1);
+
     return Card(
+      elevation: isDarkMode ? 0 : 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: isDarkMode ? BorderSide(color: borderColor) : BorderSide.none,
+      ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              Icon(icon, size: 40, color: Theme.of(context).primaryColor),
-              const SizedBox(height: 8),
-              Text(title, style: Theme.of(context).textTheme.bodyMedium),
+              Icon(icon, size: 40, color: theme.colorScheme.primary),
+              const SizedBox(height: 12),
+              Text(
+                title, 
+                style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)
+              ),
               const SizedBox(height: 4),
               Text(
                 subtitle,
-                style: Theme.of(context).textTheme.bodySmall,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurface.withOpacity(0.5)
+                ),
                 textAlign: TextAlign.center,
               ),
             ],

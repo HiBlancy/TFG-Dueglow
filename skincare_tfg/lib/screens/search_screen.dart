@@ -63,7 +63,7 @@ class _SearchScreenState extends State<SearchScreen> {
       MaterialPageRoute(
         builder: (context) => ProductScreen(
           product: product,
-          isFromSearch: true, // Indicamos que viene de búsqueda
+          isFromSearch: true,
         ),
       ),
     );
@@ -77,25 +77,31 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final searchBgColor = theme.colorScheme.onSurface.withOpacity(0.05);
+    final subtleIcon = theme.colorScheme.onSurface.withOpacity(0.6);
+
     return CustomAppBar(
       title: 'Buscar productos',
       showDrawer: true,
       showBackButton: false,
       child: Column(
         children: [
-          // Barra de búsqueda
+          // Barra de búsqueda adaptativa
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: TextField(
               controller: _searchController,
               onSubmitted: _onSearch,
               textInputAction: TextInputAction.search,
+              style: theme.textTheme.bodyMedium,
               decoration: InputDecoration(
                 hintText: 'Buscar por nombre o marca...',
-                prefixIcon: const Icon(Icons.search),
+                hintStyle: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.4)),
+                prefixIcon: Icon(Icons.search, color: subtleIcon),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear),
+                        icon: Icon(Icons.clear, color: subtleIcon),
                         onPressed: _clearSearch,
                       )
                     : null,
@@ -104,7 +110,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceVariant,
+                fillColor: searchBgColor, // Fondo dinámico
                 contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
               ),
               onChanged: (v) => setState(() {}),
@@ -121,8 +127,14 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _buildBody() {
+    final theme = Theme.of(context);
+    final subtleText = theme.colorScheme.onSurface.withOpacity(0.6);
+    final subtleIcon = theme.colorScheme.onSurface.withOpacity(0.4);
+
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: CircularProgressIndicator(color: theme.colorScheme.primary),
+      );
     }
 
     if (_errorMessage != null) {
@@ -130,12 +142,16 @@ class _SearchScreenState extends State<SearchScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.wifi_off, size: 48, color: Theme.of(context).colorScheme.outline),
+            Icon(Icons.wifi_off, size: 48, color: subtleIcon),
             const SizedBox(height: 12),
-            Text(_errorMessage!, style: TextStyle(color: Theme.of(context).colorScheme.outline)),
+            Text(_errorMessage!, style: TextStyle(color: subtleText)),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => _onSearch(_searchController.text),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: theme.colorScheme.onPrimary,
+              ),
               child: const Text('Reintentar'),
             ),
           ],
@@ -148,13 +164,12 @@ class _SearchScreenState extends State<SearchScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.search_off, size: 48, color: Theme.of(context).colorScheme.outline),
+            Icon(Icons.search_off, size: 48, color: subtleIcon),
             const SizedBox(height: 12),
-            Text('No se encontraron productos', 
-              style: TextStyle(color: Theme.of(context).colorScheme.outline)),
+            Text('No se encontraron productos', style: TextStyle(color: subtleText)),
             const SizedBox(height: 8),
             Text('Prueba con otro término de búsqueda',
-              style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.outline)),
+              style: TextStyle(fontSize: 12, color: subtleText)),
           ],
         ),
       );
@@ -165,16 +180,16 @@ class _SearchScreenState extends State<SearchScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.spa_outlined, size: 64, color: Theme.of(context).colorScheme.outline),
+            Icon(Icons.spa_outlined, size: 64, color: subtleIcon),
             const SizedBox(height: 16),
             Text(
               'Busca productos de belleza',
-              style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.outline),
+              style: TextStyle(fontSize: 16, color: subtleText),
             ),
             const SizedBox(height: 8),
             Text(
               'Ej: "L\'Oréal", "hidratante", "champú"',
-              style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.outline),
+              style: TextStyle(fontSize: 13, color: subtleText),
             ),
           ],
         ),
@@ -184,7 +199,10 @@ class _SearchScreenState extends State<SearchScreen> {
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       itemCount: _results.length,
-      separatorBuilder: (_, __) => const Divider(height: 1),
+      separatorBuilder: (_, __) => Divider(
+        height: 1, 
+        color: theme.colorScheme.onSurface.withOpacity(0.1) // Divisor adaptativo
+      ),
       itemBuilder: (context, index) => _ProductTile(
         product: _results[index],
         onTap: () => _navigateToProduct(_results[index]),
@@ -204,11 +222,14 @@ class _ProductTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final subtleIcon = theme.colorScheme.onSurface.withOpacity(0.4);
+
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
       leading: ClipRRect(
         borderRadius: BorderRadius.circular(8),
-        child: product.imageUrl != null
+        child: product.imageUrl != null && product.imageUrl!.isNotEmpty
             ? Image.network(
                 product.imageUrl!,
                 width: 56,
@@ -222,19 +243,19 @@ class _ProductTile extends StatelessWidget {
         product.name,
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
-        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+        style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
       ),
       subtitle: product.brand != null && product.brand!.isNotEmpty
           ? Text(
               product.brand!,
               style: TextStyle(
                 fontSize: 12,
-                color: Theme.of(context).colorScheme.primary,
+                color: theme.colorScheme.primary, // Resalta la marca con tu color ciruela/rosa
                 fontWeight: FontWeight.w500,
               ),
             )
           : null,
-      trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+      trailing: Icon(Icons.chevron_right, color: subtleIcon), // Adiós Colors.grey
       onTap: onTap,
     );
   }
@@ -243,14 +264,18 @@ class _ProductTile extends StatelessWidget {
 class _PlaceholderImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       width: 56,
       height: 56,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant,
+        color: theme.colorScheme.onSurface.withOpacity(0.05), // Fondo dinámico
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Icon(Icons.spa_outlined, color: Theme.of(context).colorScheme.outline),
+      child: Icon(
+        Icons.spa_outlined, 
+        color: theme.colorScheme.onSurface.withOpacity(0.4)
+      ),
     );
   }
 }

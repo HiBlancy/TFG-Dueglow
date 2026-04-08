@@ -1,3 +1,4 @@
+// product_card.dart
 import 'package:flutter/material.dart';
 import '../models/beauty_product.dart';
 
@@ -9,27 +10,35 @@ class ProductCard extends StatelessWidget {
   final VoidCallback? onMove;
 
   const ProductCard({
-    Key? key,
+    super.key, // Actualizado a sintaxis moderna
     required this.product,
     this.onTap,
     this.onLongPress,
     this.onDelete,
     this.onMove,
-  }) : super(key: key);
+  });
 
-@override
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
     
+    // Creamos colores sutiles basados en el texto principal (onSurface)
+    // Esto asegura que hereden el tono "ciruela" de fondo automáticamente
+    final subtleBg = theme.colorScheme.onSurface.withOpacity(0.05);
+    final subtleIcon = theme.colorScheme.onSurface.withOpacity(0.4);
+    final subtitleColor = theme.colorScheme.onSurface.withOpacity(0.7);
+    final labelColor = theme.colorScheme.onSurface.withOpacity(0.5);
+    final borderColor = theme.colorScheme.onSurface.withOpacity(0.1);
+    
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: theme.colorScheme.surface, // ✅ Usar color del tema
-      elevation: isDarkMode ? 1 : 2,
+      color: theme.colorScheme.surface, // Ya configurado en themes.dart
+      elevation: isDarkMode ? 0 : 2, // En oscuro queda mejor sin sombra, solo con borde
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: isDarkMode 
-            ? BorderSide(color: Colors.grey[800]!)
+            ? BorderSide(color: borderColor)
             : BorderSide.none,
       ),
       child: InkWell(
@@ -46,7 +55,7 @@ class ProductCard extends StatelessWidget {
                 height: 60,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
-                  color: isDarkMode ? Colors.grey[800] : Colors.grey[200],
+                  color: subtleBg, // Fondo dinámico que sirve para ambos temas
                 ),
                 child: product.imageUrl != null && product.imageUrl!.isNotEmpty
                     ? ClipRRect(
@@ -57,7 +66,7 @@ class ProductCard extends StatelessWidget {
                           errorBuilder: (context, error, stackTrace) {
                             return Icon(
                               Icons.image_not_supported,
-                              color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
+                              color: subtleIcon,
                               size: 30,
                             );
                           },
@@ -65,7 +74,7 @@ class ProductCard extends StatelessWidget {
                       )
                     : Icon(
                         Icons.face_rounded,
-                        color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
+                        color: subtleIcon,
                         size: 30,
                       ),
               ),
@@ -78,7 +87,7 @@ class ProductCard extends StatelessWidget {
                   children: [
                     Text(
                       product.name,
-                      style: theme.textTheme.titleMedium, // ✅ Usar tema
+                      style: theme.textTheme.titleMedium, // Ya usa el color del tema
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -87,7 +96,7 @@ class ProductCard extends StatelessWidget {
                       Text(
                         product.brand!,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                          color: subtitleColor,
                         ),
                       ),
                     if (product.categories != null && product.categories!.isNotEmpty) ...[
@@ -95,7 +104,7 @@ class ProductCard extends StatelessWidget {
                       Text(
                         product.categories!.take(2).join(', '),
                         style: theme.textTheme.labelSmall?.copyWith(
-                          color: isDarkMode ? Colors.grey[500] : Colors.grey[500],
+                          color: labelColor,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -113,7 +122,7 @@ class ProductCard extends StatelessWidget {
                     IconButton(
                       icon: Icon(
                         Icons.swap_horiz,
-                        color: theme.colorScheme.primary,
+                        color: theme.colorScheme.primary, // Rosa en oscuro, ciruela en claro
                       ),
                       onPressed: onMove,
                       tooltip: 'Mover a otra lista',
@@ -127,7 +136,7 @@ class ProductCard extends StatelessWidget {
                     ),
                   Icon(
                     Icons.chevron_right,
-                    color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
+                    color: subtleIcon,
                   ),
                 ],
               ),

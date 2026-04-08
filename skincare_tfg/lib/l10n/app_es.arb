@@ -1,0 +1,58 @@
+{
+    "@@locale": "es",
+    "appName": "DueGlow",
+    "helloUser": "¡Hola {name}!",
+    "@helloUser": {
+        "description": "Saludo en la pantalla de inicio",
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+
+    "login": "Iniciar Sesión",
+    "createAcount": "Crear Cuenta",
+        "email": "Correo electrónico",
+        "userEmailExample": "usuario@ejemplo.com",
+        "enterEmailAddress": "Ingrese su correo",
+        "invalidAddress": "Correo inválido",
+        "password": "Contraseña",
+        "enterPass": "Ingrese su contraseña",
+        "pass6Char": "Mínimo 6 caracteres",
+
+
+    "myProducts": "Mis productos",
+        "seeAll": "Ver todos",
+
+    "routines": "Rutinas",
+
+    "categories": "Categorías",
+
+    "expiringSoon": "Próximos a caducar",
+        "days": "días",
+        "allFine": "¡Todo en orden!",
+        "noProdExpiring": "No hay productos próximos a caducar",
+
+    "searchProducts": "Buscar productos",
+        "searchNameBrand": "Buscar por nombre o marca...",
+        "exmapleSearch": "Ej: \"Yves Rocher\", \"hidratante\"",
+
+    "camera": "Cámara",
+        "aimBarcode": "Apunta al código de barras",
+    
+    "settings": "Configuración",
+        "general": "General",
+            "notifications": "Notificaciones",
+            "notifText": "Recibir alertas y actualizaciones",
+        "appearance": "Apariencia",
+            "lightMode": "Modo Claro",
+            "darkMode": "Modo Oscuro",
+        "language": "Idioma",
+        "information": "Información",
+
+
+    "about": "Acerca de",
+
+    "logout": "Cerrar Sesión"
+}

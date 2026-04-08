@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:skincare_tfg/models/beauty_product.dart';
-import 'package:skincare_tfg/services/beauty_api_service.dart';
+import '../models/beauty_product.dart';
+import '../services/beauty_api_service.dart';
 import '../widgets/main_toolbar.dart';
 import 'product_screen.dart';
 
@@ -14,7 +14,7 @@ class ScanScreen extends StatefulWidget {
 
 class _ScanScreenState extends State<ScanScreen> {
   final MobileScannerController _cameraController = MobileScannerController();
-  bool _isNavigating = false; // Evita navegar varias veces seguidas
+  bool _isNavigating = false;
 
   @override
   void dispose() {
@@ -36,13 +36,12 @@ class _ScanScreenState extends State<ScanScreen> {
     if (!mounted) return;
 
     if (product != null) {
-      // Producto encontrado - pasar isFromSearch = true para mostrar botón de añadir
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (_) => ProductScreen(
             product: product,
-            isFromSearch: true, // Esto activa el botón "Agregar a mis productos"
+            isFromSearch: true,
           ),
         ),
       ).then((_) {
@@ -50,32 +49,57 @@ class _ScanScreenState extends State<ScanScreen> {
         _cameraController.start();
       });
     } else {
-      // Producto no encontrado - mostrar diálogo para crear producto manual
+      // Usamos el contexto del diálogo para obtener el tema de forma segura tras el await
       final shouldCreate = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Producto no encontrado'),
-          content: Text(
-            'No se encontró información para el código de barras: ${barcode.rawValue}\n\n'
-            '¿Quieres crear un nuevo producto manualmente?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancelar'),
+        builder: (dialogContext) {
+          final theme = Theme.of(dialogContext);
+          
+          return AlertDialog(
+            backgroundColor: theme.colorScheme.surface,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: theme.brightness == Brightness.dark 
+                  ? BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.1))
+                  : BorderSide.none,
             ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Crear producto'),
+            title: Text('Producto no encontrado', style: theme.textTheme.titleLarge),
+            content: Text(
+              'No se encontró información para el código de barras:\n${barcode.rawValue}\n\n'
+              '¿Quieres crear un nuevo producto manualmente?',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface.withOpacity(0.7)
+              ),
             ),
-          ],
-        ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: Text(
+                  'Cancelar', 
+                  style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6))
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: theme.colorScheme.onPrimary,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text('Crear producto'),
+              ),
+            ],
+          );
+        },
       );
 
       if (!mounted) return;
 
       if (shouldCreate == true) {
-        // Crear producto básico con el código de barras
         final newProduct = BeautyProduct(
           barcode: barcode.rawValue!,
           name: 'Nuevo producto',
@@ -88,7 +112,7 @@ class _ScanScreenState extends State<ScanScreen> {
           MaterialPageRoute(
             builder: (_) => ProductScreen(
               product: newProduct,
-              isFromSearch: true, // Esto activa el botón "Agregar a mis productos"
+              isFromSearch: true,
             ),
           ),
         ).then((_) {
@@ -96,7 +120,6 @@ class _ScanScreenState extends State<ScanScreen> {
           _cameraController.start();
         });
       } else {
-        // Usuario canceló, reiniciar cámara
         setState(() => _isNavigating = false);
         _cameraController.start();
       }
@@ -111,24 +134,21 @@ class _ScanScreenState extends State<ScanScreen> {
       showBackButton: false,
       child: Stack(
         children: [
-          // Vista de la cámara
           MobileScanner(
             controller: _cameraController,
             onDetect: _onBarcodeDetected,
           ),
 
-          // Overlay con marco de escaneo
           Center(
             child: Container(
               width: 260,
               height: 180,
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.white, width: 2.5),
+                border: Border.all(color: Colors.white.withOpacity(0.5), width: 2.5),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Stack(
                 children: [
-                  // Esquinas decorativas
                   _Corner(Alignment.topLeft),
                   _Corner(Alignment.topRight),
                   _Corner(Alignment.bottomLeft),
@@ -138,8 +158,7 @@ class _ScanScreenState extends State<ScanScreen> {
             ),
           ),
 
-          // Texto de instrucción
-          Positioned(
+          const Positioned(
             bottom: 48,
             left: 0,
             right: 0,
@@ -150,12 +169,11 @@ class _ScanScreenState extends State<ScanScreen> {
                 color: Colors.white,
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
-                shadows: const [Shadow(blurRadius: 4, color: Colors.black54)],
+                shadows: [Shadow(blurRadius: 4, color: Colors.black54)],
               ),
             ),
           ),
 
-          // Botón linterna
           Positioned(
             top: 16,
             right: 16,
@@ -170,7 +188,6 @@ class _ScanScreenState extends State<ScanScreen> {
   }
 }
 
-// Widget auxiliar para las esquinas del marco
 class _Corner extends StatelessWidget {
   final Alignment alignment;
   const _Corner(this.alignment);
@@ -179,6 +196,9 @@ class _Corner extends StatelessWidget {
   Widget build(BuildContext context) {
     final isLeft = alignment == Alignment.topLeft || alignment == Alignment.bottomLeft;
     final isTop = alignment == Alignment.topLeft || alignment == Alignment.topRight;
+    
+    // ¡Adiós color verde genérico! Usamos el color primario dinámico de tu app
+    final brandColor = Theme.of(context).colorScheme.primary;
 
     return Align(
       alignment: alignment,
@@ -187,10 +207,10 @@ class _Corner extends StatelessWidget {
         height: 20,
         decoration: BoxDecoration(
           border: Border(
-            top: isTop ? const BorderSide(color: Colors.green, width: 4) : BorderSide.none,
-            bottom: !isTop ? const BorderSide(color: Colors.green, width: 4) : BorderSide.none,
-            left: isLeft ? const BorderSide(color: Colors.green, width: 4) : BorderSide.none,
-            right: !isLeft ? const BorderSide(color: Colors.green, width: 4) : BorderSide.none,
+            top: isTop ? BorderSide(color: brandColor, width: 4) : BorderSide.none,
+            bottom: !isTop ? BorderSide(color: brandColor, width: 4) : BorderSide.none,
+            left: isLeft ? BorderSide(color: brandColor, width: 4) : BorderSide.none,
+            right: !isLeft ? BorderSide(color: brandColor, width: 4) : BorderSide.none,
           ),
         ),
       ),

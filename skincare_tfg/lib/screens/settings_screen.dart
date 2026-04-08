@@ -1,44 +1,55 @@
-// screens/settings_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
 import '../providers/locale_provider.dart';
 import '../widgets/main_toolbar.dart';
+import '../l10n/app_localizations.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final dividerColor = theme.colorScheme.onSurface.withOpacity(0.1);
+
     return CustomAppBar(
-      title: 'Configuración',
+      title: AppLocalizations.of(context)!.settings,
       showDrawer: true,
       showBackButton: true,
       child: ListView(
         children: [
           // ===== NOTIFICACIONES =====
-          const _SettingsSection(title: 'General', children: [
+          _SettingsSection(
+            title: AppLocalizations.of(context)!.general, 
+            children: [
             _NotificationTile(),
           ]),
           
-          const Divider(),
+          Divider(color: dividerColor, height: 1),
           
           // ===== TEMAS =====
-          const _SettingsSection(title: 'Apariencia', children: [
+          _SettingsSection(
+            title: AppLocalizations.of(context)!.appearance,
+            children: [
             _ThemeTile(),
           ]),
           
-          const Divider(),
+          Divider(color: dividerColor, height: 1),
           
           // ===== IDIOMAS =====
-          const _SettingsSection(title: 'Idioma', children: [
+          _SettingsSection(
+            title: AppLocalizations.of(context)!.language, 
+            children: [
             _LanguageTile(),
           ]),
           
-          const Divider(),
+          Divider(color: dividerColor, height: 1),
           
           // ===== ACERCA DE =====
-          const _SettingsSection(title: 'Información', children: [
+          _SettingsSection(
+            title: AppLocalizations.of(context)!.information, 
+            children: [
             _AboutTile(),
           ]),
         ],
@@ -60,23 +71,32 @@ class _NotificationTileState extends State<_NotificationTile> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final subtleText = theme.colorScheme.onSurface.withOpacity(0.6);
+    final l10n = AppLocalizations.of(context)!;
+
     return ListTile(
-      leading: const Icon(Icons.notifications),
-      title: const Text('Notificaciones'),
-      subtitle: const Text('Recibir alertas y actualizaciones'),
+      leading: Icon(Icons.notifications, color: theme.colorScheme.primary),
+      title: Text(l10n.notifications), 
+      subtitle: Text(l10n.notifText, style: TextStyle(color: subtleText)),
       trailing: Switch(
         value: _notificationsEnabled,
+        activeColor: theme.colorScheme.primary, // Switch del color de la marca
         onChanged: (bool value) {
           setState(() {
             _notificationsEnabled = value;
           });
-          // Aquí iría la lógica para guardar preferencia de notificaciones
+          
+          // Snackbar unificado con tu marca
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(value 
-                ? 'Notificaciones activadas' 
-                : 'Notificaciones desactivadas'
+              content: Text(
+                value ? 'Notificaciones activadas' : 'Notificaciones desactivadas',
+                style: const TextStyle(color: Colors.white),
               ),
+              backgroundColor: theme.colorScheme.primary,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               duration: const Duration(seconds: 1),
             ),
           );
@@ -93,25 +113,28 @@ class _ThemeTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final theme = Theme.of(context);
+
+    final l10n = AppLocalizations.of(context)!;
     
     return Column(
       children: [
         // Opción Claro
         ListTile(
-          leading: const Icon(Icons.light_mode),
-          title: const Text('Modo Claro'),
+          leading: Icon(Icons.light_mode, color: theme.colorScheme.primary),
+          title: Text(l10n.lightMode),
           trailing: themeProvider.themeMode == ThemeMode.light
-              ? const Icon(Icons.check_circle, color: Colors.green)
+              ? Icon(Icons.check_circle, color: theme.colorScheme.primary) // Adiós Colors.green
               : null,
           onTap: () => themeProvider.setLightMode(),
         ),
         
         // Opción Oscuro
         ListTile(
-          leading: const Icon(Icons.dark_mode),
-          title: const Text('Modo Oscuro'),
+          leading: Icon(Icons.dark_mode, color: theme.colorScheme.primary),
+          title: Text(l10n.darkMode),
           trailing: themeProvider.themeMode == ThemeMode.dark
-              ? const Icon(Icons.check_circle, color: Colors.green)
+              ? Icon(Icons.check_circle, color: theme.colorScheme.primary) // Adiós Colors.green
               : null,
           onTap: () => themeProvider.setDarkMode(),
         ),
@@ -128,47 +151,37 @@ class _LanguageTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final localeProvider = Provider.of<LocaleProvider>(context);
     final currentLocale = localeProvider.locale.languageCode;
+    final theme = Theme.of(context);
+    final subtleText = theme.colorScheme.onSurface.withOpacity(0.6);
     
     return Column(
       children: [
         // Español
         ListTile(
-          leading: const Icon(Icons.translate),
+          leading: Icon(Icons.translate, color: theme.colorScheme.primary),
           title: const Text('Español'),
-          subtitle: const Text('Spanish'),
+          subtitle: Text('Spanish', style: TextStyle(color: subtleText)),
           trailing: currentLocale == 'es'
-              ? const Icon(Icons.check_circle, color: Colors.green)
+              ? Icon(Icons.check_circle, color: theme.colorScheme.primary) // Adiós Colors.green
               : null,
           onTap: () {
             localeProvider.setSpanish();
-            _showRestartSnackbar(context);
           },
         ),
         
         // Inglés
         ListTile(
-          leading: const Icon(Icons.translate),
+          leading: Icon(Icons.translate, color: theme.colorScheme.primary),
           title: const Text('English'),
-          subtitle: const Text('Inglés'),
+          subtitle: Text('Inglés', style: TextStyle(color: subtleText)),
           trailing: currentLocale == 'en'
-              ? const Icon(Icons.check_circle, color: Colors.green)
+              ? Icon(Icons.check_circle, color: theme.colorScheme.primary) // Adiós Colors.green
               : null,
           onTap: () {
             localeProvider.setEnglish();
-            _showRestartSnackbar(context);
           },
         ),
       ],
-    );
-  }
-  
-  void _showRestartSnackbar(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Idioma cambiado. Reinicia la app para ver los cambios completos.'),
-        duration: Duration(seconds: 3),
-        behavior: SnackBarBehavior.floating,
-      ),
     );
   }
 }
@@ -179,10 +192,16 @@ class _AboutTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final subtleText = theme.colorScheme.onSurface.withOpacity(0.6);
+
+    final l10n = AppLocalizations.of(context)!;
+
     return ListTile(
-      leading: const Icon(Icons.info),
-      title: const Text('Acerca de'),
-      subtitle: const Text('Versión 1.0.0'),
+      leading: Icon(Icons.info, color: theme.colorScheme.primary),
+      title: Text(l10n.about),
+      subtitle: Text('Versión 1.0.0', style: TextStyle(color: subtleText)),
+      trailing: Icon(Icons.chevron_right, color: subtleText),
       onTap: () {
         // Navegar a la pantalla de About
         Navigator.pushNamed(context, '/about');
@@ -207,12 +226,13 @@ class _SettingsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 8), // Más espacio arriba
           child: Text(
             title,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: Theme.of(context).colorScheme.primary,
               fontWeight: FontWeight.bold,
+              letterSpacing: 0.5, // Leve espaciado para que se vea más premium
             ),
           ),
         ),

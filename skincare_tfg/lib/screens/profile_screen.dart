@@ -42,6 +42,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return CustomAppBar(
       title: 'Mi Perfil',
       showDrawer: true,
@@ -49,18 +51,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: RefreshIndicator(
         onRefresh: _refreshData,
         child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? Center(child: CircularProgressIndicator(color: theme.colorScheme.primary))
             : SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: Column(
                   children: [
-                    const SizedBox(height: 20),
-                    _buildProfileAvatar(),
+                    const SizedBox(height: 32),
+                    _buildProfileAvatar(theme),
                     const SizedBox(height: 24),
-                    _buildUserName(),
+                    _buildUserName(theme),
                     const SizedBox(height: 8),
-                    _buildUserEmail(),
-                    const SizedBox(height: 24),
+                    _buildUserEmail(theme),
+                    const SizedBox(height: 32),
+                    _buildProfileOptions(theme, context),
                   ],
                 ),
               ),
@@ -68,29 +71,79 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfileAvatar() {
+  Widget _buildProfileAvatar(ThemeData theme) {
     return CircleAvatar(
       radius: 60,
-      backgroundColor: Theme.of(context).primaryColor,
-      child: const Icon(Icons.person, size: 70, color: Colors.white),
+      backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+      child: Icon(Icons.person, size: 70, color: theme.colorScheme.primary),
     );
   }
 
-  Widget _buildUserName() {
+  Widget _buildUserName(ThemeData theme) {
     return Text(
       _userName,
-      style: TextStyle(
-        fontSize: 24,
+      style: theme.textTheme.headlineSmall?.copyWith(
         fontWeight: FontWeight.bold,
-        color: Theme.of(context).primaryColor,
+        color: theme.colorScheme.primary,
       ),
     );
   }
 
-  Widget _buildUserEmail() {
+  Widget _buildUserEmail(ThemeData theme) {
     return Text(
       _userEmail,
-      style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+      style: theme.textTheme.bodyLarge?.copyWith(
+        color: theme.colorScheme.onSurface.withOpacity(0.6),
+      ),
+    );
+  }
+
+  // Menú de opciones añadido para conectar con tus otras pantallas
+  Widget _buildProfileOptions(ThemeData theme, BuildContext context) {
+    final subtleIcon = theme.colorScheme.onSurface.withOpacity(0.4);
+    final dividerColor = theme.colorScheme.onSurface.withOpacity(0.1);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        children: [
+          Divider(color: dividerColor),
+          ListTile(
+            leading: Icon(Icons.edit, color: theme.colorScheme.primary),
+            title: const Text('Editar Perfil'),
+            trailing: Icon(Icons.chevron_right, color: subtleIcon),
+            onTap: () {
+              // Navega a la pantalla de edición y refresca al volver
+              // Asegúrate de que la ruta '/edit' sea correcta según tu enrutamiento
+              Navigator.pushNamed(context, '/edit').then((_) => _refreshData());
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.settings, color: theme.colorScheme.primary),
+            title: const Text('Configuración'),
+            trailing: Icon(Icons.chevron_right, color: subtleIcon),
+            onTap: () {
+              // Asegúrate de que la ruta '/settings' coincida con tu main.dart
+              Navigator.pushNamed(context, '/settings');
+            },
+          ),
+          Divider(color: dividerColor),
+          ListTile(
+            leading: Icon(Icons.logout, color: theme.colorScheme.error),
+            title: Text(
+              'Cerrar Sesión', 
+              style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.w600)
+            ),
+            onTap: () async {
+              await _authService.logout();
+              if (context.mounted) {
+                // Vuelve a la pantalla de login (ajusta la ruta '/' si es distinta)
+                Navigator.pushReplacementNamed(context, '/');
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
 }

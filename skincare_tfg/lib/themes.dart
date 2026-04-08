@@ -15,7 +15,7 @@ class AppThemes {
       surface: Color(0xFFFFFFFF),         // Blanco para tarjetas
       error: Color(0xFFD32F2F),           // Rojo para errores
       onPrimary: Colors.white,            // Texto sobre primary
-      onSecondary: Colors.black,          // Texto sobre secondary
+      onSecondary: Colors.white,          // Texto sobre secondary
       onSurface: Color(0xFF1A1A1A),       // Texto sobre surface
       onError: Colors.white,              // Texto sobre error
     ),
@@ -105,7 +105,7 @@ class AppThemes {
         fontFamily: 'Montserrat',
       ),
     ),
-    
+
     // Botones
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -169,26 +169,15 @@ class AppThemes {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+        borderSide: const BorderSide(color: Color(0xFF920069), width: 2), // Usamos tu secondary
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: Color(0xFFD32F2F)),
       ),
-      labelStyle: GoogleFonts.roboto(fontSize: 14, color: const Color(0xFF666666)),
-      hintStyle: GoogleFonts.roboto(fontSize: 14, color: const Color(0xFF999999)),
     ),
     
-    // Scaffold
     scaffoldBackgroundColor: const Color(0xFFF5F5F5),
-    
-    // Diálogos
-    dialogTheme: DialogThemeData(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      backgroundColor: Colors.white,
-    ),
   );
   
   // ==================== TEMA OSCURO ====================
@@ -197,15 +186,18 @@ class AppThemes {
     useMaterial3: true,
     
     colorScheme: const ColorScheme.dark(
-      primary: Color(0xFF90CAF9),        // Azul más claro
-      secondary: Color(0xFFEC9ED6),
-      tertiary: Color(0xFFEC9ED6),
-      surface: Color(0xFF1E1E1E),         // Gris oscuro para tarjetas
-      error: Color(0xFFEF5350),           // Rojo más claro
-      onPrimary: Color(0xFF121212),       // Texto sobre primary
-      onSecondary: Color(0xFF121212),     // Texto sobre secondary
-      onSurface: Color(0xFFFFFFFF),       // Texto sobre surface
-      onError: Color(0xFF121212),         // Texto sobre error
+      // INVERTIMOS LA PALETA: El color claro ahora es el primario para resaltar
+      primary: Color(0xFFEC9ED6),         // Rosa claro (tu antiguo tertiary)
+      secondary: Color(0xFFD05C9F),       // Un magenta un poco más claro y desaturado
+      tertiary: Color(0xFF420034),        // El ciruela oscuro pasa a ser terciario
+      
+      // Fondos con un levísimo tono ciruela en lugar de negro puro
+      surface: Color(0xFF261D24),         // Gris muy oscuro con tinte rosa/ciruela para tarjetas
+      error: Color(0xFFEF5350),           
+      onPrimary: Color(0xFF420034),       // Texto oscuro sobre el botón rosa claro
+      onSecondary: Colors.white,     
+      onSurface: Color(0xFFEAEAEA),       // Texto sobre surface
+      onError: Color(0xFF121212),        // Texto sobre error
     ),
     
     // Tipografías para tema oscuro
@@ -295,16 +287,19 @@ class AppThemes {
       ),
     ),
     
-    // AppBar oscura
+   // AppBar oscura
     appBarTheme: const AppBarTheme(
       elevation: 0,
+      scrolledUnderElevation: 0,
       centerTitle: true,
-      backgroundColor: Color(0xFF1E1E1E),
-      foregroundColor: Colors.white,
+      backgroundColor: Color(0xFF1A1318), // Fondo oscuro
+      foregroundColor: Color(0xFFEC9ED6), // Color base
+      iconTheme: IconThemeData(color: Color(0xFFEAEAEA)),      
+      actionsIconTheme: IconThemeData(color: Color(0xFFEAEAEA)),
       titleTextStyle: TextStyle(
         fontSize: 20,
         fontWeight: FontWeight.w600,
-        color: Colors.white,
+        color: Color(0xFFEAEAEA),
         fontFamily: 'Montserrat',
       ),
     ),
@@ -312,17 +307,15 @@ class AppThemes {
     // Botones oscuros
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF90CAF9),
-        foregroundColor: const Color(0xFF121212),
+        backgroundColor: const Color(0xFFEC9ED6), // Botones principales en rosa
+        foregroundColor: const Color(0xFF420034), // Texto del botón en ciruela oscuro
         minimumSize: const Size(88, 48),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        textStyle: GoogleFonts.roboto(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: const Color(0xFFEC9ED6), // Rosa claro
       ),
     ),
     
@@ -338,59 +331,39 @@ class AppThemes {
       ),
     ),
     
-    textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(
-        foregroundColor: const Color(0xFF420034),
-        textStyle: GoogleFonts.roboto(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    ),
-    
     // Cards oscuras
     cardTheme: CardThemeData(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      color: const Color(0xFF1E1E1E),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: const Color(0xFF261D24),
       margin: const EdgeInsets.all(8),
     ),
     
     // Inputs oscuros
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: const Color(0xFF2C2C2C),
+      fillColor: const Color(0xFF332730), // Fondo del input un poco más claro que el surface
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF3D3D3D)),
+        borderSide: const BorderSide(color: Color(0xFF4A3A46)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF3D3D3D)),
+        borderSide: const BorderSide(color: Color(0xFF4A3A46)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF90CAF9), width: 2),
+        borderSide: const BorderSide(color: Color(0xFFEC9ED6), width: 2), // Borde rosa al enfocar
       ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFEF5350)),
-      ),
-      labelStyle: GoogleFonts.roboto(fontSize: 14, color: Colors.white70),
-      hintStyle: GoogleFonts.roboto(fontSize: 14, color: Colors.white38),
     ),
     
-    // Scaffold oscuro
-    scaffoldBackgroundColor: const Color(0xFF121212),
+    // Scaffold oscuro (Ligeramente cálido/ciruela)
+    scaffoldBackgroundColor: const Color(0xFF1A1318),
     
     // Diálogos oscuros
     dialogTheme: DialogThemeData(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      backgroundColor: const Color(0xFF1E1E1E),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      backgroundColor: const Color(0xFF261D24),
     ),
   );
 }

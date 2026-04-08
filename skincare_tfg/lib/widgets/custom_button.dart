@@ -1,8 +1,9 @@
+// custom_button.dart
 import 'package:flutter/material.dart';
 
 /// Tipos de botones disponibles
 enum ButtonType {
-  primary,   // Botón principal (azul, fondo sólido)
+  primary,   // Botón principal (fondo sólido)
   secondary, // Botón secundario (borde, sin fondo)
   danger,    // Botón de peligro (rojo)
   text,      // Botón de texto (sin bordes)
@@ -62,21 +63,15 @@ class CustomButton extends StatelessWidget {
     this.onLongPress,
   });
 
-  // Método para obtener el tamaño del texto según el tamaño del botón
   double _getFontSize() {
     switch (size) {
-      case ButtonSize.small:
-        return 12;
-      case ButtonSize.medium:
-        return 16;
-      case ButtonSize.large:
-        return 18;
-      case ButtonSize.full:
-        return 18;
+      case ButtonSize.small: return 12;
+      case ButtonSize.medium: return 16;
+      case ButtonSize.large: return 18;
+      case ButtonSize.full: return 18;
     }
   }
 
-  // Método para obtener el padding según el tamaño
   EdgeInsetsGeometry _getDefaultPadding() {
     switch (size) {
       case ButtonSize.small:
@@ -90,88 +85,75 @@ class CustomButton extends StatelessWidget {
     }
   }
 
-  // Método para obtener el ancho según el tamaño
   double? _getWidth() {
     if (width != null) return width;
     
     switch (size) {
-      case ButtonSize.small:
-        return 100;
-      case ButtonSize.medium:
-        return 150;
-      case ButtonSize.large:
-        return 200;
-      case ButtonSize.full:
-        return double.infinity;
+      case ButtonSize.small: return 100;
+      case ButtonSize.medium: return 150;
+      case ButtonSize.large: return 200;
+      case ButtonSize.full: return double.infinity;
     }
   }
 
-  // Método para obtener el estilo del botón según el tipo
-  // custom_button.dart - Solo modificar el método _getButtonStyle
-ButtonStyle _getButtonStyle(BuildContext context) {
-  final theme = Theme.of(context);
-  final isDarkMode = theme.brightness == Brightness.dark;
-  
-  // Colores por defecto según el tipo
-  Color defaultBgColor;
-  Color defaultTextColor;
-  Color defaultBorderColor;
-  
-  switch (type) {
-    case ButtonType.primary:
-      // ✅ Usar colorScheme.primary en lugar de theme.primaryColor
-      defaultBgColor = backgroundColor ?? theme.colorScheme.primary;
-      defaultTextColor = textColor ?? theme.colorScheme.onPrimary;
-      defaultBorderColor = borderColor ?? Colors.transparent;
-      break;
-    case ButtonType.secondary:
-      defaultBgColor = backgroundColor ?? Colors.transparent;
-      defaultTextColor = textColor ?? theme.colorScheme.primary;
-      defaultBorderColor = borderColor ?? theme.colorScheme.primary;
-      break;
-    case ButtonType.danger:
-      defaultBgColor = backgroundColor ?? theme.colorScheme.error;
-      defaultTextColor = textColor ?? theme.colorScheme.onError;
-      defaultBorderColor = borderColor ?? Colors.transparent;
-      break;
-    case ButtonType.text:
-      defaultBgColor = backgroundColor ?? Colors.transparent;
-      defaultTextColor = textColor ?? theme.colorScheme.primary;
-      defaultBorderColor = borderColor ?? Colors.transparent;
-      break;
-    case ButtonType.outlined:
-      defaultBgColor = backgroundColor ?? Colors.transparent;
-      defaultTextColor = textColor ?? theme.colorScheme.primary;
-      defaultBorderColor = borderColor ?? theme.colorScheme.primary;
-      break;
+  ButtonStyle _getButtonStyle(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    // Colores por defecto según el tipo
+    Color defaultBgColor;
+    Color defaultTextColor;
+    Color defaultBorderColor;
+    
+    switch (type) {
+      case ButtonType.primary:
+        defaultBgColor = backgroundColor ?? theme.colorScheme.primary;
+        defaultTextColor = textColor ?? theme.colorScheme.onPrimary;
+        defaultBorderColor = borderColor ?? Colors.transparent;
+        break;
+      case ButtonType.secondary:
+      case ButtonType.outlined:
+        defaultBgColor = backgroundColor ?? Colors.transparent;
+        defaultTextColor = textColor ?? theme.colorScheme.primary;
+        defaultBorderColor = borderColor ?? theme.colorScheme.primary;
+        break;
+      case ButtonType.danger:
+        defaultBgColor = backgroundColor ?? theme.colorScheme.error;
+        defaultTextColor = textColor ?? theme.colorScheme.onError;
+        defaultBorderColor = borderColor ?? Colors.transparent;
+        break;
+      case ButtonType.text:
+        defaultBgColor = backgroundColor ?? Colors.transparent;
+        defaultTextColor = textColor ?? theme.colorScheme.primary;
+        defaultBorderColor = borderColor ?? Colors.transparent;
+        break;
+    }
+    
+    // Ajustar opacidad si está deshabilitado para que se vea bien en cualquier fondo
+    final bgColor = isEnabled ? defaultBgColor : defaultBgColor.withOpacity(0.3);
+    final txtColor = isEnabled ? defaultTextColor : defaultTextColor.withOpacity(0.5);
+    final brdColor = isEnabled ? defaultBorderColor : defaultBorderColor.withOpacity(0.3);
+    
+    return ElevatedButton.styleFrom(
+      backgroundColor: bgColor,
+      foregroundColor: txtColor,
+      disabledBackgroundColor: bgColor,
+      disabledForegroundColor: txtColor,
+      elevation: type == ButtonType.text ? 0 : 2,
+      shadowColor: type == ButtonType.text ? Colors.transparent : null,
+      padding: padding ?? _getDefaultPadding(),
+      minimumSize: Size(_getWidth() ?? 0, height ?? 0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(borderRadius),
+        side: (type == ButtonType.secondary || type == ButtonType.outlined)
+            ? BorderSide(color: brdColor, width: 1.5)
+            : BorderSide.none,
+      ),
+      textStyle: TextStyle(
+        fontSize: _getFontSize(),
+        fontWeight: FontWeight.w600,
+      ),
+    );
   }
-  
-  // Ajustar opacidad si está deshabilitado
-  final bgColor = isEnabled ? defaultBgColor : defaultBgColor.withOpacity(0.5);
-  final txtColor = isEnabled ? defaultTextColor : defaultTextColor.withOpacity(0.5);
-  final brdColor = isEnabled ? defaultBorderColor : defaultBorderColor.withOpacity(0.5);
-  
-  return ElevatedButton.styleFrom(
-    backgroundColor: bgColor,
-    foregroundColor: txtColor,
-    disabledBackgroundColor: bgColor,
-    disabledForegroundColor: txtColor,
-    elevation: type == ButtonType.text ? 0 : 2,
-    shadowColor: type == ButtonType.text ? Colors.transparent : null,
-    padding: padding ?? _getDefaultPadding(),
-    minimumSize: Size(_getWidth() ?? 0, height ?? 0),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(borderRadius),
-      side: (type == ButtonType.secondary || type == ButtonType.outlined)
-          ? BorderSide(color: brdColor, width: 1.5)
-          : BorderSide.none,
-    ),
-    textStyle: TextStyle(
-      fontSize: _getFontSize(),
-      fontWeight: FontWeight.w600,
-    ),
-  );
-}
 
   @override
   Widget build(BuildContext context) {
@@ -179,10 +161,9 @@ ButtonStyle _getButtonStyle(BuildContext context) {
       onPressed: (isEnabled && !isLoading) ? onPressed : null,
       onLongPress: onLongPress,
       style: _getButtonStyle(context),
-      child: _buildChild(),
+      child: _buildChild(context), // Pasamos el context para acceder al tema
     );
     
-    // Si el tamaño es full, envolver en SizedBox para ancho completo
     if (size == ButtonSize.full || width == double.infinity) {
       return SizedBox(
         width: double.infinity,
@@ -193,15 +174,27 @@ ButtonStyle _getButtonStyle(BuildContext context) {
     return button;
   }
 
-  Widget _buildChild() {
+  Widget _buildChild(BuildContext context) {
     if (isLoading) {
+      final theme = Theme.of(context);
+      
+      // ✅ Calculamos el color del loader dinámicamente según el tipo de botón
+      Color defaultLoaderColor;
+      if (type == ButtonType.primary) {
+        defaultLoaderColor = theme.colorScheme.onPrimary;
+      } else if (type == ButtonType.danger) {
+        defaultLoaderColor = theme.colorScheme.onError;
+      } else {
+        defaultLoaderColor = theme.colorScheme.primary; // Para secondary, text, etc.
+      }
+
       return SizedBox(
         height: _getFontSize() + 4,
         width: _getFontSize() + 4,
         child: CircularProgressIndicator(
           strokeWidth: 2,
           valueColor: AlwaysStoppedAnimation<Color>(
-            loadingColor ?? (type == ButtonType.primary ? Colors.white : Colors.blue),
+            loadingColor ?? defaultLoaderColor,
           ),
         ),
       );
@@ -225,7 +218,6 @@ ButtonStyle _getButtonStyle(BuildContext context) {
 
 // Extensión para facilitar el uso con context
 extension CustomButtonExtension on BuildContext {
-  // Botones preconfigurados comunes
   Widget primaryButton(String text, VoidCallback onPressed, {
     IconData? icon,
     bool isLoading = false,

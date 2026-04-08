@@ -46,27 +46,31 @@ class _BottomNavBarState extends State<BottomNavBar> {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
     
-    final defaultItems = [
+    // Generamos los colores dinámicos basados en la opacidad del texto principal
+    final unselectedColor = theme.colorScheme.onSurface.withOpacity(0.5);
+    final borderColor = theme.colorScheme.onSurface.withOpacity(0.1);
+
+    final defaultItems = const [
       BottomNavigationBarItem(
-        icon: const Icon(Icons.home_outlined),
-        activeIcon: const Icon(Icons.home),
+        icon: Icon(Icons.home_outlined),
+        activeIcon: Icon(Icons.home),
         label: 'Inicio',
       ),
       BottomNavigationBarItem(
-        icon: const Icon(Icons.search),
-        activeIcon: const Icon(Icons.search),
+        icon: Icon(Icons.search),
+        activeIcon: Icon(Icons.search),
         label: 'Búsqueda',
       ),
       BottomNavigationBarItem(
-        icon: const Icon(Icons.camera_alt_outlined),
-        activeIcon: const Icon(Icons.camera_alt),
+        icon: Icon(Icons.camera_alt_outlined),
+        activeIcon: Icon(Icons.camera_alt),
         label: 'Cámara',
       ),
       BottomNavigationBarItem(
-        icon: const Icon(Icons.person_outline),
-        activeIcon: const Icon(Icons.person),
+        icon: Icon(Icons.person_outline),
+        activeIcon: Icon(Icons.person),
         label: 'Perfil',
       ),
     ];
@@ -75,18 +79,26 @@ class _BottomNavBarState extends State<BottomNavBar> {
 
     return Scaffold(
       body: body,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: _onTap,
-        type: BottomNavigationBarType.fixed,
-        // ✅ Usar colores del tema
-        selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        elevation: 8,
-        showSelectedLabels: widget.showLabels,
-        showUnselectedLabels: widget.showLabels,
-        items: widget.items ?? defaultItems,
+      // Envolvemos el BottomNavigationBar en un Container para añadir el borde sutil
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(color: borderColor, width: 0.5),
+          ),
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          onTap: _onTap,
+          type: BottomNavigationBarType.fixed,
+          // Ya usa tu color magenta/ciruela automáticamente según el tema
+          selectedItemColor: theme.colorScheme.primary, 
+          unselectedItemColor: unselectedColor,
+          backgroundColor: theme.colorScheme.surface,
+          elevation: 0, // Quitamos la sombra gruesa a favor del borde superior
+          showSelectedLabels: widget.showLabels,
+          showUnselectedLabels: widget.showLabels,
+          items: widget.items ?? defaultItems,
+        ),
       ),
     );
   }

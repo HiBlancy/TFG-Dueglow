@@ -1,4 +1,4 @@
-// warning_dialog.dart (adaptado)
+// warning_dialog.dart
 import 'package:flutter/material.dart';
 
 class WarningDialog {
@@ -11,13 +11,19 @@ class WarningDialog {
     bool isDanger = false,
   }) async {
     final theme = Theme.of(context);
+    final subtleText = theme.colorScheme.onSurface.withOpacity(0.7);
     
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: theme.colorScheme.surface,
+        elevation: 0, // En modo oscuro los bordes redondeados lucen mejor sin sombra extra
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
+          // Pequeño borde para diferenciarlo del fondo si se usa en modo oscuro
+          side: theme.brightness == Brightness.dark 
+              ? BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.1))
+              : BorderSide.none,
         ),
         title: Row(
           children: [
@@ -26,22 +32,26 @@ class WarningDialog {
               color: isDanger ? theme.colorScheme.error : theme.colorScheme.primary,
             ),
             const SizedBox(width: 8),
-            Text(
-              title,
-              style: theme.textTheme.titleLarge,
+            // Expanded evita el desbordamiento si el título es muy largo
+            Expanded(
+              child: Text(
+                title,
+                style: theme.textTheme.titleLarge,
+              ),
             ),
           ],
         ),
         content: Text(
           content,
-          style: theme.textTheme.bodyMedium,
+          style: theme.textTheme.bodyMedium?.copyWith(color: subtleText),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               cancelText,
-              style: TextStyle(color: theme.colorScheme.primary),
+              // Botón cancelar más discreto
+              style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
             ),
           ),
           ElevatedButton(
@@ -53,8 +63,9 @@ class WarningDialog {
               foregroundColor: isDanger
                   ? theme.colorScheme.onError
                   : theme.colorScheme.onPrimary,
+              elevation: 0,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
               ),
             ),
             child: Text(confirmText),
@@ -71,13 +82,18 @@ class WarningDialog {
     required String content,
   }) async {
     final theme = Theme.of(context);
+    final subtleText = theme.colorScheme.onSurface.withOpacity(0.7);
     
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: theme.colorScheme.surface,
+        elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
+          side: theme.brightness == Brightness.dark 
+              ? BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.1))
+              : BorderSide.none,
         ),
         title: Row(
           children: [
@@ -86,23 +102,30 @@ class WarningDialog {
               color: theme.colorScheme.primary,
             ),
             const SizedBox(width: 8),
-            Text(
-              title,
-              style: theme.textTheme.titleLarge,
+            Expanded(
+              child: Text(
+                title,
+                style: theme.textTheme.titleLarge,
+              ),
             ),
           ],
         ),
         content: Text(
           content,
-          style: theme.textTheme.bodyMedium,
+          style: theme.textTheme.bodyMedium?.copyWith(color: subtleText),
         ),
         actions: [
-          TextButton(
+          ElevatedButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Entendido',
-              style: TextStyle(color: theme.colorScheme.primary),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
+            child: const Text('Entendido'),
           ),
         ],
       ),

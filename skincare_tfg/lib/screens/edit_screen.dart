@@ -1,7 +1,7 @@
 // lib/screens/edit_screen.dart
 import 'package:flutter/material.dart';
-import 'package:skincare_tfg/widgets/custom_button.dart';
-import 'package:skincare_tfg/widgets/custom_text_field.dart';
+import '../widgets/custom_button.dart';
+import '../widgets/custom_text_field.dart';
 import '../widgets/main_toolbar.dart';
 import '../services/auth_service.dart';
 
@@ -38,12 +38,10 @@ class _EditScreenState extends State<EditScreen> {
     setState(() => _isLoading = true);
     
     try {
-      // Obtener datos actuales del usuario desde SharedPreferences
       final name = await _authService.getUserName();
       final phone = await _authService.getUserPhone();
       final birthDate = await _authService.getUserBirthDate();
       
-      // Formatear fecha para mostrar en DD/MM/YYYY si es ISO
       String formattedBirthDate = '';
       if (birthDate != null && birthDate.isNotEmpty) {
         formattedBirthDate = _formatDateForDisplay(birthDate);
@@ -65,10 +63,7 @@ class _EditScreenState extends State<EditScreen> {
   }
 
   String _formatDateForDisplay(String dateStr) {
-    // Si ya viene en formato DD/MM/YYYY, devolverlo
     if (dateStr.contains('/')) return dateStr;
-    
-    // Si viene en ISO (YYYY-MM-DD), convertir a DD/MM/YYYY
     try {
       final date = DateTime.parse(dateStr);
       return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
@@ -77,27 +72,35 @@ class _EditScreenState extends State<EditScreen> {
     }
   }
 
+  void _showCustomSnackBar(String message, {bool isError = false}) {
+    final theme = Theme.of(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: const TextStyle(color: Colors.white)),
+        backgroundColor: isError ? theme.colorScheme.error : theme.colorScheme.primary,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
   Future<void> _saveChanges() async {
     if (!_formKey.currentState!.validate()) return;
     
-    // Validar contraseñas
     if (_passwordController.text.isNotEmpty && 
         _passwordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Las contraseñas no coinciden')),
-      );
+      _showCustomSnackBar('Las contraseñas no coinciden', isError: true);
       return;
     }
     
     setState(() => _isSaving = true);
     
-    // Convertir fecha a ISO si es necesario
     String? formattedBirthDate;
     if (_birthDateController.text.isNotEmpty) {
       formattedBirthDate = _convertToISODate(_birthDateController.text);
     }
     
-    // ✅ Ya no necesitas pasar el userId, el endpoint /me lo maneja
     final result = await _authService.updateUser(
       name: _nameController.text.isNotEmpty ? _nameController.text : null,
       phone: _phoneController.text.isNotEmpty ? _phoneController.text : null,
@@ -108,22 +111,16 @@ class _EditScreenState extends State<EditScreen> {
     setState(() => _isSaving = false);
     
     if (result != null && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Perfil actualizado correctamente')),
-      );
+      _showCustomSnackBar('Perfil actualizado correctamente');
       Navigator.pop(context, true);
     } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error al actualizar el perfil')),
-      );
+      _showCustomSnackBar('Error al actualizar el perfil', isError: true);
     }
   }
   
-
- Future<void> _selectDate() async {
+  Future<void> _selectDate() async {
     DateTime initialDate = DateTime.now();
     
-    // Intentar parsear la fecha actual
     if (_birthDateController.text.isNotEmpty) {
       try {
         if (_birthDateController.text.contains('/')) {
@@ -151,7 +148,6 @@ class _EditScreenState extends State<EditScreen> {
     
     if (picked != null) {
       setState(() {
-        // Guardar en formato DD/MM/YYYY para mostrar
         _birthDateController.text = _formatDateForUI(picked);
       });
     }
@@ -165,16 +161,13 @@ class _EditScreenState extends State<EditScreen> {
     try {
       if (dateStr.contains('/')) {
         final parts = dateStr.split('/');
-        // parts[0] = día, parts[1] = mes, parts[2] = año
         final date = DateTime(
           int.parse(parts[2]), 
           int.parse(parts[1]), 
           int.parse(parts[0])
         );
-        // Devolver solo YYYY-MM-DD (sin hora)
         return date.toIso8601String().split('T')[0];
       }
-      // Si ya es ISO, devolverlo
       return dateStr;
     } catch (e) {
       print('❌ Error parsing date: $e');
@@ -194,20 +187,22 @@ class _EditScreenState extends State<EditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return CustomAppBar(
       title: 'Editar Perfil',
       showDrawer: true,
       showBackButton: true,
       child: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator(color: theme.colorScheme.primary))
           : Form(
               key: _formKey,
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
                   const SizedBox(height: 10),
-                  _buildProfileAvatar(),
-                  const SizedBox(height: 24),
+                  _buildProfileAvatar(theme),
+                  const SizedBox(height: 32),
                   CustomTextField(
                     controller: _nameController,
                     label: 'Nombre',
@@ -241,16 +236,15 @@ class _EditScreenState extends State<EditScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  const Divider(),
+                  Divider(color: theme.colorScheme.onSurface.withOpacity(0.1)),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     'Cambiar contraseña (opcional)',
-                    style: TextStyle(
-                      fontSize: 16,
+                    style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 16),
                   CustomTextField(
                     controller: _passwordController,
                     label: 'Nueva contraseña',
@@ -297,29 +291,28 @@ class _EditScreenState extends State<EditScreen> {
     );
   }
 
-  Widget _buildProfileAvatar() {
+  Widget _buildProfileAvatar(ThemeData theme) {
     return Center(
       child: Stack(
         children: [
           CircleAvatar(
             radius: 60,
-            backgroundColor: Theme.of(context).primaryColor,
-            child: const Icon(Icons.person, size: 70, color: Colors.white),
+            backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+            child: Icon(Icons.person, size: 70, color: theme.colorScheme.primary),
           ),
           Positioned(
             bottom: 0,
             right: 0,
             child: Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
+                color: theme.colorScheme.primary,
                 shape: BoxShape.circle,
+                border: Border.all(color: theme.colorScheme.surface, width: 3), // Efecto de recorte
               ),
               child: IconButton(
-                icon: const Icon(Icons.camera_alt, size: 20, color: Colors.white),
+                icon: Icon(Icons.camera_alt, size: 20, color: theme.colorScheme.onPrimary),
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Próximamente: Cambiar foto de perfil')),
-                  );
+                  _showCustomSnackBar('Próximamente: Cambiar foto de perfil');
                 },
               ),
             ),

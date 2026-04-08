@@ -1,0 +1,39 @@
+{
+    "@@locale": "en",
+    "appName": "DueGlow",
+    "helloUser": "Hello {name}!",
+    
+
+    "myProducts": "My products",
+        "seeAll": "See all",
+
+    "routines": "Routines",
+
+    "categories": "Categories",
+
+    "expiringSoon": "About to expire",
+        "days": "days",
+        "allFine": "All is fine!",
+        "noProdExpiring": "No products are about to expire",
+
+    "searchProducts": "Browse products",
+        "searchNameBrand": "Search by name or brand...",
+        "exmapleSearch": "Ex: \"Yves Rocher\", \"moisturising\"",
+
+    "camera": "Camera",
+        "aimBarcode": "Aim at the barcode",
+
+    "settings": "Settings",
+        "general": "General",
+            "notifications": "Notifications",
+            "notifText": "Receive alerts and updates",
+        "appearance": "Appearance",
+            "lightMode": "Light Mode",
+            "darkMode": "Dark Mode",
+        "language": "Language",
+        "information": "Information",
+
+    "about": "About",
+
+    "logout": "Log out"
+}
