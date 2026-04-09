@@ -76,7 +76,7 @@ Future<BeautyProduct?> updateProduct(String id, Map<String, dynamic> productData
     final Map<String, dynamic> cleanedData = {};
     productData.forEach((key, value) {
       cleanedData[key] = value;
-      print('📦 Campo $key: ${value == null ? 'null' : value}');
+      print('📦 Campo $key: ${value ?? 'null'}');
     });
 
     final response = await http.patch(

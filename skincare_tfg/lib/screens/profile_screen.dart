@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../widgets/main_toolbar.dart';
-// import 'package:flutter_gen/gen_l10n/app_localizations.dart'; // Descomenta esto cuando añadas los textos a tus .arb
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -10,8 +9,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  // Mapa de categorías principales y sus subcategorías (las "pelotitas")
-  // Nota: Estos textos los puedes pasar a tu archivo .arb más adelante
   final Map<String, List<Map<String, dynamic>>> _stashData = {
     'Facial': [
       {'name': 'Limpiador', 'icon': Icons.water_drop_outlined},
@@ -42,13 +39,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     ],
   };
 
-  // Variable para recordar qué "pelotita" está seleccionada en cada pestaña
   final Map<String, String> _selectedSubcategories = {};
 
   @override
   void initState() {
     super.initState();
-    // Seleccionar por defecto la primera pelotita de cada categoría
     _stashData.forEach((key, value) {
       if (value.isNotEmpty) {
         _selectedSubcategories[key] = value.first['name'];
@@ -64,38 +59,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return DefaultTabController(
       length: tabs.length,
       child: CustomAppBar(
-        title: 'Mi Tocador', // O l10n.myVanity
+        title: 'Mi Tocador',
         showDrawer: true,
         showBackButton: false,
         child: Column(
           children: [
-            // 1. BARRA DE PESTAÑAS (Categorías Principales)
+            // 1. BARRA DE PESTAÑAS (Centrada y limpia)
             Container(
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                border: Border(
-                  bottom: BorderSide(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
-                    width: 1,
-                  ),
-                ),
-              ),
+              color: theme.colorScheme.surface,
               child: TabBar(
-                isScrollable: true, // Permite deslizar si hay muchas pestañas
+                isScrollable: true,
                 indicatorColor: theme.colorScheme.primary,
+                indicatorSize: TabBarIndicatorSize.label,
                 labelColor: theme.colorScheme.primary,
-                unselectedLabelColor: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
                 labelStyle: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                 tabs: tabs.map((tab) => Tab(text: tab)).toList(),
               ),
             ),
             
-            // 2. CONTENIDO DE CADA PESTAÑA
             Expanded(
               child: TabBarView(
-                children: tabs.map((tab) {
-                  return _buildTabContent(tab, theme);
-                }).toList(),
+                children: tabs.map((tab) => _buildTabContent(tab, theme)).toList(),
               ),
             ),
           ],
@@ -110,10 +95,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return Column(
       children: [
-        // SCROLL HORIZONTAL DE "PELOTITAS"
+        // 2. SCROLL DE PELOTITAS (Con el estilo suave de la Home)
         Container(
-          height: 110,
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          height: 120,
+          padding: const EdgeInsets.symmetric(vertical: 20),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -123,50 +108,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
               final isSelected = sub['name'] == selectedSub;
               
               return Padding(
-                padding: const EdgeInsets.only(right: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedSubcategories[categoryName] = sub['name'];
-                    });
-                  },
+                  onTap: () => setState(() => _selectedSubcategories[categoryName] = sub['name']),
                   child: Column(
                     children: [
-                      // La Pelotita
                       AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        width: 56,
-                        height: 56,
+                        duration: const Duration(milliseconds: 250),
+                        width: 54,
+                        height: 54,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
+                          // Si está seleccionado, usamos el primaryContainer suave
                           color: isSelected 
-                              ? theme.colorScheme.primary 
-                              : theme.colorScheme.onSurface.withValues(alpha: 0.05),
+                              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.6)
+                              : theme.colorScheme.surfaceContainerLow,
                           border: Border.all(
                             color: isSelected 
                                 ? theme.colorScheme.primary 
-                                : theme.colorScheme.onSurface.withValues(alpha: 0.1),
+                                : theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
                             width: 2,
                           ),
                         ),
-                        // NOTA: Aquí es donde podrás cambiar Icon() por Image.asset() o Image.network()
                         child: Icon(
                           sub['icon'] as IconData,
-                          size: 28,
+                          size: 26,
                           color: isSelected 
-                              ? theme.colorScheme.onPrimary 
-                              : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                              ? theme.colorScheme.primary 
+                              : theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
-                      const SizedBox(height: 6),
-                      // El Nombre debajo de la pelotita
+                      const SizedBox(height: 8),
                       Text(
                         sub['name'] as String,
                         style: theme.textTheme.labelSmall?.copyWith(
                           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                          color: isSelected 
-                              ? theme.colorScheme.primary 
-                              : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                          color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -177,31 +154,57 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         
-        Divider(height: 1, color: theme.colorScheme.onSurface.withValues(alpha: 0.1)),
-        
-        // ZONA DE PRODUCTOS (Dependerá de la pelotita seleccionada)
+        // 3. ZONA CENTRAL (Estructura de tarjeta suave y centrada)
         Expanded(
-          child: Center(
+          child: Container(
+            margin: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(32),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              // Usamos el fondo suave que nos gustó en la Home
+              color: theme.colorScheme.primaryContainer.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(
+                color: theme.colorScheme.primary.withValues(alpha: 0.1),
+              ),
+            ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                // Icono grande centrado con opacidad
                 Icon(
                   subcategories.firstWhere((s) => s['name'] == selectedSub)['icon'] as IconData,
-                  size: 64,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
+                  size: 80,
+                  color: theme.colorScheme.primary.withValues(alpha: 0.3),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
                 Text(
                   'Tus productos de $selectedSub',
-                  style: theme.textTheme.titleMedium?.copyWith(
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    color: theme.colorScheme.primary,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 Text(
-                  'Aún no has categorizado ningún producto aquí',
-                  style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
+                  'Aún no has categorizado ningún producto en esta sección.',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+                  ),
+                ),
+                const SizedBox(height: 32),
+                // Botón centrado para invitar a la acción
+                ElevatedButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(Icons.add, size: 20),
+                  label: const Text('Añadir ahora'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: theme.colorScheme.onPrimary,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
                 ),
               ],
             ),

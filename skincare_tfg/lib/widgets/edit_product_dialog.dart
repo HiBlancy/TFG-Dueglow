@@ -18,7 +18,6 @@ class _EditProductDialogState extends State<EditProductDialog> {
   late final TextEditingController _nameController;
   late final TextEditingController _brandController;
   late final TextEditingController _notesController;
-  late final TextEditingController _barcodeController;
   late final TextEditingController _periodAfterOpeningController;
   final TextEditingController _newCategoryController = TextEditingController();
 
@@ -34,7 +33,6 @@ class _EditProductDialogState extends State<EditProductDialog> {
     _nameController = TextEditingController(text: p.name);
     _brandController = TextEditingController(text: p.brand);
     _notesController = TextEditingController(text: p.notes ?? '');
-    _barcodeController = TextEditingController(text: p.barcode);
     _periodAfterOpeningController = TextEditingController(
       text: p.periodAfterOpening ?? '',
     );
@@ -49,7 +47,6 @@ class _EditProductDialogState extends State<EditProductDialog> {
     _nameController.dispose();
     _brandController.dispose();
     _notesController.dispose();
-    _barcodeController.dispose();
     _periodAfterOpeningController.dispose();
     _newCategoryController.dispose();
     super.dispose();
@@ -151,8 +148,6 @@ class _EditProductDialogState extends State<EditProductDialog> {
                       hint: 'Ej: L\'Oréal, Nivea, Garnier',
                     ),
                     const SizedBox(height: 16),
-                    _buildBarcodeField(),
-                    const SizedBox(height: 16),
                     _buildRatingSection(subtleBorder),
                     const SizedBox(height: 16),
                     _buildDateSelector(
@@ -234,33 +229,6 @@ class _EditProductDialogState extends State<EditProductDialog> {
             onPressed: () => Navigator.pop(context),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildBarcodeField() {
-    final theme = Theme.of(context);
-    final subtleBg = theme.colorScheme.onSurface.withValues(alpha: 0.05);
-
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: subtleBg,
-      ),
-      child: TextFormField(
-        controller: _barcodeController,
-        style: theme.textTheme.bodyMedium,
-        decoration: InputDecoration(
-          labelText: 'Código de barras',
-          prefixIcon: Icon(Icons.qr_code, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-          filled: true,
-          fillColor: subtleBg,
-        ),
-        readOnly: true,
       ),
     );
   }

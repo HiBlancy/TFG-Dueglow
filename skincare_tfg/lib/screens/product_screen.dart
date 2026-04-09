@@ -294,11 +294,6 @@ class _ProductScreenState extends State<ProductScreen> {
             const SizedBox(height: 24),
             _buildProductHeader(theme),
             const SizedBox(height: 16),
-            _InfoRow(
-              icon: Icons.qr_code, 
-              label: 'Código de barras', 
-              value: _currentProduct.barcode.isNotEmpty ? _currentProduct.barcode : '—'
-            ),
             if (isProductSaved) _buildProductDetails(theme),
             Divider(height: 32, color: theme.colorScheme.onSurface.withValues(alpha: 0.1)),
             if (_currentProduct.categories?.isNotEmpty == true) _buildCategories(theme),

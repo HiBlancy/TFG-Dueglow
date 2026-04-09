@@ -25,12 +25,17 @@ class CustomAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = theme.colorScheme.primary;
+    // ✅ Usamos el color de fondo definido en tu AppBarTheme (que ya configuramos como primario o surface)
+    final backgroundColor = appBarColor ?? theme.appBarTheme.backgroundColor;
+    // ✅ Usamos onPrimary o el color de texto del AppBar para asegurar contraste
+    final foregroundColor = theme.appBarTheme.foregroundColor;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: Text(title, style: TextStyle(color: foregroundColor)),
         centerTitle: true,
-        backgroundColor: color,
+        backgroundColor: backgroundColor,
+        iconTheme: IconThemeData(color: foregroundColor), // ✅ Flecha y menú dinámicos
         leading: showBackButton
             ? IconButton(
                 icon: const Icon(Icons.arrow_back),
@@ -55,7 +60,9 @@ class CustomAppBar extends StatelessWidget {
   }
 
   Widget _buildDrawer(BuildContext context) {
+    final theme = Theme.of(context);
     return Drawer(
+      backgroundColor: theme.colorScheme.surface, // ✅ Fondo del drawer según el tema
       child: SafeArea(
         child: Column(
           children: [
@@ -96,7 +103,10 @@ class CustomAppBar extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Text(
                 'Versión ${AppConstants.version}',
-                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                style: TextStyle(
+                  fontSize: 12, 
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6), // ✅ Texto versión legible
+                ),
               ),
             ),
           ],
@@ -118,35 +128,37 @@ class CustomAppBar extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: theme.colorScheme.primary, // ✅ Usar color del tema
+            color: theme.colorScheme.primary, // ✅ Ciruela oscuro en Light / Blanco hueso en Dark
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CircleAvatar(
                 radius: 30,
-                backgroundColor: theme.colorScheme.onPrimary,
+                backgroundColor: theme.colorScheme.onPrimary, // ✅ Contraste perfecto para el círculo
                 child: Icon(
                   Icons.person,
                   size: 40,
-                  color: theme.colorScheme.primary,
+                  color: theme.colorScheme.primary, // ✅ El icono vuelve al color de fondo
                 ),
               ),
               const SizedBox(height: 12),
               Text(
                 userName,
                 style: TextStyle(
-                  color: theme.colorScheme.onPrimary,
+                  color: theme.colorScheme.onPrimary, // ✅ Texto blanco en Light / Negro en Dark
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
+                  fontFamily: 'Sora',
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 userEmail,
                 style: TextStyle(
-                  color: theme.colorScheme.onPrimary.withValues(alpha: 0.7),
+                  color: theme.colorScheme.onPrimary.withValues(alpha: 0.8), // ✅ Email legible
                   fontSize: 12,
+                  fontFamily: 'Lato',
                 ),
               ),
             ],
@@ -170,14 +182,25 @@ class CustomAppBar extends StatelessWidget {
     String? route, {
     bool isLogout = false,
   }) {
+    final theme = Theme.of(context);
     final authService = AuthService();
+    
+    // ✅ Color dinámico para los items del menú
+    final Color itemColor = isLogout ? theme.colorScheme.error : theme.colorScheme.onSurface;
 
     return ListTile(
-      leading: Icon(icon, color: isLogout ? Colors.red : null),
-      title: Text(title, style: TextStyle(color: isLogout ? Colors.red : null)),
+      leading: Icon(icon, color: itemColor),
+      title: Text(
+        title, 
+        style: TextStyle(
+          color: itemColor,
+          fontFamily: 'Lato',
+          fontWeight: isLogout ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
       onTap: isLogout
           ? () async {
-              Navigator.pop(context); // Cerrar drawer
+              Navigator.pop(context);
               await authService.logout();
               if (context.mounted) {
                 Navigator.pushNamedAndRemoveUntil(
@@ -188,7 +211,7 @@ class CustomAppBar extends StatelessWidget {
               }
             }
           : () {
-              Navigator.pop(context); // Cerrar drawer
+              Navigator.pop(context);
               Navigator.pushNamed(context, route!);
             },
     );

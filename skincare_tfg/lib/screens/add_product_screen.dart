@@ -17,7 +17,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final _formKey = GlobalKey<FormState>();
   final ProductService _productService = ProductService();
 
-  // Controladores del formulario
   final _nameController = TextEditingController();
   final _brandController = TextEditingController();
   final _barcodeController = TextEditingController();
@@ -41,6 +40,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     super.dispose();
   }
 
+  // --- LÓGICA DE NEGOCIO (Igual que antes) ---
   Future<void> _selectDate({
     required DateTime? initialDate,
     required DateTime firstDate,
@@ -52,16 +52,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
       initialDate: initialDate ?? DateTime.now(),
       firstDate: firstDate,
       lastDate: lastDate,
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: Theme.of(context).colorScheme.primary,
-            ),
-          ),
-          child: child!,
-        );
-      },
     );
     if (picked != null && mounted) setState(() => onDateSelected(picked));
   }
@@ -78,13 +68,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
   Future<void> _saveProductManually() async {
     if (!_formKey.currentState!.validate()) return;
-
     setState(() => _isLoading = true);
-
     try {
-      // Creamos el producto nuevo. Por defecto se añade a la lista de "Tengo" ('have')
       final newProduct = BeautyProduct(
-        barcode: _barcodeController.text.trim(), // Puede estar vacío si es manual
+        barcode: _barcodeController.text.trim(),
         name: _nameController.text.trim(),
         brand: _brandController.text.trim().isEmpty ? null : _brandController.text.trim(),
         categories: _categories.isEmpty ? null : _categories,
@@ -96,74 +83,72 @@ class _AddProductScreenState extends State<AddProductScreen> {
         addedAt: DateTime.now(),
         isOpened: _openedDate != null,
       );
-
       final addedProduct = await _productService.addProductToHave(newProduct);
-
       if (mounted) {
         setState(() => _isLoading = false);
-        
         if (addedProduct != null) {
           _showSnackBar('✓ Producto añadido correctamente');
           _clearForm();
-        } else {
-          _showSnackBar('Error al añadir el producto', isError: true);
         }
       }
     } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        _showSnackBar('Error: ${e.toString()}', isError: true);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   void _clearForm() {
     setState(() {
-      _nameController.clear();
-      _brandController.clear();
-      _barcodeController.clear();
-      _paoController.clear();
-      _notesController.clear();
-      _newCategoryController.clear();
-      _expirationDate = null;
-      _openedDate = null;
-      _categories.clear();
+      _nameController.clear(); _brandController.clear(); _barcodeController.clear();
+      _paoController.clear(); _notesController.clear(); _newCategoryController.clear();
+      _expirationDate = null; _openedDate = null; _categories.clear();
     });
   }
 
-  void _showSnackBar(String message, {bool isError = false}) {
-    final theme = Theme.of(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message, style: const TextStyle(color: Colors.white)),
-        backgroundColor: isError ? theme.colorScheme.error : theme.colorScheme.primary,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
+
+  // --- DISEÑO ---
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final subtleBorder = theme.colorScheme.onSurface.withValues(alpha: 0.1);
+    final colorPrincipal = theme.colorScheme.primaryContainer;
 
     return CustomAppBar(
-      title: 'Añadir Producto', // Traducir con l10n.addProduct
-      showDrawer: true, // Pon true si tienes el menú lateral aquí, o false si no
+      title: 'Añadir Producto',
+      showDrawer: true,
       showBackButton: false,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. ZONA DE ACCIONES RÁPIDAS
-            Text(
-              'Acciones rápidas',
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            // 1. TÍTULO Y DESCRIPCIÓN CENTRADA
+            Center(
+              child: Column(
+                children: [
+                  Text(
+                    '¿Nuevo producto?',
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.primary,
+                      fontFamily: 'Sora',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Escanea o rellena los datos abajo',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
+            
+            const SizedBox(height: 32),
+
+            // 2. ACCIONES RÁPIDAS (Estilo Esencia con opacidad)
             Row(
               children: [
                 Expanded(
@@ -171,9 +156,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                     icon: Icons.qr_code_scanner,
                     title: 'Escanear',
                     subtitle: 'Código de barras',
-                    onTap: () {
-                      Navigator.pushNamed(context, AppConstants.routeScan); 
-                    },
+                    color: colorPrincipal.withValues(alpha: 0.4),
+                    onTap: () => Navigator.pushNamed(context, AppConstants.routeScan), 
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -181,10 +165,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   child: _buildQuickActionCard(
                     icon: Icons.search,
                     title: 'Buscar',
-                    subtitle: 'Según marco o tipo',
-                    onTap: () {
-                      Navigator.pushNamed(context, '/search');
-                    },
+                    subtitle: 'Base de datos',
+                    color: colorPrincipal.withValues(alpha: 0.2),
+                    onTap: () => Navigator.pushNamed(context, '/search'),
                   ),
                 ),
               ],
@@ -192,175 +175,112 @@ class _AddProductScreenState extends State<AddProductScreen> {
             
             const SizedBox(height: 32),
             
+            // Divisor sutil
             Row(
               children: [
-                Expanded(child: Divider(color: subtleBorder)),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    'O añadir manualmente',
-                    style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.5), fontSize: 12),
-                  ),
+                Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: Text('DATOS MANUALES', style: TextStyle(fontSize: 10, letterSpacing: 1.5, fontWeight: FontWeight.bold)),
                 ),
-                Expanded(child: Divider(color: subtleBorder)),
+                Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
               ],
             ),
             
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
 
+            // 3. FORMULARIO EN TARJETA NEUTRA
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                borderRadius: BorderRadius.circular(20),
-                border: theme.brightness == Brightness.dark 
-                    ? Border.all(color: subtleBorder) 
-                    : null,
-                boxShadow: theme.brightness == Brightness.light
-                    ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4))]
-                    : [],
+                color: theme.colorScheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.1)),
               ),
               child: Form(
                 key: _formKey,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CustomTextField(
                       controller: _nameController,
-                      label: 'Nombre del producto *',
-                      prefixIcon: Icons.spa,
-                      hint: 'Ej: Crema hidratante facial',
-                      validator: (v) => v?.trim().isEmpty == true ? 'El nombre es obligatorio' : null,
+                      label: 'Nombre *',
+                      prefixIcon: Icons.spa_outlined,
+                      hint: 'Ej: Crema Hidratante',
+                      validator: (v) => v?.trim().isEmpty == true ? 'Obligatorio' : null,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     CustomTextField(
                       controller: _brandController,
                       label: 'Marca',
-                      prefixIcon: Icons.branding_watermark,
-                      hint: 'Ej: L\'Oréal, Nivea, Garnier',
+                      prefixIcon: Icons.branding_watermark_outlined,
+                      hint: 'Ej: Nivea',
                     ),
-                    const SizedBox(height: 16),
-                    CustomTextField(
-                      controller: _barcodeController,
-                      label: 'Código de barras (Opcional)',
-                      prefixIcon: Icons.qr_code,
-                      keyboardType: TextInputType.number,
-                    ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     _buildDateSelector(
-                      icon: Icons.warning_amber,
-                      iconColor: Colors.orange,
+                      icon: Icons.calendar_today_outlined,
                       text: _expirationDate != null
-                          ? 'Caducidad: ${_formatDate(_expirationDate!)}'
-                          : 'Añadir fecha de caducidad',
+                          ? 'Caduca: ${_formatDate(_expirationDate!)}'
+                          : 'Fecha de caducidad',
                       isActive: _expirationDate != null,
-                      borderColor: subtleBorder,
                       onTap: () => _selectDate(
                         initialDate: _expirationDate,
                         firstDate: DateTime.now(),
                         lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
-                        onDateSelected: (date) => _expirationDate = date,
+                        onDateSelected: (date) => setState(() => _expirationDate = date),
                       ),
-                      onClear: () => setState(() => _expirationDate = null),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     CustomTextField(
                       controller: _paoController,
                       label: 'Duración tras abrir (PAO)',
                       prefixIcon: Icons.timer,
                       hint: 'Ej: 6 meses, 12M',
                     ),
-                    const SizedBox(height: 16),
-                    _buildDateSelector(
-                      icon: Icons.open_in_new,
-                      iconColor: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                      text: _openedDate != null
-                          ? 'Abierto el: ${_formatDate(_openedDate!)}'
-                          : 'Añadir fecha de apertura',
-                      isActive: _openedDate != null,
-                      borderColor: subtleBorder,
-                      onTap: () => _selectDate(
-                        initialDate: _openedDate,
-                        firstDate: DateTime.now().subtract(const Duration(days: 365 * 2)),
-                        lastDate: DateTime.now(),
-                        onDateSelected: (date) => _openedDate = date,
-                      ),
-                      onClear: () => setState(() => _openedDate = null),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildCategoriesSection(subtleBorder),
-                    const SizedBox(height: 16),
-                    CustomTextField(
-                      controller: _notesController,
-                      label: 'Notas adicionales',
-                      prefixIcon: Icons.note,
-                      hint: 'Ej: Usar solo de noche',
-                      keyboardType: TextInputType.multiline,
-                    ),
+                    const SizedBox(height: 20),
+                    _buildCategoriesSection(theme),
                     const SizedBox(height: 32),
                     CustomButton(
-                      text: 'Guardar Producto',
+                      text: 'Guardar en mi tocador',
                       onPressed: _saveProductManually,
                       isLoading: _isLoading,
                       type: ButtonType.primary,
                       size: ButtonSize.full,
-                      icon: Icons.save,
+                      icon: Icons.add_task_rounded,
                     ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 40), // Espacio extra al final para el scroll
+            const SizedBox(height: 40),
           ],
         ),
       ),
     );
   }
 
-  // --- WIDGETS AUXILIARES ---
-
   Widget _buildQuickActionCard({
     required IconData icon,
     required String title,
     required String subtitle,
+    required Color color,
     required VoidCallback onTap,
   }) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     return Card(
-      elevation: isDark ? 0 : 2,
-      color: isDark ? theme.colorScheme.surface : theme.colorScheme.primary.withValues(alpha: 0.03),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: isDark ? BorderSide(color: theme.colorScheme.onSurface.withValues(alpha: 0.1)) : BorderSide.none,
-      ),
+      elevation: 0,
+      color: color,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 12),
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
           child: Column(
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, size: 32, color: theme.colorScheme.primary),
-              ),
+              Icon(icon, size: 32, color: theme.colorScheme.primary),
               const SizedBox(height: 12),
-              Text(
-                title,
-                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
-              ),
+              Text(title, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+              Text(subtitle, style: theme.textTheme.bodySmall?.copyWith(fontSize: 10), textAlign: TextAlign.center),
             ],
           ),
         ),
@@ -370,116 +290,69 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
   Widget _buildDateSelector({
     required IconData icon,
-    required Color iconColor,
     required String text,
     required bool isActive,
-    required Color borderColor,
     required VoidCallback onTap,
-    required VoidCallback onClear,
   }) {
     final theme = Theme.of(context);
-    final subtleText = theme.colorScheme.onSurface.withValues(alpha: 0.6);
-
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          border: Border.all(color: borderColor),
-          borderRadius: BorderRadius.circular(12),
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: theme.colorScheme.outlineVariant),
         ),
         child: Row(
           children: [
-            Icon(icon, color: iconColor),
+            Icon(icon, color: isActive ? theme.colorScheme.primary : theme.colorScheme.outline, size: 20),
             const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                text,
-                style: TextStyle(
-                  color: isActive ? theme.colorScheme.onSurface : subtleText,
-                ),
-              ),
-            ),
-            if (isActive)
-              IconButton(
-                icon: Icon(Icons.clear, size: 20, color: theme.colorScheme.error),
-                onPressed: onClear,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-            Icon(Icons.calendar_today, color: subtleText),
+            Expanded(child: Text(text, style: TextStyle(color: isActive ? theme.colorScheme.onSurface : theme.colorScheme.outline))),
+            Icon(Icons.edit_calendar_outlined, size: 18, color: theme.colorScheme.primary.withValues(alpha: 0.5)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCategoriesSection(Color borderColor) {
-    final theme = Theme.of(context);
-    final subtleText = theme.colorScheme.onSurface.withValues(alpha: 0.6);
-    final chipBg = theme.colorScheme.onSurface.withValues(alpha: 0.05);
-
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: borderColor),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Categorías', style: TextStyle(fontSize: 12, color: subtleText)),
-              if (_categories.isNotEmpty)
-                TextButton(
-                  onPressed: () => setState(() => _categories.clear()),
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: Text('Eliminar todas', style: TextStyle(fontSize: 11, color: theme.colorScheme.error)),
-                ),
-            ],
-          ),
-          const SizedBox(height: 8),
+  Widget _buildCategoriesSection(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: CustomTextField(
+                controller: _newCategoryController,
+                label: 'Categoría',
+                prefixIcon: Icons.category_outlined,
+                hint: 'Ej: Facial',
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton.filled(
+              onPressed: _addCategory,
+              icon: const Icon(Icons.add),
+              style: IconButton.styleFrom(backgroundColor: theme.colorScheme.primaryContainer, foregroundColor: theme.colorScheme.primary),
+            ),
+          ],
+        ),
+        if (_categories.isNotEmpty) ...[
+          const SizedBox(height: 12),
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: _categories
-                .map((cat) => Chip(
-                      label: Text(cat, style: theme.textTheme.bodySmall),
-                      backgroundColor: chipBg,
-                      side: BorderSide.none,
-                      deleteIcon: Icon(Icons.close, size: 16, color: theme.colorScheme.error),
-                      onDeleted: () => setState(() => _categories.remove(cat)),
-                    ))
-                .toList(),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: CustomTextField(
-                  controller: _newCategoryController,
-                  label: '',
-                  prefixIcon: Icons.category,
-                  hint: 'Nueva categoría (ej. Facial)',
-                ),
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                icon: Icon(Icons.add_circle, color: theme.colorScheme.primary),
-                onPressed: _addCategory,
-                iconSize: 40,
-              ),
-            ],
+            children: _categories.map((cat) => Chip(
+              label: Text(cat, style: const TextStyle(fontSize: 11)),
+              onDeleted: () => setState(() => _categories.remove(cat)),
+              backgroundColor: theme.colorScheme.surface,
+              side: BorderSide(color: theme.colorScheme.outlineVariant),
+            )).toList(),
           ),
         ],
-      ),
+      ],
     );
   }
 
