@@ -51,7 +51,7 @@ export declare class ProductController {
         message: string;
         data: any;
     }>;
-    markAsOpened(req: any, id: string): Promise<{
+    markAsOpened(req: any, id: string, openedDateStr?: string): Promise<{
         status: boolean;
         message: string;
         data: any;

@@ -111,7 +111,7 @@ export class ProductService {
 
   // ==================== MÉTODOS DE CADUCIDAD ====================
 
-  async markAsOpened(id: string, userId: string): Promise<Product | null> {
+  async markAsOpened(id: string, userId: string, customOpenedDate?: Date): Promise<Product | null> {
     const product = await this.productModel.findById(id).exec();
     if (!product) throw new NotFoundException(`Producto ${id} no encontrado`);
     if (product.userId.toString() !== userId.toString()) {
@@ -121,7 +121,9 @@ export class ProductService {
       throw new BadRequestException('El producto ya está abierto');
     }
 
-    const openedDate = new Date();
+    // 2. AQUÍ ESTÁ LA MAGIA: Usamos la fecha enviada, o la de hoy si no viene nada
+    const openedDate = customOpenedDate || new Date();
+    
     let finalExpiration = product.expirationDate;
 
     // Si tiene periodo después de abrir, calcular nueva fecha

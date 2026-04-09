@@ -97,7 +97,7 @@ let ProductService = class ProductService {
             .findByIdAndUpdate(id, { listType: targetList }, { returnDocument: 'after' })
             .exec();
     }
-    async markAsOpened(id, userId) {
+    async markAsOpened(id, userId, customOpenedDate) {
         const product = await this.productModel.findById(id).exec();
         if (!product)
             throw new common_1.NotFoundException(`Producto ${id} no encontrado`);
@@ -107,7 +107,7 @@ let ProductService = class ProductService {
         if (product.isOpened) {
             throw new common_1.BadRequestException('El producto ya está abierto');
         }
-        const openedDate = new Date();
+        const openedDate = customOpenedDate || new Date();
         let finalExpiration = product.expirationDate;
         if (product.periodAfterOpening) {
             const calculatedExpiration = this.calculateExpirationFromPeriod(openedDate, product.periodAfterOpening);

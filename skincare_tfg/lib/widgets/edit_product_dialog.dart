@@ -67,7 +67,11 @@ class _EditProductDialogState extends State<EditProductDialog> {
       firstDate: firstDate,
       lastDate: lastDate,
     );
-    if (picked != null && mounted) setState(() => onDateSelected(picked));
+    if (picked != null && mounted) {
+      // Convertimos a UTC a las 12:00 antes de guardar el estado
+      final safeDate = DateTime.utc(picked.year, picked.month, picked.day, 12);
+      setState(() => onDateSelected(safeDate));
+    }
   }
 
   void _addCategory() {
@@ -113,7 +117,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
   Widget build(BuildContext context) {
     // Definimos colores sutiles reutilizables basados en el tema actual
     final theme = Theme.of(context);
-    final subtleBorder = theme.colorScheme.onSurface.withOpacity(0.1);
+    final subtleBorder = theme.colorScheme.onSurface.withValues(alpha: 0.1);
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -175,23 +179,6 @@ class _EditProductDialogState extends State<EditProductDialog> {
                       hint: 'Ej: 6 meses, 12M',
                     ),
                     const SizedBox(height: 16),
-                    _buildDateSelector(
-                      icon: Icons.open_in_new,
-                      iconColor: theme.colorScheme.onSurface.withOpacity(0.6), // Adaptativo
-                      text: _openedDate != null
-                          ? 'Abierto el: ${_formatDate(_openedDate!)}'
-                          : 'Añadir fecha de apertura',
-                      isActive: _openedDate != null,
-                      borderColor: subtleBorder,
-                      onTap: () => _selectDate(
-                        initialDate: _openedDate,
-                        firstDate: DateTime.now().subtract(const Duration(days: 365 * 2)),
-                        lastDate: DateTime.now(),
-                        onDateSelected: (date) => _openedDate = date,
-                      ),
-                      onClear: () => setState(() => _openedDate = null),
-                    ),
-                    const SizedBox(height: 16),
                     _buildCategoriesSection(subtleBorder),
                     const SizedBox(height: 16),
                     CustomTextField(
@@ -227,7 +214,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        border: isDarkMode ? Border(bottom: BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.1))) : null,
+        border: isDarkMode ? Border(bottom: BorderSide(color: theme.colorScheme.onSurface.withValues(alpha: 0.1))) : null,
       ),
       child: Row(
         children: [
@@ -253,7 +240,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
 
   Widget _buildBarcodeField() {
     final theme = Theme.of(context);
-    final subtleBg = theme.colorScheme.onSurface.withOpacity(0.05);
+    final subtleBg = theme.colorScheme.onSurface.withValues(alpha: 0.05);
 
     return Container(
       decoration: BoxDecoration(
@@ -265,7 +252,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
         style: theme.textTheme.bodyMedium,
         decoration: InputDecoration(
           labelText: 'Código de barras',
-          prefixIcon: Icon(Icons.qr_code, color: theme.colorScheme.onSurface.withOpacity(0.6)),
+          prefixIcon: Icon(Icons.qr_code, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
@@ -280,7 +267,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
 
   Widget _buildRatingSection(Color borderColor) {
     final theme = Theme.of(context);
-    final subtleText = theme.colorScheme.onSurface.withOpacity(0.6);
+    final subtleText = theme.colorScheme.onSurface.withValues(alpha: 0.6);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -343,7 +330,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
     required VoidCallback onClear,
   }) {
     final theme = Theme.of(context);
-    final subtleText = theme.colorScheme.onSurface.withOpacity(0.6);
+    final subtleText = theme.colorScheme.onSurface.withValues(alpha: 0.6);
 
     return InkWell(
       onTap: onTap,
@@ -383,8 +370,8 @@ class _EditProductDialogState extends State<EditProductDialog> {
 
   Widget _buildCategoriesSection(Color borderColor) {
     final theme = Theme.of(context);
-    final subtleText = theme.colorScheme.onSurface.withOpacity(0.6);
-    final chipBg = theme.colorScheme.onSurface.withOpacity(0.08);
+    final subtleText = theme.colorScheme.onSurface.withValues(alpha: 0.6);
+    final chipBg = theme.colorScheme.onSurface.withValues(alpha: 0.08);
 
     return Container(
       decoration: BoxDecoration(

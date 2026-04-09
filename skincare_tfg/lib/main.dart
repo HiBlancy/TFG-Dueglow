@@ -1,3 +1,4 @@
+import 'package:dueglow/screens/scan_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -5,6 +6,7 @@ import 'providers/theme_provider.dart';
 import 'providers/locale_provider.dart';
 import 'screens/about_screen.dart';
 import 'screens/edit_screen.dart';
+import 'screens/search_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
@@ -65,6 +67,8 @@ class MyApp extends StatelessWidget {
             AppConstants.routeHome: (context) => const BottomNavBar(),
             AppConstants.routeProfile: (context) => const BottomNavBar(initialIndex: 4),
             AppConstants.routeSettings: (context) => const SettingsScreen(),
+            AppConstants.routeScan: (context) => const ScanScreen(),
+            AppConstants.routeSearch: (context) => const SearchScreen(),
             AppConstants.routeEdit: (context) => const EditScreen(),
             AppConstants.routeAbout: (context) => const AboutScreen(),
             AppConstants.routeMyProducts: (context) => const MyProductsScreen(),

@@ -67,13 +67,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: 'Mi Tocador', // O l10n.myVanity
         showDrawer: true,
         showBackButton: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () => Navigator.pushNamed(context, '/settings'),
-            tooltip: 'Configuración',
-          ),
-        ],
         child: Column(
           children: [
             // 1. BARRA DE PESTAÑAS (Categorías Principales)

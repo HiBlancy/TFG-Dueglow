@@ -99,8 +99,13 @@ export class ProductController {
   }
 
   @Patch(':id/open')
-  async markAsOpened(@Req() req, @Param('id') id: string) {
-    const product = await this.productService.markAsOpened(id, req.user._id);
+  async markAsOpened(
+    @Req() req, 
+    @Param('id') id: string,
+    @Body('openedDate') openedDateStr?: string 
+  ) {
+    const customDate = openedDateStr ? new Date(openedDateStr) : undefined;
+    const product = await this.productService.markAsOpened(id, req.user._id, customDate);
     return this.successResponse('Producto marcado como abierto', product);
   }
 

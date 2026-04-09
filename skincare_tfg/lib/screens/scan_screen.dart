@@ -61,7 +61,7 @@ class _ScanScreenState extends State<ScanScreen> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
               side: theme.brightness == Brightness.dark 
-                  ? BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.1))
+                  ? BorderSide(color: theme.colorScheme.onSurface.withValues(alpha: 0.1))
                   : BorderSide.none,
             ),
             title: Text('Producto no encontrado', style: theme.textTheme.titleLarge),
@@ -69,7 +69,7 @@ class _ScanScreenState extends State<ScanScreen> {
               'No se encontró información para el código de barras:\n${barcode.rawValue}\n\n'
               '¿Quieres crear un nuevo producto manualmente?',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.7)
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7)
               ),
             ),
             actions: [
@@ -77,7 +77,7 @@ class _ScanScreenState extends State<ScanScreen> {
                 onPressed: () => Navigator.pop(dialogContext, false),
                 child: Text(
                   'Cancelar', 
-                  style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6))
+                  style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6))
                 ),
               ),
               ElevatedButton(
@@ -144,7 +144,7 @@ class _ScanScreenState extends State<ScanScreen> {
               width: 260,
               height: 180,
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.white.withOpacity(0.5), width: 2.5),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 2.5),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Stack(

@@ -161,98 +161,106 @@ class _ProductScreenState extends State<ProductScreen> {
   }
 
   Future<void> _markAsOpened() async {
-    bool useCustomDate = false;
-    DateTime? selectedDate = DateTime.now();
     final theme = Theme.of(context);
 
-    final confirmed = await showDialog<bool>(
+    // 1. Mostramos un diálogo simple con las dos opciones directas
+    final selectedOption = await showDialog<String>(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          backgroundColor: theme.colorScheme.surface,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Text('Abrir producto', style: theme.textTheme.titleLarge),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '¿Cuándo abriste este producto?',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7)
-                )
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  _buildDateRadio('Hoy', false, useCustomDate, (val) => setDialogState(() => useCustomDate = val)),
-                  _buildDateRadio('Otra fecha', true, useCustomDate, (val) => setDialogState(() => useCustomDate = val)),
-                ],
-              ),
-              if (useCustomDate) ...[
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () async {
-                    final picked = await showDatePicker(
-                      context: context,
-                      initialDate: selectedDate,
-                      firstDate: DateTime(2020),
-                      lastDate: DateTime.now(),
-                    );
-                    if (picked != null) setDialogState(() => selectedDate = picked);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
-                    foregroundColor: theme.colorScheme.primary,
-                    elevation: 0,
-                  ),
-                  child: Text('Seleccionar fecha: ${_formatDate(selectedDate!)}'),
-                ),
-              ],
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false), 
-              child: Text('Cancelar', style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)))
+      builder: (context) => AlertDialog(
+        backgroundColor: theme.colorScheme.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text('Abrir producto', style: theme.textTheme.titleLarge),
+        contentPadding: const EdgeInsets.only(top: 16, bottom: 8),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.today, color: theme.colorScheme.primary),
+              title: const Text('Hoy'),
+              onTap: () => Navigator.pop(context, 'hoy'),
             ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, true), 
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.primary,
-                foregroundColor: theme.colorScheme.onPrimary,
-                elevation: 0,
-              ),
-              child: const Text('Abrir producto')
+            ListTile(
+              leading: Icon(Icons.calendar_month, color: theme.colorScheme.primary),
+              title: const Text('Otra fecha...'),
+              onTap: () => Navigator.pop(context, 'otra'),
             ),
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context), 
+            child: Text('Cancelar', style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)))
+          ),
+        ],
       ),
     );
+    if (selectedOption == null) return;
 
-    if (confirmed != true) return;
+    DateTime? finalDate;
 
-    final openedDate = useCustomDate ? selectedDate : DateTime.now();
+    if (selectedOption == 'hoy') {
+      finalDate = DateTime.now();
+    } else if (selectedOption == 'otra') {
+      final pickedDate = await showDatePicker(
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime(2020),
+        lastDate: DateTime.now(),
+        builder: (context, child) {
+          return Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: theme.colorScheme,
+            ),
+            child: child!,
+          );
+        },
+      );
+
+      if (pickedDate == null) return;
+      finalDate = DateTime.utc(pickedDate.year, pickedDate.month, pickedDate.day, 12, 0, 0);
+    }
+
+    // 3. Guardamos automáticamente con la fecha obtenida
     await _executeAction(
-      action: () => _productService.markAsOpened(_currentProduct.id!, openedDate: openedDate),
+      action: () => _productService.markAsOpened(_currentProduct.id!, openedDate: finalDate),
       successMessage: '✓ Producto marcado como abierto',
       loadingKey: 'opening',
     );
   }
 
   Future<void> _markAsClosed() async {
+    // 1. Comprobamos si el producto tiene el periodo (la "M")
+    final hasPAO = _currentProduct.periodAfterOpening?.isNotEmpty == true;
+
+    // 2. Adaptamos el mensaje del diálogo dinámicamente
+    final expirationMessage = hasPAO
+        ? '• Se eliminará la fecha de caducidad calculada\n'
+        : '• Se conservará tu fecha de caducidad fija\n';
+
     if (!await _confirmAction(
       'Cerrar producto',
       '¿Estás seguro de que quieres cerrar "${_currentProduct.name}"?\n\n'
       'Al cerrar el producto:\n'
       '• Se eliminará la fecha de apertura\n'
-      '• Se eliminará la fecha de caducidad calculada\n'
+      '$expirationMessage'
       '• Se conservará la duración después de abrir (ej: "6M")\n\n'
       'Podrás volver a abrirlo más tarde si fue un error.',
       isDanger: true,
-    )) return;
+    )) {return;}
 
     await _executeAction(
-      action: () => _productService.markAsClosed(_currentProduct.id!),
+      action: () {
+        final updatedData = <String, dynamic>{
+          'openedDate': null,
+          'isOpened': false, // Aseguramos que el estado de abierto cambia a false
+        };
+
+        if (hasPAO) {
+          updatedData['expirationDate'] = null;
+        }
+
+        return _productService.updateProduct(_currentProduct.id!, updatedData);
+      },
       successMessage: '✓ Producto cerrado correctamente',
       loadingKey: 'closing',
     );
@@ -323,22 +331,6 @@ class _ProductScreenState extends State<ProductScreen> {
     ];
   }
 
-  Widget _buildDateRadio(String label, bool value, bool groupValue, Function(bool) onChanged) {
-    final theme = Theme.of(context);
-    return Expanded(
-      child: ListTile(
-        contentPadding: EdgeInsets.zero,
-        title: Text(label, style: theme.textTheme.bodyMedium),
-        leading: Radio<bool>(
-          value: value,
-          groupValue: groupValue,
-          activeColor: theme.colorScheme.primary,
-          onChanged: (val) => onChanged(val!),
-        ),
-      ),
-    );
-  }
-
   Widget _buildProductImage() {
     return Center(
       child: ClipRRect(
@@ -348,7 +340,7 @@ class _ProductScreenState extends State<ProductScreen> {
                 _currentProduct.imageUrl!,
                 height: 220,
                 fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => const _PlaceholderImage(),
+                errorBuilder: (_, _, _) => const _PlaceholderImage(),
               )
             : const _PlaceholderImage(),
       ),

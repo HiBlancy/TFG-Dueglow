@@ -11,7 +11,7 @@ export declare class ProductService {
     update(id: string, userId: string, updateProductDto: UpdateProductDto): Promise<Product | null>;
     delete(id: string, userId: string): Promise<Product | null>;
     moveToList(id: string, userId: string, targetList: string): Promise<Product | null>;
-    markAsOpened(id: string, userId: string): Promise<Product | null>;
+    markAsOpened(id: string, userId: string, customOpenedDate?: Date): Promise<Product | null>;
     markAsClosed(id: string, userId: string): Promise<Product | null>;
     calculateExpirationFromOpening(id: string, userId: string): Promise<Product | null>;
     getStats(userId: string): Promise<{

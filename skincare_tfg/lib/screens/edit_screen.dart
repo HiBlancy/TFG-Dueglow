@@ -236,7 +236,7 @@ class _EditScreenState extends State<EditScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Divider(color: theme.colorScheme.onSurface.withOpacity(0.1)),
+                  Divider(color: theme.colorScheme.onSurface.withValues(alpha: 0.1)),
                   const SizedBox(height: 16),
                   Text(
                     'Cambiar contraseña (opcional)',
@@ -297,7 +297,7 @@ class _EditScreenState extends State<EditScreen> {
         children: [
           CircleAvatar(
             radius: 60,
-            backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+            backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
             child: Icon(Icons.person, size: 70, color: theme.colorScheme.primary),
           ),
           Positioned(

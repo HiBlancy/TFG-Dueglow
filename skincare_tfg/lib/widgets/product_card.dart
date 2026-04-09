@@ -25,11 +25,11 @@ class ProductCard extends StatelessWidget {
     
     // Creamos colores sutiles basados en el texto principal (onSurface)
     // Esto asegura que hereden el tono "ciruela" de fondo automáticamente
-    final subtleBg = theme.colorScheme.onSurface.withOpacity(0.05);
-    final subtleIcon = theme.colorScheme.onSurface.withOpacity(0.4);
-    final subtitleColor = theme.colorScheme.onSurface.withOpacity(0.7);
-    final labelColor = theme.colorScheme.onSurface.withOpacity(0.5);
-    final borderColor = theme.colorScheme.onSurface.withOpacity(0.1);
+    final subtleBg = theme.colorScheme.onSurface.withValues(alpha: 0.05);
+    final subtleIcon = theme.colorScheme.onSurface.withValues(alpha: 0.4);
+    final subtitleColor = theme.colorScheme.onSurface.withValues(alpha: 0.7);
+    final labelColor = theme.colorScheme.onSurface.withValues(alpha: 0.5);
+    final borderColor = theme.colorScheme.onSurface.withValues(alpha: 0.1);
     
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

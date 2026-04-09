@@ -67,8 +67,9 @@ let ProductController = class ProductController {
         const product = await this.productService.delete(id, req.user._id);
         return this.successResponse('Producto eliminado', product);
     }
-    async markAsOpened(req, id) {
-        const product = await this.productService.markAsOpened(id, req.user._id);
+    async markAsOpened(req, id, openedDateStr) {
+        const customDate = openedDateStr ? new Date(openedDateStr) : undefined;
+        const product = await this.productService.markAsOpened(id, req.user._id, customDate);
         return this.successResponse('Producto marcado como abierto', product);
     }
     async markAsClosed(req, id) {
@@ -157,8 +158,9 @@ __decorate([
     (0, common_1.Patch)(':id/open'),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)('openedDate')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], ProductController.prototype, "markAsOpened", null);
 __decorate([

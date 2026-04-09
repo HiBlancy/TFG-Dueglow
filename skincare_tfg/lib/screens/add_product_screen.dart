@@ -144,8 +144,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
     );
   }
 
-  // --- INTERFAZ ---
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -174,7 +172,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
                     title: 'Escanear',
                     subtitle: 'Código de barras',
                     onTap: () {
-                      // Usa el enrutamiento que tengas en tu main.dart
                       Navigator.pushNamed(context, AppConstants.routeScan); 
                     },
                   ),
@@ -186,7 +183,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                     title: 'Buscar',
                     subtitle: 'Según marco o tipo',
                     onTap: () {
-                      Navigator.pushNamed(context, AppConstants.routeSearch);
+                      Navigator.pushNamed(context, '/search');
                     },
                   ),
                 ),

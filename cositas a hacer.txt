@@ -11,8 +11,11 @@ categorizar listas de abierto/cerrado -> y como verlo?
 poder cambiar de lista a un producto desde el mismo producto, MISMO PRODUCTO
 
 añadir imagen manualmente si quiere (importar y o link?)
-añadir producto desde el scaneo si no existe
+LAS CATEGIRAS SON LAS QUE HABRAN EN EL PERFIL -> crema de manos, acondicionador de pelo...
+añadir producto con M, abrirlo y al cerrarlo se mantiene la fecha, hay que limpiarlo
+en producto -> poner el boton de borrar abajo del todo
 
+HACER TRELO O MIRO
 
 HECHO
 comprobar el funcionamiento de la camara
@@ -28,3 +31,4 @@ DONDE BOTON DE ANADIR PRODUCTO NUEVO
 tema de añadir un producto manualmente -> puede hacerlo a raíz de escanear o manual
 Crear los sub apartados de los productos -> tengo, quiero, eliminado
 modificar apartado de perfil con ver mis productos?
+añadir producto desde el scaneo si no existe
