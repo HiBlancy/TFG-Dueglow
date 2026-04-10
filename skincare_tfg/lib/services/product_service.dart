@@ -7,39 +7,45 @@ import 'api_config.dart';
 class ProductService {
   final AuthService _authService = AuthService();
 
-  Future<List<BeautyProduct>> getProducts({String? listType}) async {
-    try {
-      final token = await _authService.getToken();
-      if (token == null) return [];
+  Future<PaginatedProducts?> getProducts({
+  String? listType, 
+  int page = 1, 
+  int limit = 10
+}) async {
+  try {
+    final token = await _authService.getToken();
+    if (token == null) return null;
 
-      final url = Uri.parse(ApiConfig.getProductsUrl());
-      final finalUrl = listType != null 
-          ? Uri.parse('${ApiConfig.getProductsUrl()}?listType=$listType')
-          : url;
+    // Construir la URL con Query Parameters
+    final queryParams = {
+      'page': page.toString(),
+      'limit': limit.toString(),
+      if (listType != null) 'listType': listType,
+    };
+    
+    final uri = Uri.parse(ApiConfig.getProductsUrl())
+        .replace(queryParameters: queryParams);
 
-      final response = await http.get(
-        finalUrl,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
+    final response = await http.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data['status'] == true && data['data'] != null) {
-          final List<dynamic> productsJson = data['data'];
-          return productsJson
-              .map((json) => BeautyProduct.fromBackend(json))
-              .toList();
-        }
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['status'] == true) {
+        return PaginatedProducts.fromJson(data);
       }
-      return [];
-    } catch (e) {
-      print('❌ Error obteniendo productos: $e');
-      return [];
     }
+    return null;
+  } catch (e) {
+    print('❌ Error obteniendo productos paginados: $e');
+    return null;
   }
+}
 
   Future<BeautyProduct?> createProduct(Map<String, dynamic> productData) async {
     try {

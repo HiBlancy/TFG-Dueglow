@@ -44,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final email = _emailController.text.trim();
       final password = _passwordController.text;
-    
+
       final authData = await _authService.login(email, password);
 
       setState(() => _isLoading = false);
@@ -67,22 +67,37 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _showErrorDialog([String? customMessage]) {
     final theme = Theme.of(context);
+
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: theme.colorScheme.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('Error', style: theme.textTheme.titleLarge),
+        title: Row(
+          children: [
+            Icon(Icons.error_outline, color: theme.colorScheme.error, size: 28),
+            const SizedBox(width: 12),
+            Text(
+              'Error',
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+          ],
+        ),
         content: Text(
           customMessage ?? 'Usuario o contraseña incorrectos',
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.7)
-          )
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Aceptar', style: TextStyle(color: theme.colorScheme.primary)),
+            child: Text(
+              'Aceptar',
+              style: TextStyle(color: theme.colorScheme.primary),
+            ),
           ),
         ],
       ),
@@ -92,6 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return PopScope(
       canPop: false,
@@ -102,28 +118,44 @@ class _LoginScreenState extends State<LoginScreen> {
           context: context,
           builder: (_) => AlertDialog(
             backgroundColor: theme.colorScheme.surface,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: Text('Salir de la app', style: theme.textTheme.titleLarge),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: Text(
+              'Salir de la app',
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
             content: Text(
               '¿Quieres salir de la aplicación?',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.7)
-              )
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text('Cancelar', style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
+                child: Text(
+                  'Cancelar',
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                ),
               ),
               TextButton(
                 onPressed: () => SystemNavigator.pop(),
-                child: Text('Salir', style: TextStyle(color: theme.colorScheme.error)),
+                child: Text(
+                  'Salir',
+                  style: TextStyle(color: theme.colorScheme.error),
+                ),
               ),
             ],
           ),
         );
       },
       child: Scaffold(
+        backgroundColor: theme.colorScheme.surface,
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(24.0),
@@ -133,44 +165,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 50),
-                    _buildHeader(theme),
                     const SizedBox(height: 40),
-                    CustomTextField(
-                      controller: _emailController,
-                      label: 'Correo electrónico',
-                      hint: 'usuario@ejemplo.com',
-                      prefixIcon: Icons.email_outlined,
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (value) {
-                        if (value?.isEmpty ?? true) return 'Ingrese su correo';
-                        if (!value!.contains('@') || !value.contains('.')) {
-                          return 'Correo inválido';
-                        }
-                        return null;
-                      },
-                    ),
+                    _buildHeader(theme, isDark),
+                    const SizedBox(height: 48),
+                    _buildFormSection(theme, isDark),
+                    const SizedBox(height: 32),
+                    _buildLoginButton(theme),
                     const SizedBox(height: 16),
-                    CustomTextField(
-                      controller: _passwordController,
-                      label: 'Contraseña',
-                      prefixIcon: Icons.lock_outline,
-                      obscureText: !_isPasswordVisible,
-                      showVisibilityToggle: true,
-                      onToggleVisibility: () {
-                        setState(() => _isPasswordVisible = !_isPasswordVisible);
-                      },
-                      textInputAction: TextInputAction.done,
-                      validator: (value) {
-                        if (value?.isEmpty ?? true) return 'Ingrese su contraseña';
-                        if (value!.length < 6) return 'Mínimo 6 caracteres';
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 24),
-                    _buildLoginButton(),
-                    const SizedBox(height: 16),
-                    _buildRegisterButton(),
+                    _buildRegisterLink(theme),
+                    const SizedBox(height: 40),
+                    _buildSocialLogins(theme),
                   ],
                 ),
               ),
@@ -181,33 +185,234 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildHeader(ThemeData theme) => Column(
+  Widget _buildHeader(ThemeData theme, bool isDark) => Column(
     children: [
+      // Logo/Icono decorativo
+      Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: isDark
+              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.2)
+              : theme.colorScheme.primaryContainer.withValues(alpha: 0.15),
+          border: Border.all(
+            color: isDark
+                ? theme.colorScheme.primary.withValues(alpha: 0.3)
+                : theme.colorScheme.primary.withValues(alpha: 0.2),
+            width: 4,
+          ),
+        ), // Para asegurar que la imagen se mantenga circular si es necesario
+        child: Image.asset(
+          'assets/logo.png', // <--- LA RUTA DE TU LOGO
+          width: 120, // Ajusta el tamaño aquí
+          height: 120,
+          fit: BoxFit.contain,
+          // Si quieres que el logo cambie de color según el tema (solo si es un PNG plano/icono)
+          // color: theme.colorScheme.primary,
+        ),
+      ),
+
+      const SizedBox(height: 24),
+
+      // Título
       Text(
         'DueGlow',
         style: theme.textTheme.displayLarge?.copyWith(
-          color: theme.colorScheme.primary, // Toma el color magenta/ciruela
+          color: theme.colorScheme.primary,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 1.2,
         ),
       ),
-//LOGOOOOOO CUANDO LO TENGAAA
+      const SizedBox(height: 8),
+
+      // Subtítulo
+      Text(
+        'Tu rutina de belleza personalizada',
+        style: theme.textTheme.bodyLarge?.copyWith(
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+          fontWeight: FontWeight.w500,
+        ),
+        textAlign: TextAlign.center,
+      ),
     ],
   );
 
-  Widget _buildLoginButton() {
+  Widget _buildFormSection(ThemeData theme, bool isDark) => Column(
+    children: [
+      // Campo de email
+      CustomTextField(
+        controller: _emailController,
+        label: 'Correo electrónico',
+        hint: 'usuario@ejemplo.com',
+        prefixIcon: Icons.email_outlined,
+        keyboardType: TextInputType.emailAddress,
+        validator: (value) {
+          if (value?.isEmpty ?? true) return 'Ingrese su correo';
+          if (!value!.contains('@') || !value.contains('.')) {
+            return 'Correo inválido';
+          }
+          return null;
+        },
+      ),
+      const SizedBox(height: 20),
+
+      // Campo de contraseña
+      CustomTextField(
+        controller: _passwordController,
+        label: 'Contraseña',
+        prefixIcon: Icons.lock_outline,
+        obscureText: !_isPasswordVisible,
+        showVisibilityToggle: true,
+        onToggleVisibility: () {
+          setState(() => _isPasswordVisible = !_isPasswordVisible);
+        },
+        textInputAction: TextInputAction.done,
+        validator: (value) {
+          if (value?.isEmpty ?? true) return 'Ingrese su contraseña';
+          if (value!.length < 6) return 'Mínimo 6 caracteres';
+          return null;
+        },
+      ),
+      const SizedBox(height: 12),
+
+      // Link "Olvidé mi contraseña"
+      Align(
+        alignment: Alignment.centerRight,
+        child: TextButton(
+          onPressed: () {
+            // TODO: Implementar recuperación de contraseña
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('Función próximamente disponible'),
+                backgroundColor: theme.colorScheme.primary.withValues(
+                  alpha: 0.8,
+                ),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          },
+          child: Text(
+            '¿Olvidaste tu contraseña?',
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: theme.colorScheme.primary,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        ),
+      ),
+    ],
+  );
+
+  Widget _buildLoginButton(ThemeData theme) {
     return context.primaryButton(
       'Iniciar Sesión',
       _login,
       isLoading: _isLoading,
       size: ButtonSize.full,
-      icon: Icons.person_add,
+      icon: Icons.login_outlined,
     );
   }
 
-  Widget _buildRegisterButton() {
-    return context.secondaryButton(
-      'Crear Cuenta',
-      () => Navigator.pushNamed(context, '/register'),
-      size: ButtonSize.full,
+  Widget _buildRegisterLink(ThemeData theme) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          '¿No tienes cuenta? ',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+          ),
+        ),
+        GestureDetector(
+          onTap: () => Navigator.pushNamed(context, '/register'),
+          child: Text(
+            'Crear una',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.bold,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSocialLogins(ThemeData theme) {
+    return Column(
+      children: [
+        // Divisor con texto "O"
+        Row(
+          children: [
+            Expanded(
+              child: Divider(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                'O continuar con',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Divider(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+
+        // Botones de Google y Apple
+        Row(
+          children: [
+            // Botón Google
+            Expanded(
+              child: _socialButton(
+                icon: Icons.g_mobiledata, // O puedes usar un FontAwesome/Asset
+                label: 'Google',
+                onPressed: () {}, // No funcional por ahora
+                theme: theme,
+              ),
+            ),
+            const SizedBox(width: 16),
+            // Botón Apple
+            Expanded(
+              child: _socialButton(
+                icon: Icons.apple,
+                label: 'Apple',
+                onPressed: () {}, // No funcional por ahoras
+                theme: theme,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _socialButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+    required ThemeData theme,
+  }) {
+    return OutlinedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 24),
+      label: Text(label),
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        side: BorderSide(
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        foregroundColor: theme.colorScheme.onSurface,
+      ),
     );
   }
 }

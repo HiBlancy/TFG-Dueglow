@@ -132,3 +132,33 @@ class BeautyProduct {
     );
   }
 }
+
+class PaginatedProducts {
+  final List<BeautyProduct> products;
+  final int totalProducts;
+  final int totalPages;
+  final int currentPage;
+  final int limit;
+
+  PaginatedProducts({
+    required this.products,
+    required this.totalProducts,
+    required this.totalPages,
+    required this.currentPage,
+    required this.limit,
+  });
+
+  factory PaginatedProducts.fromJson(Map<String, dynamic> json) {
+    final data = json['data']; // El objeto que contiene {data, info}
+    final List<dynamic> productsList = data['data'];
+    final info = data['info'];
+
+    return PaginatedProducts(
+      products: productsList.map((p) => BeautyProduct.fromBackend(p)).toList(),
+      totalProducts: info['totalProducts'],
+      totalPages: info['totalPages'],
+      currentPage: info['page'],
+      limit: info['limit'],
+    );
+  }
+}

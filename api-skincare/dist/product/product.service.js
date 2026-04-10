@@ -221,6 +221,31 @@ let ProductService = class ProductService {
             return parseInt(numberMatch[1]);
         return null;
     }
+    async findAllByUserPaginated(userId, paginationDto, listType) {
+        const { page, limit } = paginationDto;
+        const skip = (page - 1) * limit;
+        const filter = { userId };
+        if (listType)
+            filter.listType = listType;
+        const [data, total] = await Promise.all([
+            this.productModel
+                .find(filter)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .exec(),
+            this.productModel.countDocuments(filter),
+        ]);
+        return {
+            data,
+            info: {
+                totalProducts: total,
+                totalPages: Math.ceil(total / limit),
+                page,
+                limit,
+            },
+        };
+    }
 };
 exports.ProductService = ProductService;
 exports.ProductService = ProductService = __decorate([

@@ -11,6 +11,7 @@ import { Model } from 'mongoose';
 import { Product } from './interfaces/product.interface';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { PaginationDto } from '../pagination/pagination.dto';
 
 @Injectable()
 export class ProductService {
@@ -270,5 +271,41 @@ export class ProductService {
     if (numberMatch) return parseInt(numberMatch[1]);
     
     return null;
+  }
+
+  // En product.service.ts
+
+  async findAllByUserPaginated(
+    userId: string,
+    paginationDto: PaginationDto,
+    listType?: string
+  ) {
+    const { page, limit } = paginationDto;
+    const skip = (page - 1) * limit;
+
+    // Filtro base
+    const filter: any = { userId };
+    if (listType) filter.listType = listType;
+
+    // Ejecutamos ambas consultas en paralelo para mejor performance
+    const [data, total] = await Promise.all([
+      this.productModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .exec(),
+      this.productModel.countDocuments(filter),
+    ]);
+
+    return {
+      data,
+      info: {
+        totalProducts: total,
+        totalPages: Math.ceil(total / limit),
+        page,
+        limit,
+      },
+    };
   }
 }

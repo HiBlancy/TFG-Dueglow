@@ -35,30 +35,40 @@ class AppThemes {
     inversePrimary: Color(0xfff8b1dc),
   );
 
+  // ==================== TEMA OSCURO MEJORADO ====================
+  // Colores más vibrantes y accesibles, AppBar con color
+
   static const ColorScheme _darkHighContrastScheme = ColorScheme(
     brightness: Brightness.dark,
-    primary: Color(0xffffebf4),
+    // Primario: Rosa/Magenta más claro y vibrante para oscuro
+    primary: Color(0xfff4add8),
     surfaceTint: Color(0xfff8b1dc),
-    onPrimary: Color(0xff000000),
-    primaryContainer: Color(0xfff4add8),
+    onPrimary: Color(0xff3a1a2f), // Texto oscuro sobre primario claro
+    // Contenedor primario: Rosa más saturada
+    primaryContainer: Color(0xffd9a3c8),
     onPrimaryContainer: Color(0xff1e0016),
-    secondary: Color(0xffffebf4),
-    onSecondary: Color(0xff000000),
-    secondaryContainer: Color(0xffd9baca),
+    // Secundario: Tonos cálidos complementarios
+    secondary: Color(0xffe8c9d8),
+    onSecondary: Color(0xff2d1721),
+    secondaryContainer: Color(0xffcfb3c2),
     onSecondaryContainer: Color(0xff160611),
-    tertiary: Color(0xffffeafe),
-    onTertiary: Color(0xff000000),
-    tertiaryContainer: Color(0xffe4b2ec),
+    // Terciario: Púrpura más vibrante
+    tertiary: Color(0xffe8d5f2),
+    onTertiary: Color(0xff3a1f45),
+    tertiaryContainer: Color(0xffd4bfe8),
     onTertiaryContainer: Color(0xff1a0023),
-    error: Color(0xffffece9),
-    onError: Color(0xff000000),
-    errorContainer: Color(0xffffaea4),
+    // Error: Rojo coral más visible
+    error: Color(0xffffb4ab),
+    onError: Color(0xff5a1c1f),
+    errorContainer: Color(0xffff8a7f),
     onErrorContainer: Color(0xff220001),
-    surface: Color(0xff181115),
-    onSurface: Color(0xffffffff),
-    onSurfaceVariant: Color(0xffffffff),
-    outline: Color(0xfffdebf3),
-    outlineVariant: Color(0xffcfbec5),
+    // Superficie: Gris oscuro con toque púrpura (no puro negro)
+    surface: Color(0xff1a1419),
+    onSurface: Color(0xfff4eff3),
+    onSurfaceVariant: Color(0xffe8d5e0),
+    // Outline: Colores definidos, no grises
+    outline: Color(0xffd9a3c8),
+    outlineVariant: Color(0xffb095a8),
     shadow: Color(0xff000000),
     scrim: Color(0xff000000),
     inverseSurface: Color(0xffeddfe4),
@@ -79,6 +89,11 @@ class AppThemes {
           fontWeight: FontWeight.bold,
           color: colorScheme.onSurface,
         ),
+        displaySmall: GoogleFonts.sora(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: colorScheme.onSurface,
+        ),
         headlineMedium: GoogleFonts.sora(
           fontSize: 20,
           fontWeight: FontWeight.w600,
@@ -94,6 +109,11 @@ class AppThemes {
           fontWeight: FontWeight.bold,
           color: colorScheme.onSurface,
         ),
+        titleMedium: GoogleFonts.sora(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: colorScheme.onSurface,
+        ),
         bodyLarge: GoogleFonts.lato(
           fontSize: 16,
           color: colorScheme.onSurface,
@@ -103,6 +123,11 @@ class AppThemes {
           fontSize: 14,
           color: colorScheme.onSurface,
           height: 1.5,
+        ),
+        bodySmall: GoogleFonts.lato(
+          fontSize: 12,
+          color: colorScheme.onSurfaceVariant,
+          height: 1.4,
         ),
         labelLarge: GoogleFonts.lato(
           fontSize: 14,
@@ -114,18 +139,24 @@ class AppThemes {
       appBarTheme: AppBarTheme(
         elevation: 0,
         centerTitle: true,
+        // En modo oscuro: AppBar con color (primario), en claro: el primario original
         backgroundColor: colorScheme.brightness == Brightness.light 
             ? colorScheme.primary 
-            : colorScheme.surface,
+            : Color(0xff3a1a2f), // Gris oscuro con toque púrpura (base del primario oscuro)
         foregroundColor: colorScheme.brightness == Brightness.light 
             ? colorScheme.onPrimary 
-            : colorScheme.onSurface,
+            : Color(0xfff4add8), // Texto rosa claro en oscuro
         titleTextStyle: GoogleFonts.sora(
           fontSize: 20,
           fontWeight: FontWeight.w600,
           color: colorScheme.brightness == Brightness.light 
               ? colorScheme.onPrimary 
-              : colorScheme.onSurface,
+              : Color(0xfff4add8), // Título rosa en oscuro
+        ),
+        iconTheme: IconThemeData(
+          color: colorScheme.brightness == Brightness.light
+              ? colorScheme.onPrimary
+              : Color(0xfff4add8),
         ),
       ),
 

@@ -35,7 +35,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _register() async {
     if (!_formKey.currentState!.validate() || !_acceptTerms) {
-      if (!_acceptTerms) _showErrorDialog('Debes aceptar los términos');
+      if (!_acceptTerms) _showErrorDialog('Debes aceptar los términos y condiciones');
       return;
     }
 
@@ -54,11 +54,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
         final theme = Theme.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('¡Cuenta creada exitosamente!', style: TextStyle(color: Colors.white)),
-            backgroundColor: theme.colorScheme.primary, // Adaptado al color de tu app
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: theme.colorScheme.onPrimary),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    '¡Cuenta creada exitosamente!',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: theme.colorScheme.primary,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             duration: const Duration(seconds: 2),
+            margin: const EdgeInsets.all(16),
           ),
         );
         Future.delayed(const Duration(seconds: 1), () {
@@ -82,22 +94,41 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   void _showErrorDialog(String message) {
     final theme = Theme.of(context);
+
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: theme.colorScheme.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('Error', style: theme.textTheme.titleLarge),
+        title: Row(
+          children: [
+            Icon(
+              Icons.error_outline,
+              color: theme.colorScheme.error,
+              size: 28,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Error',
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+          ],
+        ),
         content: Text(
           message,
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.7)
-          )
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Aceptar', style: TextStyle(color: theme.colorScheme.primary)),
+            child: Text(
+              'Aceptar',
+              style: TextStyle(color: theme.colorScheme.primary),
+            ),
           ),
         ],
       ),
@@ -107,12 +138,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Crear Cuenta'),
+        elevation: 0,
+        backgroundColor: isDark
+            ? Color(0xff3a1a2f)
+            : theme.colorScheme.primary,
+        foregroundColor: isDark
+            ? Color(0xfff4add8)
+            : theme.colorScheme.onPrimary,
+        title: Text(
+          'Crear Cuenta',
+          style: theme.textTheme.titleLarge?.copyWith(
+            color: isDark
+                ? Color(0xfff4add8)
+                : theme.colorScheme.onPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(
+            Icons.arrow_back,
+            color: isDark
+                ? Color(0xfff4add8)
+                : theme.colorScheme.onPrimary,
+          ),
           onPressed: () => Navigator.pushReplacementNamed(context, '/'),
         ),
       ),
@@ -126,75 +180,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 20),
-                  _buildHeader(theme),
-                  const SizedBox(height: 40),
-                  CustomTextField(
-                    controller: _nameController,
-                    label: 'Nombre completo',
-                    hint: 'Tu nombre',
-                    prefixIcon: Icons.person_outline,
-                    validator: (value) {
-                      if (value?.isEmpty ?? true) return 'Ingrese su nombre';
-                      if (value!.length < 3) return 'Mínimo 3 caracteres';
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  CustomTextField(
-                    controller: _emailController,
-                    label: 'Correo electrónico',
-                    hint: 'usuario@ejemplo.com',
-                    prefixIcon: Icons.email_outlined,
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value?.isEmpty ?? true) return 'Ingrese su correo';
-                      if (!value!.contains('@') || !value.contains('.')) {
-                        return 'Correo inválido';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  CustomTextField(
-                    controller: _passwordController,
-                    label: 'Contraseña',
-                    prefixIcon: Icons.lock_outline,
-                    obscureText: !_isPasswordVisible,
-                    showVisibilityToggle: true,
-                    onToggleVisibility: () {
-                      setState(() => _isPasswordVisible = !_isPasswordVisible);
-                    },
-                    validator: (value) {
-                      if (value?.isEmpty ?? true) return 'Ingrese su contraseña';
-                      if (value!.length < 6) return 'Mínimo 6 caracteres';
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  CustomTextField(
-                    controller: _confirmPasswordController,
-                    label: 'Confirmar contraseña',
-                    prefixIcon: Icons.lock_outline,
-                    obscureText: !_isConfirmVisible,
-                    showVisibilityToggle: true,
-                    onToggleVisibility: () {
-                      setState(() => _isConfirmVisible = !_isConfirmVisible);
-                    },
-                    textInputAction: TextInputAction.done,
-                    validator: (value) {
-                      if (value?.isEmpty ?? true) return 'Confirme su contraseña';
-                      if (value != _passwordController.text) {
-                        return 'Las contraseñas no coinciden';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  _buildTermsCheckbox(theme),
+                  _buildHeader(theme, isDark),
+                  const SizedBox(height: 32),
+                  _buildFormSection(theme),
                   const SizedBox(height: 24),
-                  _buildRegisterButton(),
+                  _buildTermsCheckbox(theme, isDark),
+                  const SizedBox(height: 28),
+                  _buildRegisterButton(theme),
                   const SizedBox(height: 20),
                   _buildLoginLink(theme),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
@@ -204,57 +199,169 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _buildHeader(ThemeData theme) => Container(
-    padding: const EdgeInsets.all(20),
+  Widget _buildHeader(ThemeData theme, bool isDark) => Container(
+    padding: const EdgeInsets.all(24),
     decoration: BoxDecoration(
-      color: theme.colorScheme.primary.withValues(alpha: 0.1),
       shape: BoxShape.circle,
+      color: isDark
+          ? theme.colorScheme.primaryContainer.withValues(alpha: 0.2)
+          : theme.colorScheme.primaryContainer.withValues(alpha: 0.15),
+      border: Border.all(
+        color: isDark
+            ? theme.colorScheme.primary.withValues(alpha: 0.3)
+            : theme.colorScheme.primary.withValues(alpha: 0.2),
+        width: 2,
+      ),
     ),
     child: Icon(
-      Icons.person_add,
-      size: 60,
+      Icons.person_add_outlined,
+      size: 56,
       color: theme.colorScheme.primary,
     ),
   );
 
-  Widget _buildTermsCheckbox(ThemeData theme) {
-    final textColor = theme.colorScheme.onSurface.withValues(alpha: 0.7);
-    final linkColor = theme.colorScheme.primary; // Reemplaza al azul por defecto
+  Widget _buildFormSection(ThemeData theme) => Column(
+    children: [
+      // Campo de nombre
+      CustomTextField(
+        controller: _nameController,
+        label: 'Nombre completo',
+        hint: 'Tu nombre',
+        prefixIcon: Icons.person_outline,
+        validator: (value) {
+          if (value?.isEmpty ?? true) return 'Ingrese su nombre';
+          if (value!.length < 3) return 'Mínimo 3 caracteres';
+          return null;
+        },
+      ),
+      const SizedBox(height: 16),
 
-    return Row(
-      children: [
-        Checkbox(
-          value: _acceptTerms,
-          activeColor: theme.colorScheme.primary,
-          onChanged: (value) => setState(() => _acceptTerms = value ?? false),
+      // Campo de email
+      CustomTextField(
+        controller: _emailController,
+        label: 'Correo electrónico',
+        hint: 'usuario@ejemplo.com',
+        prefixIcon: Icons.email_outlined,
+        keyboardType: TextInputType.emailAddress,
+        validator: (value) {
+          if (value?.isEmpty ?? true) return 'Ingrese su correo';
+          if (!value!.contains('@') || !value.contains('.')) {
+            return 'Correo inválido';
+          }
+          return null;
+        },
+      ),
+      const SizedBox(height: 16),
+
+      // Campo de contraseña
+      CustomTextField(
+        controller: _passwordController,
+        label: 'Contraseña',
+        prefixIcon: Icons.lock_outline,
+        obscureText: !_isPasswordVisible,
+        showVisibilityToggle: true,
+        onToggleVisibility: () {
+          setState(() => _isPasswordVisible = !_isPasswordVisible);
+        },
+        validator: (value) {
+          if (value?.isEmpty ?? true) return 'Ingrese su contraseña';
+          if (value!.length < 6) return 'Mínimo 6 caracteres';
+          return null;
+        },
+      ),
+      const SizedBox(height: 16),
+
+      // Campo de confirmar contraseña
+      CustomTextField(
+        controller: _confirmPasswordController,
+        label: 'Confirmar contraseña',
+        prefixIcon: Icons.lock_outline,
+        obscureText: !_isConfirmVisible,
+        showVisibilityToggle: true,
+        onToggleVisibility: () {
+          setState(() => _isConfirmVisible = !_isConfirmVisible);
+        },
+        textInputAction: TextInputAction.done,
+        validator: (value) {
+          if (value?.isEmpty ?? true) return 'Confirme su contraseña';
+          if (value != _passwordController.text) {
+            return 'Las contraseñas no coinciden';
+          }
+          return null;
+        },
+      ),
+    ],
+  );
+
+  Widget _buildTermsCheckbox(ThemeData theme, bool isDark) {
+    final textColor = theme.colorScheme.onSurface.withValues(alpha: 0.7);
+    final linkColor = theme.colorScheme.primary;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark
+            ? theme.colorScheme.primaryContainer.withValues(alpha: 0.1)
+            : theme.colorScheme.primaryContainer.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark
+              ? theme.colorScheme.primary.withValues(alpha: 0.2)
+              : theme.colorScheme.primary.withValues(alpha: 0.15),
         ),
-        Expanded(
-          child: GestureDetector(
-            onTap: () => setState(() => _acceptTerms = !_acceptTerms),
-            child: RichText(
-              text: TextSpan(
-                style: theme.textTheme.bodySmall?.copyWith(color: textColor),
-                children: [
-                  const TextSpan(text: 'Acepto los '),
-                  TextSpan(
-                    text: 'términos y condiciones',
-                    style: TextStyle(color: linkColor, fontWeight: FontWeight.bold),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Checkbox(
+            value: _acceptTerms,
+            activeColor: theme.colorScheme.primary,
+            checkColor: theme.colorScheme.onPrimary,
+            side: BorderSide(
+              color: theme.colorScheme.primary.withValues(alpha: 0.5),
+              width: 2,
+            ),
+            onChanged: (value) => setState(() => _acceptTerms = value ?? false),
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _acceptTerms = !_acceptTerms),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: RichText(
+                  text: TextSpan(
+                    style: theme.textTheme.bodySmall?.copyWith(color: textColor),
+                    children: [
+                      const TextSpan(text: 'Acepto los '),
+                      TextSpan(
+                        text: 'términos y condiciones',
+                        style: TextStyle(
+                          color: linkColor,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                      const TextSpan(text: ' y la '),
+                      TextSpan(
+                        text: 'política de privacidad',
+                        style: TextStyle(
+                          color: linkColor,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ],
                   ),
-                  const TextSpan(text: ' y la '),
-                  TextSpan(
-                    text: 'política de privacidad',
-                    style: TextStyle(color: linkColor, fontWeight: FontWeight.bold),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  Widget _buildRegisterButton() {
+  Widget _buildRegisterButton(ThemeData theme) {
     return context.primaryButton(
       'Crear Cuenta',
       _register,
@@ -270,11 +377,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
       children: [
         Text(
           '¿Ya tienes una cuenta? ',
-          style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+          ),
         ),
-        context.textButton(
-          'Iniciar Sesión',
-          () => Navigator.pushReplacementNamed(context, '/'),
+        GestureDetector(
+          onTap: () => Navigator.pushReplacementNamed(context, '/'),
+          child: Text(
+            'Inicia sesión',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.bold,
+              decoration: TextDecoration.underline,
+            ),
+          ),
         ),
       ],
     );

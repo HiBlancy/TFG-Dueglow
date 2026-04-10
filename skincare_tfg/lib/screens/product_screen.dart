@@ -23,7 +23,7 @@ class ProductScreen extends StatefulWidget {
 class _ProductScreenState extends State<ProductScreen> {
   final ProductService _productService = ProductService();
   late BeautyProduct _currentProduct;
-  
+
   // Estados de carga
   final Map<String, bool> _loadingStates = {
     'adding': false,
@@ -32,6 +32,7 @@ class _ProductScreenState extends State<ProductScreen> {
     'opening': false,
     'closing': false,
     'calculating': false,
+    'finishing': false,
   };
 
   @override
@@ -41,7 +42,7 @@ class _ProductScreenState extends State<ProductScreen> {
   }
 
   // --- HELPERS ---
-  
+
   void _setLoading(String key, bool value) {
     if (mounted) {
       setState(() => _loadingStates[key] = value);
@@ -52,7 +53,7 @@ class _ProductScreenState extends State<ProductScreen> {
 
   Future<void> _showMessage(String message, {bool isError = false}) async {
     if (!mounted) return;
-    
+
     final theme = Theme.of(context);
 
     if (isError) {
@@ -62,7 +63,6 @@ class _ProductScreenState extends State<ProductScreen> {
         content: message,
       );
     } else {
-      // SnackBar unificado con la marca
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message, style: const TextStyle(color: Colors.white)),
@@ -160,10 +160,13 @@ class _ProductScreenState extends State<ProductScreen> {
     }
   }
 
+  Future<void> _markAsFinished() async {
+    await _showMessage('Funcionalidad "Producto acabado" en desarrollo');
+  }
+
   Future<void> _markAsOpened() async {
     final theme = Theme.of(context);
 
-    // 1. Mostramos un diálogo simple con las dos opciones directas
     final selectedOption = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
@@ -188,8 +191,8 @@ class _ProductScreenState extends State<ProductScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context), 
-            child: Text('Cancelar', style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)))
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancelar', style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
           ),
         ],
       ),
@@ -220,7 +223,6 @@ class _ProductScreenState extends State<ProductScreen> {
       finalDate = DateTime.utc(pickedDate.year, pickedDate.month, pickedDate.day, 12, 0, 0);
     }
 
-    // 3. Guardamos automáticamente con la fecha obtenida
     await _executeAction(
       action: () => _productService.markAsOpened(_currentProduct.id!, openedDate: finalDate),
       successMessage: '✓ Producto marcado como abierto',
@@ -229,10 +231,8 @@ class _ProductScreenState extends State<ProductScreen> {
   }
 
   Future<void> _markAsClosed() async {
-    // 1. Comprobamos si el producto tiene el periodo (la "M")
     final hasPAO = _currentProduct.periodAfterOpening?.isNotEmpty == true;
 
-    // 2. Adaptamos el mensaje del diálogo dinámicamente
     final expirationMessage = hasPAO
         ? '• Se eliminará la fecha de caducidad calculada\n'
         : '• Se conservará tu fecha de caducidad fija\n';
@@ -246,13 +246,15 @@ class _ProductScreenState extends State<ProductScreen> {
       '• Se conservará la duración después de abrir (ej: "6M")\n\n'
       'Podrás volver a abrirlo más tarde si fue un error.',
       isDanger: true,
-    )) {return;}
+    )) {
+      return;
+    }
 
     await _executeAction(
       action: () {
         final updatedData = <String, dynamic>{
           'openedDate': null,
-          'isOpened': false, // Aseguramos que el estado de abierto cambia a false
+          'isOpened': false,
         };
 
         if (hasPAO) {
@@ -267,10 +269,10 @@ class _ProductScreenState extends State<ProductScreen> {
   }
 
   Future<void> _calculateExpiration() => _executeAction(
-    action: () => _productService.calculateExpiration(_currentProduct.id!),
-    successMessage: '✓ Fecha de caducidad calculada',
-    loadingKey: 'calculating',
-  );
+        action: () => _productService.calculateExpiration(_currentProduct.id!),
+        successMessage: '✓ Fecha de caducidad calculada',
+        loadingKey: 'calculating',
+      );
 
   // --- UI ---
 
@@ -285,22 +287,55 @@ class _ProductScreenState extends State<ProductScreen> {
       showDrawer: false,
       showBackButton: true,
       actions: _buildAppBarActions(isProductSaved, showAddButton),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildProductImage(),
-            const SizedBox(height: 24),
-            _buildProductHeader(theme),
-            const SizedBox(height: 16),
-            if (isProductSaved) _buildProductDetails(theme),
-            Divider(height: 32, color: theme.colorScheme.onSurface.withValues(alpha: 0.1)),
-            if (_currentProduct.categories?.isNotEmpty == true) _buildCategories(theme),
-            const SizedBox(height: 24),
-            _buildActionButtons(isProductSaved, showAddButton),
-          ],
-        ),
+      child: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _buildProductImage(),
+                  const SizedBox(height: 24),
+                  _buildProductHeader(theme),
+                  const SizedBox(height: 24),
+                  if (isProductSaved) _buildProductDetails(theme),
+                  if (_currentProduct.categories?.isNotEmpty == true) ...[
+                    const SizedBox(height: 16),
+                    _buildCategories(theme),
+                  ],
+                  const SizedBox(height: 24),
+                  // Todos los botones excepto eliminar
+                  _buildScrollableButtons(isProductSaved, showAddButton),
+                ],
+              ),
+            ),
+          ),
+          // Solo el botón de eliminar fijo abajo (si aplica)
+          if (isProductSaved)
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: CustomButton(
+                text: 'Eliminar producto',
+                onPressed: _isLoading('deleting') ? () {} : _deleteProduct,
+                type: ButtonType.danger,
+                size: ButtonSize.full,
+                icon: Icons.delete,
+                isLoading: _isLoading('deleting'),
+                isEnabled: !_isLoading('deleting'),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -309,7 +344,7 @@ class _ProductScreenState extends State<ProductScreen> {
     return [
       if (isProductSaved)
         IconButton(
-          icon: _isLoading('editing') 
+          icon: _isLoading('editing')
               ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
               : const Icon(Icons.edit),
           onPressed: _isLoading('editing') ? null : _editProduct,
@@ -328,55 +363,78 @@ class _ProductScreenState extends State<ProductScreen> {
 
   Widget _buildProductImage() {
     return Center(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: _currentProduct.imageUrl?.isNotEmpty == true
-            ? Image.network(
-                _currentProduct.imageUrl!,
-                height: 220,
-                fit: BoxFit.contain,
-                errorBuilder: (_, _, _) => const _PlaceholderImage(),
-              )
-            : const _PlaceholderImage(),
+      child: Container(
+        width: 200,
+        height: 200,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: _currentProduct.imageUrl?.isNotEmpty == true
+              ? Image.network(
+                  _currentProduct.imageUrl!,
+                  width: 160,
+                  height: 200,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => const _PlaceholderImage(),
+                )
+              : const _PlaceholderImage(),
+        ),
       ),
     );
   }
 
   Widget _buildProductHeader(ThemeData theme) {
-    final subtleText = theme.colorScheme.onSurface.withValues(alpha: 0.6);
-
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (_currentProduct.brand?.isNotEmpty == true)
           Text(
             _currentProduct.brand!.toUpperCase(),
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 14,
               fontWeight: FontWeight.w700,
               color: theme.colorScheme.primary,
-              letterSpacing: 1.2,
+              letterSpacing: 1.5,
             ),
+            textAlign: TextAlign.center,
           ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         Text(
           _currentProduct.name.isNotEmpty ? _currentProduct.name : 'Sin nombre',
-          style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.center,
         ),
         if (_currentProduct.rating != null) ...[
           const SizedBox(height: 16),
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ...List.generate(
                 5,
                 (index) => Icon(
                   index < _currentProduct.rating! ? Icons.star : Icons.star_border,
-                  color: Colors.amber, // El ámbar de las estrellas queda bien siempre
-                  size: 20,
+                  color: Colors.amber,
+                  size: 24,
                 ),
               ),
               const SizedBox(width: 8),
-              Text('${_currentProduct.rating}/5', style: TextStyle(fontSize: 14, color: subtleText)),
+              Text(
+                '${_currentProduct.rating}/5',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
             ],
           ),
         ],
@@ -389,43 +447,51 @@ class _ProductScreenState extends State<ProductScreen> {
     final hasExpirationInfo = (_currentProduct.periodAfterOpening?.isNotEmpty == true) || (_currentProduct.expirationDate != null);
     final subtleText = theme.colorScheme.onSurface.withValues(alpha: 0.6);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (_currentProduct.addedAt != null) ...[
-          const SizedBox(height: 12),
-          _InfoRow(icon: Icons.calendar_today, label: 'Agregado', value: _formatDate(_currentProduct.addedAt!)),
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (_currentProduct.addedAt != null) ...[
+            _InfoRow(icon: Icons.calendar_today, label: 'Agregado', value: _formatDate(_currentProduct.addedAt!)),
+            const SizedBox(height: 12),
+          ],
+          if (_currentProduct.expirationDate != null) ...[
+            _InfoRow(icon: Icons.warning_amber, label: 'Caducidad', value: _formatDate(_currentProduct.expirationDate!)),
+            const SizedBox(height: 12),
+          ],
+          if (isReallyOpened && _currentProduct.openedDate != null) ...[
+            _InfoRow(icon: Icons.open_in_new, label: 'Abierto el', value: _formatDate(_currentProduct.openedDate!)),
+            const SizedBox(height: 12),
+          ],
+          if (isReallyOpened && _currentProduct.periodAfterOpening?.isNotEmpty == true) ...[
+            _InfoRow(icon: Icons.timer, label: 'Duración después de abrir', value: _currentProduct.periodAfterOpening!),
+            const SizedBox(height: 12),
+          ],
+          if (isReallyOpened && !hasExpirationInfo) _buildExpirationWarning(theme),
+          if (_currentProduct.notes?.isNotEmpty == true) ...[
+            const Divider(height: 24),
+            Text(
+              'Notas',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: subtleText),
+            ),
+            const SizedBox(height: 8),
+            Text(_currentProduct.notes!, style: theme.textTheme.bodyMedium),
+          ],
         ],
-        if (_currentProduct.expirationDate != null) ...[
-          const SizedBox(height: 12),
-          _InfoRow(icon: Icons.warning_amber, label: 'Caducidad', value: _formatDate(_currentProduct.expirationDate!)),
-        ],
-        if (isReallyOpened && _currentProduct.openedDate != null) ...[
-          const SizedBox(height: 12),
-          _InfoRow(icon: Icons.open_in_new, label: 'Abierto el', value: _formatDate(_currentProduct.openedDate!)),
-        ],
-        if (isReallyOpened && _currentProduct.periodAfterOpening?.isNotEmpty == true) ...[
-          const SizedBox(height: 12),
-          _InfoRow(icon: Icons.timer, label: 'Duración después de abrir', value: _currentProduct.periodAfterOpening!),
-        ],
-        if (isReallyOpened && !hasExpirationInfo) _buildExpirationWarning(theme),
-        if (_currentProduct.notes?.isNotEmpty == true) ...[
-          Divider(height: 32, color: theme.colorScheme.onSurface.withValues(alpha: 0.1)),
-          Text(
-            'Notas', 
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: subtleText)
-          ),
-          const SizedBox(height: 10),
-          Text(_currentProduct.notes!, style: theme.textTheme.bodyMedium),
-        ],
-      ],
+      ),
     );
   }
 
   Widget _buildExpirationWarning(ThemeData theme) {
     final isDarkMode = theme.brightness == Brightness.dark;
-    
-    // Naranja dinámico adaptado al tema para que no deslumbre en la oscuridad
     final warningColor = isDarkMode ? Colors.orange[300]! : Colors.orange[800]!;
     final bgColor = Colors.orange.withValues(alpha: 0.15);
     final borderColor = warningColor.withValues(alpha: 0.3);
@@ -447,8 +513,8 @@ class _ProductScreenState extends State<ProductScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '⚠️ Sin información de caducidad', 
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: warningColor)
+                  '⚠️ Sin información de caducidad',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: warningColor),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -471,42 +537,43 @@ class _ProductScreenState extends State<ProductScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Categorías', 
-          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: subtleText)
+          'Categorías',
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: subtleText),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: _currentProduct.categories!.take(6).map((cat) => Chip(
-            label: Text(cat, style: theme.textTheme.bodySmall),
-            backgroundColor: chipBg,
-            side: BorderSide.none,
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          )).toList(),
+                label: Text(cat, style: theme.textTheme.bodySmall),
+                backgroundColor: chipBg,
+                side: BorderSide.none,
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              )).toList(),
         ),
       ],
     );
   }
 
-  Widget _buildActionButtons(bool isProductSaved, bool showAddButton) {
+  // Nuevo método: botones que van dentro del scroll (todos excepto eliminar)
+  Widget _buildScrollableButtons(bool isProductSaved, bool showAddButton) {
     final isReallyOpened = _currentProduct.isOpened == true && _currentProduct.openedDate != null;
-    final canCalculateExpiration = isReallyOpened && 
-                                   _currentProduct.periodAfterOpening?.isNotEmpty == true && 
-                                   _currentProduct.expirationDate == null;
+    final canCalculateExpiration = isReallyOpened &&
+        _currentProduct.periodAfterOpening?.isNotEmpty == true &&
+        _currentProduct.expirationDate == null;
 
     return Column(
       children: [
-        if (isProductSaved) ...[
+        if (showAddButton) ...[
           CustomButton(
-            text: 'Eliminar producto',
-            onPressed: _isLoading('deleting') ? () {} : _deleteProduct,
-            type: ButtonType.danger,
+            text: 'Agregar a mis productos',
+            onPressed: _isLoading('adding') ? () {} : _addToMyProducts,
+            type: ButtonType.primary,
             size: ButtonSize.full,
-            icon: Icons.delete,
-            isLoading: _isLoading('deleting'),
-            isEnabled: !_isLoading('deleting'),
+            icon: Icons.add,
+            isLoading: _isLoading('adding'),
+            isEnabled: !_isLoading('adding'),
           ),
           const SizedBox(height: 12),
         ],
@@ -546,16 +613,18 @@ class _ProductScreenState extends State<ProductScreen> {
           ),
           const SizedBox(height: 12),
         ],
-        if (showAddButton)
+        if (isProductSaved) ...[
           CustomButton(
-            text: 'Agregar a mis productos',
-            onPressed: _isLoading('adding') ? () {} : _addToMyProducts,
-            type: ButtonType.primary,
+            text: 'Producto acabado',
+            onPressed: _isLoading('finishing') ? () {} : _markAsFinished,
+            type: ButtonType.secondary,
             size: ButtonSize.full,
-            icon: Icons.add,
-            isLoading: _isLoading('adding'),
-            isEnabled: !_isLoading('adding'),
+            icon: Icons.check_circle_outline,
+            isLoading: _isLoading('finishing'),
+            isEnabled: !_isLoading('finishing') && !_isLoading('editing'),
           ),
+          const SizedBox(height: 12),
+        ],
       ],
     );
   }
@@ -596,16 +665,16 @@ class _PlaceholderImage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      height: 220,
-      width: double.infinity,
+      height: 160,
+      width: 200,
       decoration: BoxDecoration(
         color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
       ),
       child: Icon(
-        Icons.spa_outlined, 
-        size: 72, 
-        color: theme.colorScheme.onSurface.withValues(alpha: 0.4)
+        Icons.spa_outlined,
+        size: 72,
+        color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
       ),
     );
   }

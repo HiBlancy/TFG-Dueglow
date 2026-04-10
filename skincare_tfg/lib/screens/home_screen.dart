@@ -31,12 +31,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _loadUserData() async {
     setState(() => _isLoading = true);
     final name = await _authService.getUserName();
-    final products = await _productService.getProducts();
+    final response = await _productService.getProducts(page: 1, limit: 10);
 
     if (mounted) {
       setState(() {
         _userName = name ?? 'Usuario';
-        _products = products;
+        _products = response?.products ?? [];
         _isLoading = false;
       });
     }
@@ -61,6 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
+    final isDark = theme.brightness == Brightness.dark;
 
     return CustomAppBar(
       title: 'DueGlow',
@@ -93,7 +94,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           Text(
                             'Tu rutina personalizada te espera',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
+                              color: isDark 
+                                  ? theme.colorScheme.onSurfaceVariant
+                                  : theme.colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -102,13 +105,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     
                     const SizedBox(height: 32),
                     
-                    // --- ACCIONES RÁPIDAS (Opacidades suaves) ---
-                    _buildQuickActions(theme, l10n),
+                    // --- ACCIONES RÁPIDAS (Con mejor uso de colores en modo oscuro) ---
+                    _buildQuickActions(theme, l10n, isDark),
                     
                     const SizedBox(height: 32),
                     
                     // --- SECCIÓN DE CADUCIDAD ---
-                    _buildExpiringSoonProducts(),
+                    _buildExpiringSoonProducts(isDark),
                   ],
                 ),
               ),
@@ -116,9 +119,25 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildQuickActions(ThemeData theme, AppLocalizations l10n) {
-    // Usamos el mismo tono primaryContainer pero variando la intensidad
-    final colorPrincipal = theme.colorScheme.primaryContainer;
+  Widget _buildQuickActions(ThemeData theme, AppLocalizations l10n, bool isDark) {
+    // En modo oscuro: usamos colores más saturados y con variación
+    // En modo claro: los tonos más suaves que ya tienes
+    
+    final color1 = isDark 
+        ? theme.colorScheme.primaryContainer.withValues(alpha: 0.6)
+        : theme.colorScheme.primaryContainer.withValues(alpha: 0.4);
+    
+    final color2 = isDark
+        ? Color(0xffe8d5f2).withValues(alpha: 0.5) // Púrpura suave
+        : theme.colorScheme.primaryContainer.withValues(alpha: 0.2);
+    
+    final color3 = isDark
+        ? Color(0xffd9a3c8).withValues(alpha: 0.4) // Rosa más saturada
+        : theme.colorScheme.primaryContainer.withValues(alpha: 0.2);
+    
+    final color4 = isDark
+        ? Color(0xffb095a8).withValues(alpha: 0.3) // Rosa neutral suave
+        : theme.colorScheme.primaryContainer.withValues(alpha: 0.1);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -131,8 +150,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   Icons.shopping_bag_outlined,
                   l10n.myProducts,
                   l10n.seeAll,
-                  colorPrincipal.withValues(alpha: 0.4), 
+                  color1,
                   () => Navigator.pushNamed(context, AppConstants.routeMyProducts),
+                  theme,
+                  isDark,
                 ),
               ),
               const SizedBox(width: 16),
@@ -141,12 +162,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   Icons.face_retouching_natural_outlined,
                   l10n.routines,
                   'Próximamente',
-                  colorPrincipal.withValues(alpha: 0.2), 
+                  color2,
                   () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Próximamente')),
                     );
                   },
+                  theme,
+                  isDark,
                 ),
               ),
             ],
@@ -159,12 +182,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   Icons.category_outlined,
                   l10n.categories,
                   'Próximamente',
-                  colorPrincipal.withValues(alpha: 0.2), 
+                  color3,
                   () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Próximamente')),
                     );
                   },
+                  theme,
+                  isDark,
                 ),
               ),
               const SizedBox(width: 16),
@@ -173,12 +198,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   Icons.history,
                   'Usados',
                   'Próximamente',
-                  colorPrincipal.withValues(alpha: 0.1), // El más suave para el historial
+                  color4,
                   () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Próximamente')),
                     );
                   },
+                  theme,
+                  isDark,
                 ),
               ),
             ],
@@ -188,7 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildExpiringSoonProducts() {
+  Widget _buildExpiringSoonProducts(bool isDark) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     
@@ -223,45 +250,63 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(height: 8),
         if (expiringSoon.isEmpty)
-          _buildEmptyCard(theme, l10n)
+          _buildEmptyCard(theme, l10n, isDark)
         else
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: expiringSoon.length > 5 ? 5 : expiringSoon.length,
-            itemBuilder: (context, index) => _buildExpiringProductCard(expiringSoon[index]),
+            itemBuilder: (context, index) => _buildExpiringProductCard(expiringSoon[index], isDark),
           ),
       ],
     );
   }
 
-  // ... (Resto de métodos _buildEmptyCard, _buildExpiringProductCard y _buildActionCard se mantienen iguales)
-  // He omitido la repetición para que sea más clara la lectura, 
-  // pero mantén la lógica de diseño que ya te funcionaba perfectamente.
-
-  Widget _buildEmptyCard(ThemeData theme, AppLocalizations l10n) {
+  Widget _buildEmptyCard(ThemeData theme, AppLocalizations l10n, bool isDark) {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 24),
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLow,
+        color: isDark
+            ? theme.colorScheme.primaryContainer.withValues(alpha: 0.15)
+            : theme.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
+        border: Border.all(
+          color: isDark
+              ? theme.colorScheme.primary.withValues(alpha: 0.3)
+              : theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+        ),
       ),
       child: Column(
         children: [
-          Icon(Icons.check_circle_outline, size: 48, color: theme.colorScheme.primary.withValues(alpha: 0.5)),
+          Icon(
+            Icons.check_circle_outline,
+            size: 48,
+            color: isDark
+                ? theme.colorScheme.primary.withValues(alpha: 0.7)
+                : theme.colorScheme.primary.withValues(alpha: 0.5),
+          ),
           const SizedBox(height: 16),
-          Text(l10n.allFine, style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            l10n.allFine,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
           const SizedBox(height: 8),
-          Text(l10n.noProdExpiring, textAlign: TextAlign.center, style: theme.textTheme.bodySmall),
+          Text(
+            l10n.noProdExpiring,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodySmall,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildExpiringProductCard(BeautyProduct product) {
+  Widget _buildExpiringProductCard(BeautyProduct product, bool isDark) {
     final theme = Theme.of(context);
     final days = product.expirationDate!.difference(DateTime.now()).inDays;
     final isDanger = days <= 7;
@@ -270,10 +315,16 @@ class _HomeScreenState extends State<HomeScreen> {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       elevation: 0,
-      color: theme.colorScheme.surface,
+      color: isDark
+          ? theme.colorScheme.surfaceContainerHigh
+          : theme.colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
+        side: BorderSide(
+          color: isDark
+              ? theme.colorScheme.primary.withValues(alpha: 0.2)
+              : theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+        ),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.all(12),
@@ -282,28 +333,49 @@ class _HomeScreenState extends State<HomeScreen> {
           width: 52,
           height: 52,
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerLow,
+            color: isDark
+                ? theme.colorScheme.surfaceContainerHigh
+                : theme.colorScheme.surfaceContainerLow,
             borderRadius: BorderRadius.circular(12),
           ),
           child: product.imageUrl != null 
               ? ClipRRect(
                   borderRadius: BorderRadius.circular(12), 
                   child: Image.network(product.imageUrl!, fit: BoxFit.cover))
-              : Icon(Icons.face_retouching_natural, color: theme.colorScheme.outline),
+              : Icon(
+                  Icons.face_retouching_natural,
+                  color: isDark
+                      ? theme.colorScheme.primary.withValues(alpha: 0.5)
+                      : theme.colorScheme.outline,
+                ),
         ),
-        title: Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text(product.brand ?? '', style: theme.textTheme.bodySmall),
+        title: Text(
+          product.name,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        subtitle: Text(
+          product.brand ?? '',
+          style: theme.textTheme.bodySmall,
+        ),
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: isDanger ? theme.colorScheme.errorContainer : theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+            color: isDanger 
+                ? theme.colorScheme.errorContainer 
+                : (isDark
+                    ? theme.colorScheme.primaryContainer.withValues(alpha: 0.4)
+                    : theme.colorScheme.primaryContainer.withValues(alpha: 0.5)),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
             '$days ${l10n.days}',
             style: TextStyle(
-              fontWeight: FontWeight.bold, 
-              color: isDanger ? theme.colorScheme.onErrorContainer : theme.colorScheme.onPrimaryContainer,
+              fontWeight: FontWeight.bold,
+              color: isDanger
+                  ? theme.colorScheme.onErrorContainer
+                  : (isDark
+                      ? theme.colorScheme.onPrimaryContainer
+                      : theme.colorScheme.onPrimaryContainer),
             ),
           ),
         ),
@@ -317,8 +389,9 @@ class _HomeScreenState extends State<HomeScreen> {
     String subtitle,
     Color bgColor,
     VoidCallback onTap,
+    ThemeData theme,
+    bool isDark,
   ) {
-    final theme = Theme.of(context);
     return Card(
       elevation: 0,
       color: bgColor,
@@ -331,17 +404,28 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 32, color: theme.colorScheme.onSurfaceVariant),
+              Icon(
+                icon,
+                size: 32,
+                color: isDark
+                    ? theme.colorScheme.onSurfaceVariant
+                    : theme.colorScheme.onSurfaceVariant,
+              ),
               const SizedBox(height: 12),
               Text(
-                title, 
-                style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)
+                title,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSurface,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
                 subtitle,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7)
+                  color: isDark
+                      ? theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8)
+                      : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                 ),
                 textAlign: TextAlign.center,
               ),

@@ -2,15 +2,15 @@
 import 'package:flutter/material.dart';
 import '../models/beauty_product.dart';
 
-class ProductCard extends StatelessWidget {
+class ProductCard extends StatefulWidget {
   final BeautyProduct product;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
-  final VoidCallback? onDelete;
-  final VoidCallback? onMove;
+  final VoidCallback? onDelete; // Mantenemos por si lo usas luego
+  final VoidCallback? onMove;   // Mantenemos por si lo usas luego
 
   const ProductCard({
-    super.key, // Actualizado a sintaxis moderna
+    super.key,
     required this.product,
     this.onTap,
     this.onLongPress,
@@ -19,131 +19,128 @@ class ProductCard extends StatelessWidget {
   });
 
   @override
+  State<ProductCard> createState() => _ProductCardState();
+}
+
+class _ProductCardState extends State<ProductCard> with SingleTickerProviderStateMixin {
+  late AnimationController _scaleController;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _scaleController = AnimationController(
+      duration: const Duration(milliseconds: 150),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.98).animate(
+      CurvedAnimation(parent: _scaleController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _scaleController.dispose();
+    super.dispose();
+  }
+
+  void _handleTap() {
+    _scaleController.forward().then((_) => _scaleController.reverse());
+    widget.onTap?.call();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
+    final isDark = theme.brightness == Brightness.dark;
     
-    // Creamos colores sutiles basados en el texto principal (onSurface)
-    // Esto asegura que hereden el tono "ciruela" de fondo automáticamente
+    // Colores dinámicos extraídos de tu lógica anterior
     final subtleBg = theme.colorScheme.onSurface.withValues(alpha: 0.05);
     final subtleIcon = theme.colorScheme.onSurface.withValues(alpha: 0.4);
-    final subtitleColor = theme.colorScheme.onSurface.withValues(alpha: 0.7);
-    final labelColor = theme.colorScheme.onSurface.withValues(alpha: 0.5);
     final borderColor = theme.colorScheme.onSurface.withValues(alpha: 0.1);
-    
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: theme.colorScheme.surface, // Ya configurado en themes.dart
-      elevation: isDarkMode ? 0 : 2, // En oscuro queda mejor sin sombra, solo con borde
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: isDarkMode 
-            ? BorderSide(color: borderColor)
-            : BorderSide.none,
-      ),
-      child: InkWell(
-        onTap: onTap,
-        onLongPress: onLongPress,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              // Imagen del producto
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: subtleBg, // Fondo dinámico que sirve para ambos temas
-                ),
-                child: product.imageUrl != null && product.imageUrl!.isNotEmpty
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          product.imageUrl!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Icon(
-                              Icons.image_not_supported,
-                              color: subtleIcon,
-                              size: 30,
-                            );
-                          },
-                        ),
-                      )
-                    : Icon(
-                        Icons.face_rounded,
-                        color: subtleIcon,
-                        size: 30,
-                      ),
-              ),
-              const SizedBox(width: 12),
-              
-              // Información del producto
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      product.name,
-                      style: theme.textTheme.titleMedium, // Ya usa el color del tema
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    if (product.brand != null && product.brand!.isNotEmpty)
+
+    return ScaleTransition(
+      scale: _scaleAnimation,
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        color: theme.colorScheme.surface,
+        elevation: isDark ? 0 : 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: BorderSide(color: borderColor),
+        ),
+        child: InkWell(
+          onTap: _handleTap,
+          onLongPress: widget.onLongPress,
+          borderRadius: BorderRadius.circular(14),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                // Imagen del producto corregida
+                _buildProductImage(theme, subtleBg, subtleIcon),
+                
+                const SizedBox(width: 14),
+                
+                // Información (Nombre y Marca)
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        product.brand!,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: subtitleColor,
-                        ),
-                      ),
-                    if (product.categories != null && product.categories!.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        product.categories!.take(2).join(', '),
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: labelColor,
+                        widget.product.name, // Acceso correcto vía widget.
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                    ],
-                  ],
-                ),
-              ),
-              
-              // Acciones
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (onMove != null)
-                    IconButton(
-                      icon: Icon(
-                        Icons.swap_horiz,
-                        color: theme.colorScheme.primary, // Rosa en oscuro, ciruela en claro
+                      const SizedBox(height: 4),
+                      Text(
+                        (widget.product.brand != null && widget.product.brand!.isNotEmpty)
+                            ? widget.product.brand!
+                            : 'Sin marca',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
                       ),
-                      onPressed: onMove,
-                      tooltip: 'Mover a otra lista',
-                    ),
-                  if (onDelete != null)
-                    IconButton(
-                      icon: const Icon(Icons.delete_outline),
-                      onPressed: onDelete,
-                      tooltip: 'Eliminar',
-                      color: theme.colorScheme.error,
-                    ),
-                  Icon(
-                    Icons.chevron_right,
-                    color: subtleIcon,
+                    ],
                   ),
-                ],
-              ),
-            ],
+                ),
+                
+                // Icono de flecha o acciones
+                Icon(
+                  Icons.chevron_right,
+                  color: subtleIcon,
+                  size: 20,
+                ),
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildProductImage(ThemeData theme, Color bg, Color iconColor) {
+    return Container(
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: bg,
+      ),
+      child: widget.product.imageUrl != null && widget.product.imageUrl!.isNotEmpty
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.network(
+                widget.product.imageUrl!,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => 
+                    Icon(Icons.image_not_supported_outlined, color: iconColor, size: 28),
+              ),
+            )
+          : Icon(Icons.spa_outlined, color: iconColor, size: 28),
     );
   }
 }

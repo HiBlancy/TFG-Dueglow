@@ -18,98 +18,114 @@ class MyProductsScreen extends StatefulWidget {
 
 class _MyProductsScreenState extends State<MyProductsScreen> {
   final ProductService _productService = ProductService();
-  
+
   ProductListType? _selectedListType;
   List<BeautyProduct> _allProducts = [];
   List<BeautyProduct> _filteredProducts = [];
   bool _isLoading = true;
   String? _error;
 
+  final ScrollController _scrollController = ScrollController();
+  int _currentPage = 1;
+  bool _isMoreLoading = false; // Para el spinner al final de la lista
+  bool _hasMore = true;
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
     _selectedListType = widget.initialListType;
-    _loadProducts();
+    _refreshProducts(); 
+
+    // Escuchamos el scroll
+    _scrollController.addListener(() {
+      // Si llegamos casi al final (200px antes) y no estamos cargando ya...
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200) {
+        if (!_isMoreLoading && _hasMore && !_isLoading) {
+          _loadProducts(reset: false);
+        }
+      }
+    });
   }
 
-  Future<void> _loadProducts() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
+  Future<void> _loadProducts({bool reset = false}) async {
+    if (reset) {
+      setState(() {
+        _isLoading = true;
+        _currentPage = 1;
+        _allProducts = []; // Limpiamos para empezar de cero
+        _hasMore = true;
+      });
+    } else {
+      setState(() => _isMoreLoading = true);
+    }
 
     try {
-      final allProducts = await _productService.getProducts();
-      
-      if (mounted) {
+      // IMPORTANTE: Pasamos page, limit y el filtro al backend
+      final response = await _productService.getProducts(
+        page: _currentPage,
+        limit: 12,
+        listType: _selectedListType?.value,
+      );
+
+      if (mounted && response != null) {
         setState(() {
-          _allProducts = allProducts;
-          _filteredProducts = _applyFilter(allProducts, _selectedListType);
+          _allProducts.addAll(
+            response.products,
+          ); // Añadimos los nuevos a los que ya había
+          _filteredProducts = _allProducts;
+          _currentPage++;
+
+          // Comprobamos si el backend dice que no hay más
+          if (response.currentPage >= response.totalPages) {
+            _hasMore = false;
+          }
+
           _isLoading = false;
+          _isMoreLoading = false;
         });
       }
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _error = 'Error al cargar los productos: $e';
-          _isLoading = false;
-        });
-      }
+      setState(() {
+        _error = 'Error: $e';
+        _isLoading = false;
+        _isMoreLoading = false;
+      });
     }
-  }
-
-  List<BeautyProduct> _applyFilter(List<BeautyProduct> products, ProductListType? listType) {
-    if (listType == null) {
-      return products; 
-    }
-    return products.where((product) {
-      return product.listType == listType.value;
-    }).toList();
   }
 
   Future<void> _refreshProducts() async {
-    await _loadProducts();
+    await _loadProducts(reset: true);
   }
 
   void _changeListType(ProductListType? newType) {
     setState(() {
-      if (_selectedListType == newType) {
-        _selectedListType = null; 
-      } else {
-        _selectedListType = newType; 
-      }
-      _filteredProducts = _applyFilter(_allProducts, _selectedListType);
+      _selectedListType = (_selectedListType == newType) ? null : newType;
     });
+    _loadProducts(reset: true);
   }
 
   Future<void> _navigateToProduct(BeautyProduct product) async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ProductScreen(product: product, isFromSearch: false),
-      ),
-    );
-    await _loadProducts();
-  }
-
-  void _showCustomSnackBar(String message, {bool isError = false}) {
-    final theme = Theme.of(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message, style: const TextStyle(color: Colors.white)),
-        backgroundColor: isError ? theme.colorScheme.error : theme.colorScheme.primary,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
+  await Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => ProductScreen(product: product, isFromSearch: false),
+    ),
+  );
+  await _refreshProducts(); // Refrescar al volver
+}
 
   String _getTitle() {
     if (_selectedListType == null) {
-      return 'Todos los productos (${_filteredProducts.length})';
+      return 'Todos los productos';
     }
-    return '${_selectedListType!.label} (${_filteredProducts.length})';
+    return _selectedListType!.label;
   }
 
   String _getEmptyMessage() {
@@ -151,7 +167,6 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final subtleText = theme.colorScheme.onSurface.withOpacity(0.6);
 
     return CustomAppBar(
       title: 'Mis Productos',
@@ -159,30 +174,51 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
       showBackButton: true,
       child: Column(
         children: [
+          // Filter Chips Section
           _buildFilterChips(theme),
-          const SizedBox(height: 8),
+
+          // Title and Count Section
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  _getTitle(),
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: subtleText,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _getTitle(),
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${_filteredProducts.length} producto${_filteredProducts.length != 1 ? 's' : ''}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.6,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 if (_selectedListType != null)
-                  TextButton(
+                  TextButton.icon(
                     onPressed: () => _changeListType(_selectedListType),
-                    style: TextButton.styleFrom(foregroundColor: theme.colorScheme.primary),
-                    child: const Text('Mostrar todos'),
+                    icon: const Icon(Icons.close, size: 18),
+                    label: const Text('Limpiar'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: theme.colorScheme.primary,
+                    ),
                   ),
               ],
             ),
           ),
+
+          // Products List
           Expanded(
             child: RefreshIndicator(
               onRefresh: _refreshProducts,
@@ -196,13 +232,17 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
   }
 
   Widget _buildFilterChips(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface, // Fondo adaptativo
+        color: theme.colorScheme.surface,
         border: Border(
           bottom: BorderSide(
-            color: theme.colorScheme.onSurface.withOpacity(0.1),
+            color: isDark
+                ? theme.colorScheme.outline.withValues(alpha: 0.1)
+                : theme.colorScheme.outline.withValues(alpha: 0.08),
             width: 1,
           ),
         ),
@@ -214,7 +254,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
             final isSelected = _selectedListType == type;
             final count = _getProductCountByType(type);
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 6),
               child: _buildFilterChip(type, isSelected, count, theme),
             );
           }).toList(),
@@ -223,24 +263,35 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
     );
   }
 
-  Widget _buildFilterChip(ProductListType type, bool isSelected, int count, ThemeData theme) {
-    final unselectedBg = theme.colorScheme.onSurface.withOpacity(0.05);
-    final unselectedBorder = theme.colorScheme.onSurface.withOpacity(0.1);
-    final unselectedText = theme.colorScheme.onSurface.withOpacity(0.7);
+  Widget _buildFilterChip(
+    ProductListType type,
+    bool isSelected,
+    int count,
+    ThemeData theme,
+  ) {
+    final isDark = theme.brightness == Brightness.dark;
 
-    return GestureDetector(
-      onTap: () => _changeListType(type),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? type.color : unselectedBg,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? type.color : unselectedBorder,
-            width: 1,
-          ),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: isSelected
+            ? type.color
+            : (isDark
+                  ? theme.colorScheme.surface.withValues(alpha: 0.8)
+                  : theme.colorScheme.primary.withValues(alpha: 0.08)),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isSelected
+              ? type.color
+              : (isDark
+                    ? type.color.withValues(alpha: 0.3)
+                    : type.color.withValues(alpha: 0.2)),
+          width: isSelected ? 2 : 1.5,
         ),
+      ),
+      child: GestureDetector(
+        onTap: () => _changeListType(type),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -249,12 +300,13 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
               color: isSelected ? Colors.white : type.color,
               size: 18,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 6),
             Text(
               type.label,
               style: TextStyle(
-                color: isSelected ? Colors.white : unselectedText,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? Colors.white : type.color,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                fontSize: 13,
               ),
             ),
             if (count > 0) ...[
@@ -262,10 +314,10 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: isSelected 
-                      ? Colors.white.withOpacity(0.3) 
-                      : type.color.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
+                  color: isSelected
+                      ? Colors.white.withValues(alpha: 0.3)
+                      : type.color.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
                   '$count',
@@ -277,10 +329,6 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
                 ),
               ),
             ],
-            if (isSelected) ...[
-              const SizedBox(width: 4),
-              const Icon(Icons.close, color: Colors.white, size: 16),
-            ],
           ],
         ),
       ),
@@ -289,7 +337,12 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
 
   Widget _buildContent(ThemeData theme) {
     if (_isLoading) {
-      return Center(child: CircularProgressIndicator(color: theme.colorScheme.primary));
+      return Center(
+        child: CircularProgressIndicator(
+          color: theme.colorScheme.primary,
+          strokeWidth: 3,
+        ),
+      );
     }
 
     if (_error != null) {
@@ -297,21 +350,32 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: theme.colorScheme.error.withOpacity(0.7)),
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: theme.colorScheme.error.withValues(alpha: 0.6),
+            ),
             const SizedBox(height: 16),
             Text(
               _error!,
               textAlign: TextAlign.center,
-              style: TextStyle(color: theme.colorScheme.error),
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.error,
+              ),
             ),
-            const SizedBox(height: 16),
-            ElevatedButton(
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
               onPressed: _loadProducts,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Reintentar'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.colorScheme.primary,
                 foregroundColor: theme.colorScheme.onPrimary,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
               ),
-              child: const Text('Reintentar'),
             ),
           ],
         ),
@@ -323,24 +387,37 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              _selectedListType?.icon ?? Icons.inbox_outlined,
-              size: 80,
-              color: theme.colorScheme.onSurface.withOpacity(0.3),
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: theme.colorScheme.primary.withValues(alpha: 0.1),
+              ),
+              child: Icon(
+                _selectedListType?.icon ?? Icons.inbox_outlined,
+                size: 56,
+                color: theme.colorScheme.primary.withValues(alpha: 0.5),
+              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Text(
               _getEmptyMessage(),
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
+              padding: const EdgeInsets.symmetric(horizontal: 40),
               child: Text(
                 _getEmptySubMessage(),
                 textAlign: TextAlign.center,
-                style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  height: 1.5,
+                ),
               ),
             ),
           ],
@@ -349,126 +426,25 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
     }
 
     return ListView.builder(
+      controller: _scrollController, // <--- No olvides asignar el controller
       padding: const EdgeInsets.only(bottom: 24),
-      itemCount: _filteredProducts.length,
+      // Añadimos +1 al conteo si estamos cargando más para mostrar el spinner
+      itemCount: _filteredProducts.length + (_isMoreLoading ? 1 : 0),
       itemBuilder: (context, index) {
-        final product = _filteredProducts[index];
-        return ProductCard(
-          product: product,
-          onTap: () => _navigateToProduct(product),
-          onDelete: () => _showDeleteDialog(product),
-          onMove: () => _showMoveToListDialog(product),
-        );
+        if (index < _filteredProducts.length) {
+          final product = _filteredProducts[index];
+          return ProductCard(
+            product: product,
+            onTap: () => _navigateToProduct(product),
+          );
+        } else {
+          // Este es el spinner que sale abajo del todo
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 32),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
       },
     );
-  }
-
-  Future<void> _showDeleteDialog(BeautyProduct product) async {
-    final theme = Theme.of(context);
-    
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: theme.colorScheme.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: theme.brightness == Brightness.dark 
-              ? BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.1))
-              : BorderSide.none,
-        ),
-        title: Text('Eliminar producto', style: theme.textTheme.titleLarge),
-        content: Text(
-          '¿Estás seguro de que quieres eliminar "${product.name}"?',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurface.withOpacity(0.7)
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancelar', style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6))),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: theme.colorScheme.error,
-              foregroundColor: theme.colorScheme.onError,
-              elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            child: const Text('Eliminar'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm == true) {
-      setState(() => _isLoading = true);
-      try {
-        if (product.id != null) {
-          await _productService.deleteProduct(product.id!);
-          await _loadProducts();
-          if (mounted) {
-            _showCustomSnackBar('Producto eliminado correctamente');
-          }
-        }
-      } catch (e) {
-        if (mounted) {
-          _showCustomSnackBar('Error al eliminar: $e', isError: true);
-          setState(() => _isLoading = false);
-        }
-      }
-    }
-  }
-
-  Future<void> _showMoveToListDialog(BeautyProduct product) async {
-    final theme = Theme.of(context);
-    
-    final newListType = await showDialog<ProductListType?>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: theme.colorScheme.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: theme.brightness == Brightness.dark 
-              ? BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.1))
-              : BorderSide.none,
-        ),
-        title: Text('Mover a otra lista', style: theme.textTheme.titleLarge),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: ProductListType.values.map((type) {
-            final isCurrentType = product.listType == type.value;
-            return ListTile(
-              leading: Icon(type.icon, color: type.color),
-              title: Text(type.label, style: theme.textTheme.bodyMedium),
-              trailing: isCurrentType 
-                  ? Icon(Icons.check_circle, color: type.color, size: 20)
-                  : null,
-              onTap: () => Navigator.pop(context, type),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-
-    if (newListType != null && product.listType != newListType.value) {
-      setState(() => _isLoading = true);
-      try {
-        final updatedProduct = product.copyWith(listType: newListType.value);
-        if (product.id != null) {
-          await _productService.updateProduct(product.id!, updatedProduct.toBackendJson());
-          await _loadProducts();
-          if (mounted) {
-            _showCustomSnackBar('Producto movido a ${newListType.label.toLowerCase()}');
-          }
-        }
-      } catch (e) {
-        if (mounted) {
-          _showCustomSnackBar('Error al mover: $e', isError: true);
-          setState(() => _isLoading = false);
-        }
-      }
-    }
   }
 }

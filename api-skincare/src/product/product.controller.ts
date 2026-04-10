@@ -18,6 +18,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { MoveProductDto } from './dto/move-product.dto';
 import { AuthGuard } from '../users/guards/auth.guard';
+import { PaginationDto } from '../pagination/pagination.dto';
 
 @Controller('products')
 @UseGuards(AuthGuard)
@@ -35,9 +36,19 @@ export class ProductController {
   }
 
   @Get()
-  async findAll(@Req() req, @Query('listType') listType?: string) {
-    const products = await this.productService.findAllByUser(req.user._id, listType);
-    return this.successResponse('Productos obtenidos', products);
+  async findAll(
+    @Req() req,
+    @Query() paginationDto: PaginationDto, // Recibe page y limit
+    @Query('listType') listType?: string
+  ) {
+    // Pasamos el DTO al servicio
+    const result = await this.productService.findAllByUserPaginated(
+      req.user._id,
+      paginationDto,
+      listType
+    );
+
+    return this.successResponse('Productos obtenidos con paginación', result);
   }
 
     @Get('stats/summary')

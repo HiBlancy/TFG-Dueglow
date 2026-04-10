@@ -2,6 +2,7 @@ import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { MoveProductDto } from './dto/move-product.dto';
+import { PaginationDto } from '../pagination/pagination.dto';
 export declare class ProductController {
     private readonly productService;
     constructor(productService: ProductService);
@@ -11,7 +12,7 @@ export declare class ProductController {
         message: string;
         data: any;
     }>;
-    findAll(req: any, listType?: string): Promise<{
+    findAll(req: any, paginationDto: PaginationDto, listType?: string): Promise<{
         status: boolean;
         message: string;
         data: any;

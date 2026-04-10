@@ -19,6 +19,7 @@ const create_product_dto_1 = require("./dto/create-product.dto");
 const update_product_dto_1 = require("./dto/update-product.dto");
 const move_product_dto_1 = require("./dto/move-product.dto");
 const auth_guard_1 = require("../users/guards/auth.guard");
+const pagination_dto_1 = require("../pagination/pagination.dto");
 let ProductController = class ProductController {
     productService;
     constructor(productService) {
@@ -31,9 +32,9 @@ let ProductController = class ProductController {
         const product = await this.productService.create(req.user._id, createProductDto);
         return this.successResponse('Producto añadido exitosamente', product);
     }
-    async findAll(req, listType) {
-        const products = await this.productService.findAllByUser(req.user._id, listType);
-        return this.successResponse('Productos obtenidos', products);
+    async findAll(req, paginationDto, listType) {
+        const result = await this.productService.findAllByUserPaginated(req.user._id, paginationDto, listType);
+        return this.successResponse('Productos obtenidos con paginación', result);
     }
     async getStats(req) {
         const stats = await this.productService.getStats(req.user._id);
@@ -93,9 +94,10 @@ __decorate([
 __decorate([
     (0, common_1.Get)(),
     __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Query)('listType')),
+    __param(1, (0, common_1.Query)()),
+    __param(2, (0, common_1.Query)('listType')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:paramtypes", [Object, pagination_dto_1.PaginationDto, String]),
     __metadata("design:returntype", Promise)
 ], ProductController.prototype, "findAll", null);
 __decorate([

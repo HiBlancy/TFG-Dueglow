@@ -18,7 +18,7 @@ enum ButtonSize {
   full,    // Ancho completo
 }
 
-class CustomButton extends StatelessWidget {
+class CustomButton extends StatefulWidget {
   // Propiedades requeridas
   final String text;
   final VoidCallback onPressed;
@@ -63,8 +63,34 @@ class CustomButton extends StatelessWidget {
     this.onLongPress,
   });
 
+  @override
+  State<CustomButton> createState() => _CustomButtonState();
+}
+
+class _CustomButtonState extends State<CustomButton> with SingleTickerProviderStateMixin {
+  late AnimationController _scaleController;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _scaleController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _scaleController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _scaleController.dispose();
+    super.dispose();
+  }
+
   double _getFontSize() {
-    switch (size) {
+    switch (widget.size) {
       case ButtonSize.small: return 12;
       case ButtonSize.medium: return 16;
       case ButtonSize.large: return 18;
@@ -73,7 +99,7 @@ class CustomButton extends StatelessWidget {
   }
 
   EdgeInsetsGeometry _getDefaultPadding() {
-    switch (size) {
+    switch (widget.size) {
       case ButtonSize.small:
         return const EdgeInsets.symmetric(vertical: 8, horizontal: 12);
       case ButtonSize.medium:
@@ -86,9 +112,9 @@ class CustomButton extends StatelessWidget {
   }
 
   double? _getWidth() {
-    if (width != null) return width;
+    if (widget.width != null) return widget.width;
     
-    switch (size) {
+    switch (widget.size) {
       case ButtonSize.small: return 100;
       case ButtonSize.medium: return 150;
       case ButtonSize.large: return 200;
@@ -96,75 +122,119 @@ class CustomButton extends StatelessWidget {
     }
   }
 
+  void _handlePress() {
+    if (widget.isEnabled && !widget.isLoading) {
+      _scaleController.forward().then((_) {
+        _scaleController.reverse();
+      });
+      widget.onPressed();
+    }
+  }
+
   ButtonStyle _getButtonStyle(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     
     // Colores por defecto según el tipo
     Color defaultBgColor;
     Color defaultTextColor;
     Color defaultBorderColor;
+    Color? defaultHoverColor;
     
-    switch (type) {
+    switch (widget.type) {
       case ButtonType.primary:
-        defaultBgColor = backgroundColor ?? theme.colorScheme.primary;
-        defaultTextColor = textColor ?? theme.colorScheme.onPrimary;
-        defaultBorderColor = borderColor ?? Colors.transparent;
+        defaultBgColor = widget.backgroundColor ?? theme.colorScheme.primary;
+        defaultTextColor = widget.textColor ?? theme.colorScheme.onPrimary;
+        defaultBorderColor = widget.borderColor ?? Colors.transparent;
+        // Hover: más saturado o más claro según el modo
+        defaultHoverColor = isDark 
+            ? theme.colorScheme.primary.withValues(alpha: 0.9)
+            : theme.colorScheme.primary.withValues(alpha: 0.85);
         break;
+        
       case ButtonType.secondary:
       case ButtonType.outlined:
-        defaultBgColor = backgroundColor ?? Colors.transparent;
-        defaultTextColor = textColor ?? theme.colorScheme.primary;
-        defaultBorderColor = borderColor ?? theme.colorScheme.primary;
+        defaultBgColor = widget.backgroundColor ?? Colors.transparent;
+        defaultTextColor = widget.textColor ?? theme.colorScheme.primary;
+        defaultBorderColor = widget.borderColor ?? theme.colorScheme.primary;
+        defaultHoverColor = isDark
+            ? theme.colorScheme.primary.withValues(alpha: 0.15)
+            : theme.colorScheme.primary.withValues(alpha: 0.1);
         break;
+        
       case ButtonType.danger:
-        defaultBgColor = backgroundColor ?? theme.colorScheme.error;
-        defaultTextColor = textColor ?? theme.colorScheme.onError;
-        defaultBorderColor = borderColor ?? Colors.transparent;
+        defaultBgColor = widget.backgroundColor ?? theme.colorScheme.error;
+        defaultTextColor = widget.textColor ?? theme.colorScheme.onError;
+        defaultBorderColor = widget.borderColor ?? Colors.transparent;
+        defaultHoverColor = isDark
+            ? theme.colorScheme.error.withValues(alpha: 0.9)
+            : theme.colorScheme.error.withValues(alpha: 0.85);
         break;
+        
       case ButtonType.text:
-        defaultBgColor = backgroundColor ?? Colors.transparent;
-        defaultTextColor = textColor ?? theme.colorScheme.primary;
-        defaultBorderColor = borderColor ?? Colors.transparent;
+        defaultBgColor = widget.backgroundColor ?? Colors.transparent;
+        defaultTextColor = widget.textColor ?? theme.colorScheme.primary;
+        defaultBorderColor = widget.borderColor ?? Colors.transparent;
+        defaultHoverColor = isDark
+            ? theme.colorScheme.primary.withValues(alpha: 0.15)
+            : theme.colorScheme.primary.withValues(alpha: 0.1);
         break;
     }
     
-    // Ajustar opacidad si está deshabilitado para que se vea bien en cualquier fondo
-    final bgColor = isEnabled ? defaultBgColor : defaultBgColor.withValues(alpha: 0.3);
-    final txtColor = isEnabled ? defaultTextColor : defaultTextColor.withValues(alpha: 0.5);
-    final brdColor = isEnabled ? defaultBorderColor : defaultBorderColor.withValues(alpha: 0.3);
+    // Ajustar opacidad si está deshabilitado
+    final bgColor = widget.isEnabled ? defaultBgColor : defaultBgColor.withValues(alpha: 0.3);
+    final txtColor = widget.isEnabled ? defaultTextColor : defaultTextColor.withValues(alpha: 0.5);
+    final brdColor = widget.isEnabled ? defaultBorderColor : defaultBorderColor.withValues(alpha: 0.3);
+    final hoverColor = widget.isEnabled ? defaultHoverColor : bgColor;
     
     return ElevatedButton.styleFrom(
       backgroundColor: bgColor,
       foregroundColor: txtColor,
       disabledBackgroundColor: bgColor,
       disabledForegroundColor: txtColor,
-      elevation: type == ButtonType.text ? 0 : 2,
-      shadowColor: type == ButtonType.text ? Colors.transparent : null,
-      padding: padding ?? _getDefaultPadding(),
-      minimumSize: Size(_getWidth() ?? 0, height ?? 0),
+      elevation: widget.type == ButtonType.text ? 0 : 4,
+      shadowColor: widget.type == ButtonType.text 
+          ? Colors.transparent 
+          : theme.colorScheme.shadow.withValues(alpha: 0.3),
+      padding: widget.padding ?? _getDefaultPadding(),
+      minimumSize: Size(_getWidth() ?? 0, widget.height ?? 0),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(borderRadius),
-        side: (type == ButtonType.secondary || type == ButtonType.outlined)
-            ? BorderSide(color: brdColor, width: 1.5)
+        borderRadius: BorderRadius.circular(widget.borderRadius),
+        side: (widget.type == ButtonType.secondary || widget.type == ButtonType.outlined)
+            ? BorderSide(color: brdColor, width: 2)
             : BorderSide.none,
       ),
       textStyle: TextStyle(
         fontSize: _getFontSize(),
         fontWeight: FontWeight.w600,
+        letterSpacing: 0.5,
       ),
+    ).copyWith(
+      overlayColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.hovered)) {
+          return hoverColor;
+        }
+        if (states.contains(WidgetState.pressed)) {
+          return hoverColor.withValues(alpha: 0.8);
+        }
+        return null;
+      }),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final button = ElevatedButton(
-      onPressed: (isEnabled && !isLoading) ? onPressed : null,
-      onLongPress: onLongPress,
-      style: _getButtonStyle(context),
-      child: _buildChild(context), // Pasamos el context para acceder al tema
+    Widget button = ScaleTransition(
+      scale: _scaleAnimation,
+      child: ElevatedButton(
+        onPressed: widget.isEnabled && !widget.isLoading ? _handlePress : null,
+        onLongPress: widget.onLongPress,
+        style: _getButtonStyle(context),
+        child: _buildChild(context),
+      ),
     );
     
-    if (size == ButtonSize.full || width == double.infinity) {
+    if (widget.size == ButtonSize.full || widget.width == double.infinity) {
       return SizedBox(
         width: double.infinity,
         child: button,
@@ -175,44 +245,44 @@ class CustomButton extends StatelessWidget {
   }
 
   Widget _buildChild(BuildContext context) {
-    if (isLoading) {
+    if (widget.isLoading) {
       final theme = Theme.of(context);
       
-      // ✅ Calculamos el color del loader dinámicamente según el tipo de botón
+      // Color del loader dinámico según el tipo de botón
       Color defaultLoaderColor;
-      if (type == ButtonType.primary) {
+      if (widget.type == ButtonType.primary) {
         defaultLoaderColor = theme.colorScheme.onPrimary;
-      } else if (type == ButtonType.danger) {
+      } else if (widget.type == ButtonType.danger) {
         defaultLoaderColor = theme.colorScheme.onError;
       } else {
-        defaultLoaderColor = theme.colorScheme.primary; // Para secondary, text, etc.
+        defaultLoaderColor = theme.colorScheme.primary;
       }
 
       return SizedBox(
         height: _getFontSize() + 4,
         width: _getFontSize() + 4,
         child: CircularProgressIndicator(
-          strokeWidth: 2,
+          strokeWidth: 2.5,
           valueColor: AlwaysStoppedAnimation<Color>(
-            loadingColor ?? defaultLoaderColor,
+            widget.loadingColor ?? defaultLoaderColor,
           ),
         ),
       );
     }
     
-    if (icon != null) {
+    if (widget.icon != null) {
       return Row(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: _getFontSize() + 4),
-          const SizedBox(width: 8),
-          Text(text),
+          Icon(widget.icon, size: _getFontSize() + 4),
+          const SizedBox(width: 10),
+          Text(widget.text),
         ],
       );
     }
     
-    return Text(text);
+    return Text(widget.text);
   }
 }
 

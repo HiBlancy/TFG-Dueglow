@@ -2,6 +2,7 @@ import { Model } from 'mongoose';
 import { Product } from './interfaces/product.interface';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { PaginationDto } from '../pagination/pagination.dto';
 export declare class ProductService {
     private readonly productModel;
     constructor(productModel: Model<Product>);
@@ -27,4 +28,19 @@ export declare class ProductService {
     private calculateExpirationDate;
     private calculateExpirationFromPeriod;
     private parsePeriodToMonths;
+    findAllByUserPaginated(userId: string, paginationDto: PaginationDto, listType?: string): Promise<{
+        data: (import("mongoose").Document<unknown, {}, Product, {}, import("mongoose").DefaultSchemaOptions> & Product & Required<{
+            _id: string;
+        }> & {
+            __v: number;
+        } & {
+            id: string;
+        })[];
+        info: {
+            totalProducts: number;
+            totalPages: number;
+            page: number;
+            limit: number;
+        };
+    }>;
 }

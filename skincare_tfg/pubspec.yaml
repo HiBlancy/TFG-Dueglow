@@ -31,6 +31,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  
+  assets:
+    - assets/logo.png
   # ========== ACTIVAR GENERADOR DE IDIOMAS (NUEVO) ==========
   generate: true
