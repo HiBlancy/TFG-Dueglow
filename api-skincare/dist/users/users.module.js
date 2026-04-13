@@ -15,6 +15,7 @@ const users_controller_1 = require("./users.controller");
 const jwt_1 = require("@nestjs/jwt");
 const auth_guard_1 = require("./guards/auth.guard");
 const config_1 = require("@nestjs/config");
+const cloudinary_service_1 = require("../cloudinary/cloudinary.service");
 let UserModule = class UserModule {
 };
 exports.UserModule = UserModule;
@@ -25,21 +26,22 @@ exports.UserModule = UserModule = __decorate([
                 {
                     name: 'Users',
                     schema: user_schema_1.UserSchema,
-                    collection: 'users'
+                    collection: 'users',
                 },
             ]),
             jwt_1.JwtModule.registerAsync({
                 imports: [config_1.ConfigModule],
                 useFactory: async (configService) => ({
-                    secret: configService.get('JWT_SECRET') || 'mi_clave_secreta_temporal_para_desarrollo',
+                    secret: configService.get('JWT_SECRET') ||
+                        'mi_clave_secreta_temporal_para_desarrollo',
                     signOptions: { expiresIn: '3h' },
                 }),
                 inject: [config_1.ConfigService],
             }),
         ],
         controllers: [users_controller_1.UsersController],
-        providers: [users_service_1.UsersService, auth_guard_1.AuthGuard],
-        exports: [users_service_1.UsersService, auth_guard_1.AuthGuard, jwt_1.JwtModule,],
+        providers: [users_service_1.UsersService, auth_guard_1.AuthGuard, cloudinary_service_1.CloudinaryService],
+        exports: [users_service_1.UsersService, auth_guard_1.AuthGuard, jwt_1.JwtModule, cloudinary_service_1.CloudinaryService],
     })
 ], UserModule);
 //# sourceMappingURL=users.module.js.map

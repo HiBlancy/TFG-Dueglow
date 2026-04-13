@@ -2,10 +2,12 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtService } from '@nestjs/jwt';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 export declare class UsersController {
     private readonly usersService;
     private readonly jwtService;
-    constructor(usersService: UsersService, jwtService: JwtService);
+    private readonly cloudinaryService;
+    constructor(usersService: UsersService, jwtService: JwtService, cloudinaryService: CloudinaryService);
     private successResponse;
     register(createUserDto: CreateUserDto): Promise<{
         status: boolean;
@@ -26,6 +28,11 @@ export declare class UsersController {
         data: any;
     }>;
     updateProfile(updateUserDto: UpdateUserDto, req: any): Promise<{
+        status: boolean;
+        message: string;
+        data: any;
+    }>;
+    uploadProfileImage(file: Express.Multer.File, req: any): Promise<{
         status: boolean;
         message: string;
         data: any;

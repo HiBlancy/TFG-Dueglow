@@ -14,17 +14,21 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersController = void 0;
 const common_1 = require("@nestjs/common");
+const platform_express_1 = require("@nestjs/platform-express");
 const users_service_1 = require("./users.service");
 const create_user_dto_1 = require("./dto/create-user.dto");
 const update_user_dto_1 = require("./dto/update-user.dto");
 const jwt_1 = require("@nestjs/jwt");
 const auth_guard_1 = require("./guards/auth.guard");
+const cloudinary_service_1 = require("../cloudinary/cloudinary.service");
 let UsersController = class UsersController {
     usersService;
     jwtService;
-    constructor(usersService, jwtService) {
+    cloudinaryService;
+    constructor(usersService, jwtService, cloudinaryService) {
         this.usersService = usersService;
         this.jwtService = jwtService;
+        this.cloudinaryService = cloudinaryService;
     }
     successResponse(message, data = null) {
         return { status: true, message, data };
@@ -78,6 +82,47 @@ let UsersController = class UsersController {
     async updateProfile(updateUserDto, req) {
         const updatedUser = await this.usersService.update(req.user._id, updateUserDto);
         return this.successResponse('Perfil actualizado', updatedUser);
+    }
+    async uploadProfileImage(file, req) {
+        try {
+            if (!file) {
+                throw new common_1.BadRequestException('No se proporcionó ningún archivo');
+            }
+            const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
+            if (!allowedMimeTypes.includes(file.mimetype)) {
+                throw new common_1.BadRequestException(`Tipo de archivo no permitido. Permitidos: ${allowedMimeTypes.join(', ')}`);
+            }
+            const maxSizeBytes = 5 * 1024 * 1024;
+            if (file.size > maxSizeBytes) {
+                throw new common_1.BadRequestException(`El archivo es demasiado grande. Máximo: 5MB, Recibido: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+            }
+            console.log(`📤 Subiendo imagen de usuario ${req.user._id}`);
+            console.log(`   - Nombre original: ${file.originalname}`);
+            console.log(`   - MIME type: ${file.mimetype}`);
+            console.log(`   - Tamaño: ${(file.size / 1024).toFixed(2)}KB`);
+            const imageUrl = await this.cloudinaryService.uploadImage(file.buffer, `${req.user._id}_${file.originalname}`, 'user-profiles');
+            const currentUser = await this.usersService.findById(req.user._id);
+            if (currentUser?.profileImage) {
+                const publicId = this.cloudinaryService.extractPublicIdFromUrl(currentUser.profileImage);
+                if (publicId) {
+                    await this.cloudinaryService.deleteImage(publicId);
+                    console.log(`🗑️  Imagen anterior eliminada: ${publicId}`);
+                }
+            }
+            const updateDto = {
+                profileImage: imageUrl,
+            };
+            const updatedUser = await this.usersService.update(req.user._id, updateDto);
+            console.log(`✅ Imagen de perfil actualizada para usuario ${req.user._id}`);
+            console.log(`   - URL: ${imageUrl}`);
+            return this.successResponse('Imagen de perfil actualizada exitosamente', updatedUser);
+        }
+        catch (error) {
+            console.error('❌ Error al subir imagen:', error);
+            if (error instanceof common_1.BadRequestException)
+                throw error;
+            throw new common_1.BadRequestException(error.message || 'Error al subir la imagen');
+        }
     }
     async findAllUsers() {
         const users = await this.usersService.getAllUsers();
@@ -142,6 +187,29 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateProfile", null);
 __decorate([
+    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
+    (0, common_1.Patch)('me/upload-image'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('profileImage', {
+        limits: {
+            fileSize: 5 * 1024 * 1024,
+        },
+        fileFilter: (req, file, cb) => {
+            const allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
+            if (!allowedMimes.includes(file.mimetype)) {
+                cb(new common_1.BadRequestException(`Tipo de archivo no permitido. Permitidos: ${allowedMimes.join(', ')}`), false);
+            }
+            else {
+                cb(null, true);
+            }
+        },
+    })),
+    __param(0, (0, common_1.UploadedFile)()),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "uploadProfileImage", null);
+__decorate([
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
@@ -157,6 +225,7 @@ __decorate([
 exports.UsersController = UsersController = __decorate([
     (0, common_1.Controller)('users'),
     __metadata("design:paramtypes", [users_service_1.UsersService,
-        jwt_1.JwtService])
+        jwt_1.JwtService,
+        cloudinary_service_1.CloudinaryService])
 ], UsersController);
 //# sourceMappingURL=users.controller.js.map

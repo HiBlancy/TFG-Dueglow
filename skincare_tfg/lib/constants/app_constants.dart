@@ -21,5 +21,6 @@ class AppConstants {
   static const String prefUserId = 'user_id';
   static const String prefUserPhone = 'user_phone';
   static const String prefUserBD = 'user_birthday';
+  static const String prefUserProfileImage = 'user_profile_image';
   static const String prefIsLoggedIn = 'is_logged_in';
 }

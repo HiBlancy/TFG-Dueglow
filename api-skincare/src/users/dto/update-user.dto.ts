@@ -1,4 +1,11 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength, IsDateString } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MinLength,
+  IsDateString,
+} from 'class-validator';
 
 export class UpdateUserDto {
   @IsOptional()
@@ -20,7 +27,7 @@ export class UpdateUserDto {
   phone?: string;
 
   @IsOptional()
-  @IsDateString() 
+  @IsDateString()
   birthDate?: Date;
 
   @IsOptional()

@@ -3,7 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Necesitamos acceso a la cámara para escanear códigos de barras</string>
+	<string>Necesitamos acceso a la cámara para escanear códigos de barras o hacer fotos</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Necesitamos acceso a tu galería para seleccionar fotos de perfil</string>
+	<key>NSPhotoLibraryAddOnlyUsageDescription</key>
+	<string>Necesitamos permiso para guardar fotos</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

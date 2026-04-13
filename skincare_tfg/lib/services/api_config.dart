@@ -19,6 +19,7 @@ class ApiConfig {
   static String getRegisterUrl() => '$baseUrl/users/register';
   static String getLoginUrl() => '$baseUrl/users/login';
   static String getProfileUrl() => '$baseUrl/users/me';
+  static String getUploadProfileImageUrl() => '$baseUrl/users/me/upload-image';
 
   //PRODUCTS
   static String getProductsUrl() => '$baseUrl/products';

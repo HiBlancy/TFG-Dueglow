@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/app_constants.dart';
@@ -19,6 +20,7 @@ class AuthService {
     await prefs.setString(AppConstants.prefUserId, userData['_id'] ?? '');
     await prefs.setString(AppConstants.prefUserPhone, userData['phone'] ?? '');
     await prefs.setString(AppConstants.prefUserBD, userData['birthDate'] ?? '');
+    await prefs.setString(AppConstants.prefUserProfileImage, userData['profileImage'] ?? '');
     await prefs.setBool(AppConstants.prefIsLoggedIn, true);
     
     print('✅ Sesión guardada - Email: ${userData['email']}, Name: ${userData['name']}');
@@ -50,7 +52,6 @@ class AuthService {
     return prefs.getString(AppConstants.prefUserId);
   }
 
-  
   // Obtener teléfono
   Future<String?> getUserPhone() async {
     final prefs = await _prefs;
@@ -61,6 +62,12 @@ class AuthService {
   Future<String?> getUserBirthDate() async {
     final prefs = await _prefs;
     return prefs.getString(AppConstants.prefUserBD);
+  }
+
+  // Obtener imagen de perfil
+  Future<String?> getUserProfileImage() async {
+    final prefs = await _prefs;
+    return prefs.getString(AppConstants.prefUserProfileImage);
   }
   
   // Verificar si está autenticado
@@ -74,76 +81,76 @@ class AuthService {
   
   // Registrar usuario con JWT
   Future<Map<String, dynamic>?> register(String email, String password, String name) async {
-  try {
-    final url = Uri.parse(ApiConfig.getRegisterUrl());
-    
-    final cleanPassword = password;
-    
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'name': name,
-        'email': email,
-        'password': cleanPassword,
-      }),
-    ).timeout(const Duration(seconds: 10));
+    try {
+      final url = Uri.parse(ApiConfig.getRegisterUrl());
       
-      if (response.statusCode == 201 || response.statusCode == 200) {
+      final cleanPassword = password;
+      
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'name': name,
+          'email': email,
+          'password': cleanPassword,
+        }),
+      ).timeout(const Duration(seconds: 10));
+        
+        if (response.statusCode == 201 || response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          
+          if (data['status'] == true && data['data'] != null) {
+            final authData = data['data'];
+            await saveSession(authData['token'], authData['user']);
+            return authData;
+          }
+        }
+        
+        return null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+  Future<Map<String, dynamic>?> login(String email, String password) async {
+    try {
+      final url = Uri.parse(ApiConfig.getLoginUrl());
+      
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({
+          'email': email.trim(),
+          'password': password,
+        }),
+      ).timeout(const Duration(seconds: 10));
+      
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
+        print('📦 Parsed data: $data');
         
         if (data['status'] == true && data['data'] != null) {
           final authData = data['data'];
           await saveSession(authData['token'], authData['user']);
           return authData;
+        } else {
+          print('❌ Status false o data null');
+          return null;
         }
-      }
-      
-      return null;
-    } catch (e) {
-      return null;
-    }
-  }
-
-Future<Map<String, dynamic>?> login(String email, String password) async {
-  try {
-    final url = Uri.parse(ApiConfig.getLoginUrl());
-    
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: jsonEncode({
-        'email': email.trim(),
-        'password': password,
-      }),
-    ).timeout(const Duration(seconds: 10));
-    
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      final data = jsonDecode(response.body);
-      print('📦 Parsed data: $data');
-      
-      if (data['status'] == true && data['data'] != null) {
-        final authData = data['data'];
-        await saveSession(authData['token'], authData['user']);
-        return authData;
       } else {
-        print('❌ Status false o data null');
+        print('❌ Status code no es 200/201: ${response.statusCode}');
+        print('❌ Response: ${response.body}');
         return null;
       }
-    } else {
-      print('❌ Status code no es 200/201: ${response.statusCode}');
-      print('❌ Response: ${response.body}');
+    } catch (e) {
+      print('❌ Excepción en login: $e');
       return null;
     }
-  } catch (e) {
-    print('❌ Excepción en login: $e');
-    return null;
   }
-}
   
   // Obtener perfil del usuario autenticado
   Future<Map<String, dynamic>?> getProfile() async {
@@ -176,66 +183,116 @@ Future<Map<String, dynamic>?> login(String email, String password) async {
     }
   }
 
-  // Actualizar usuario
+  // Actualizar usuario (sin imagen)
   Future<Map<String, dynamic>?> updateUser({
-  String? name,
-  String? phone,
-  String? birthDate,
-  String? profileImage,
-  String? password,
-}) async {
-  final token = await getToken();
-  if (token == null) return null;
+    String? name,
+    String? phone,
+    String? birthDate,
+    String? password,
+    String? profileImage,
+  }) async {
+    final token = await getToken();
+    if (token == null) return null;
 
-  try {
-    final url = Uri.parse(ApiConfig.getProfileUrl());
-    
-    final Map<String, dynamic> updateData = {};
-    if (name != null && name.isNotEmpty) updateData['name'] = name;
-    if (phone != null && phone.isNotEmpty) updateData['phone'] = phone;
-    if (birthDate != null && birthDate.isNotEmpty) updateData['birthDate'] = birthDate;
-    if (profileImage != null && profileImage.isNotEmpty) updateData['profileImage'] = profileImage;
-    if (password != null && password.isNotEmpty) updateData['password'] = password;
+    try {
+      final url = Uri.parse(ApiConfig.getProfileUrl());
+      
+      final Map<String, dynamic> updateData = {};
+      if (name != null && name.isNotEmpty) updateData['name'] = name;
+      if (phone != null && phone.isNotEmpty) updateData['phone'] = phone;
+      if (birthDate != null && birthDate.isNotEmpty) updateData['birthDate'] = birthDate;
+      if (password != null && password.isNotEmpty) updateData['password'] = password;
+      if (profileImage != null && profileImage.isNotEmpty) updateData['profileImage'] = profileImage;
 
-    final response = await http.patch(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode(updateData),
-    );
+      final response = await http.patch(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(updateData),
+      );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['status'] == true && data['data'] != null) {
-        final updatedUser = data['data'];
-        final prefs = await _prefs;
-        
-        // Actualizar campos en SharedPreferences
-        if (updatedUser['name'] != null) {
-          await prefs.setString(AppConstants.prefUserName, updatedUser['name']);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == true && data['data'] != null) {
+          final updatedUser = data['data'];
+          final prefs = await _prefs;
+          
+          // Actualizar campos en SharedPreferences
+          if (updatedUser['name'] != null) {
+            await prefs.setString(AppConstants.prefUserName, updatedUser['name']);
+          }
+          if (updatedUser['phone'] != null) {
+            await prefs.setString(AppConstants.prefUserPhone, updatedUser['phone']);
+          }
+          if (updatedUser['birthDate'] != null) {
+            await prefs.setString(AppConstants.prefUserBD, updatedUser['birthDate']);
+          }
+          
+          print('✅ Usuario actualizado correctamente');
+          return updatedUser;
         }
-        if (updatedUser['phone'] != null) {
-          await prefs.setString(AppConstants.prefUserPhone, updatedUser['phone']);
-        }
-        if (updatedUser['birthDate'] != null) {
-          // Guardar en formato ISO para consistencia
-          await prefs.setString(AppConstants.prefUserBD, updatedUser['birthDate']);
-        }
-        
-        print('✅ Usuario actualizado correctamente');
-        return updatedUser;
       }
+      
+      print('❌ Error al actualizar: ${response.body}');
+      return null;
+    } catch (e) {
+      print('❌ Error al actualizar usuario: $e');
+      return null;
     }
-    
-    print('❌ Error al actualizar: ${response.body}');
-    return null;
-  } catch (e) {
-    print('❌ Error al actualizar usuario: $e');
-    return null;
   }
-}
+
+  // 🆕 SUBIR IMAGEN DE PERFIL (multipart/form-data)
+  Future<Map<String, dynamic>?> uploadProfileImage(File imageFile) async {
+    final token = await getToken();
+    if (token == null) {
+      print('❌ No hay token disponible');
+      return null;
+    }
+
+    try {
+      final url = Uri.parse(ApiConfig.getUploadProfileImageUrl());
+      
+      // Crear request multipart
+      final request = http.MultipartRequest('PATCH', url)
+        ..headers['Authorization'] = 'Bearer $token'
+        ..files.add(
+          await http.MultipartFile.fromPath(
+            'profileImage', // El nombre del campo esperado por el backend
+            imageFile.path,
+          ),
+        );
+
+      print('📤 Subiendo imagen de perfil...');
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == true && data['data'] != null) {
+          final updatedUser = data['data'];
+          
+          // Actualizar la imagen en SharedPreferences
+          final prefs = await _prefs;
+          if (updatedUser['profileImage'] != null) {
+            await prefs.setString(AppConstants.prefUserProfileImage, updatedUser['profileImage']);
+          }
+          
+          print('✅ Imagen de perfil actualizada correctamente');
+          return updatedUser;
+        }
+      } else {
+        print('❌ Error al subir imagen: ${response.statusCode}');
+        print('❌ Response: ${response.body}');
+      }
+      
+      return null;
+    } catch (e) {
+      print('❌ Error al subir imagen: $e');
+      return null;
+    }
+  }
 
   // Cerrar sesión
   Future<void> logout() async {
@@ -246,6 +303,7 @@ Future<Map<String, dynamic>?> login(String email, String password) async {
     await prefs.remove(AppConstants.prefUserId);
     await prefs.remove(AppConstants.prefUserPhone);
     await prefs.remove(AppConstants.prefUserBD);
+    await prefs.remove(AppConstants.prefUserProfileImage);
     await prefs.setBool(AppConstants.prefIsLoggedIn, false);
     print('👋 Sesión cerrada');
   }
