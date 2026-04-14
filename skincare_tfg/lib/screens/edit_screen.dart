@@ -18,20 +18,21 @@ class _EditScreenState extends State<EditScreen> {
   final _authService = AuthService();
   final _imageService = ImageService();
   final _formKey = GlobalKey<FormState>();
-  
+
   // Controllers
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
   late TextEditingController _birthDateController;
   late TextEditingController _passwordController;
   late TextEditingController _confirmPasswordController;
-  
+
   // Estado
   bool _isLoading = true;
   bool _isSaving = false;
   bool _isUploadingImage = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _shouldDeleteImage = false;
   File? _selectedImage;
   String? _currentProfileImageUrl;
 
@@ -43,18 +44,18 @@ class _EditScreenState extends State<EditScreen> {
 
   Future<void> _loadUserData() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final name = await _authService.getUserName();
       final phone = await _authService.getUserPhone();
       final birthDate = await _authService.getUserBirthDate();
       final profileImage = await _authService.getUserProfileImage();
-      
+
       String formattedBirthDate = '';
       if (birthDate != null && birthDate.isNotEmpty) {
         formattedBirthDate = _formatDateForDisplay(birthDate);
       }
-      
+
       if (mounted) {
         _nameController = TextEditingController(text: name ?? '');
         _phoneController = TextEditingController(text: phone ?? '');
@@ -62,7 +63,7 @@ class _EditScreenState extends State<EditScreen> {
         _passwordController = TextEditingController();
         _confirmPasswordController = TextEditingController();
         _currentProfileImageUrl = profileImage;
-        
+
         setState(() => _isLoading = false);
       }
     } catch (e) {
@@ -86,7 +87,9 @@ class _EditScreenState extends State<EditScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message, style: const TextStyle(color: Colors.white)),
-        backgroundColor: isError ? theme.colorScheme.error : theme.colorScheme.primary,
+        backgroundColor: isError
+            ? theme.colorScheme.error
+            : theme.colorScheme.primary,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         duration: const Duration(seconds: 2),
@@ -136,12 +139,24 @@ class _EditScreenState extends State<EditScreen> {
                 ),
                 if (_selectedImage != null || _currentProfileImageUrl != null)
                   ListTile(
-                    leading: const Icon(Icons.delete_outline, color: Colors.red),
-                    title: const Text('Eliminar foto', style: TextStyle(color: Colors.red)),
+                    leading: const Icon(
+                      Icons.delete_outline,
+                      color: Colors.red,
+                    ),
+                    title: const Text(
+                      'Eliminar foto',
+                      style: TextStyle(color: Colors.red),
+                    ),
                     onTap: () {
                       Navigator.pop(context);
-                      _deleteImage();
-                      _showCustomSnackBar('Foto removida');
+                      setState(() {
+                        _shouldDeleteImage = true;
+                        _selectedImage = null;
+                        _currentProfileImageUrl = null;
+                      });
+                      _showCustomSnackBar(
+                        'Foto marcada para eliminar al guardar',
+                      );
                     },
                   ),
                 const SizedBox(height: 8),
@@ -156,160 +171,122 @@ class _EditScreenState extends State<EditScreen> {
   // 🆕 Seleccionar imagen desde cámara
   Future<void> _pickImageFromCamera() async {
     setState(() => _isUploadingImage = true);
-    
+
     final imageFile = await _imageService.takePhotoWithCamera();
-    
+
     if (imageFile != null) {
       setState(() => _selectedImage = imageFile);
       _showCustomSnackBar('Foto capturada correctamente');
-      
+
       // Mostrar info de la imagen
       final info = await _imageService.getImageInfo(imageFile);
       print('📸 Info de imagen: $info');
     } else {
       _showCustomSnackBar('No se pudo capturar la foto', isError: true);
     }
-    
+
     setState(() => _isUploadingImage = false);
   }
 
   // 🆕 Seleccionar imagen desde galería
   Future<void> _pickImageFromGallery() async {
     setState(() => _isUploadingImage = true);
-    
+
     final imageFile = await _imageService.pickImageFromGallery();
-    
+
     if (imageFile != null) {
       setState(() => _selectedImage = imageFile);
       _showCustomSnackBar('Imagen seleccionada correctamente');
-      
+
       // Mostrar info de la imagen
       final info = await _imageService.getImageInfo(imageFile);
       print('🖼️ Info de imagen: $info');
     } else {
       _showCustomSnackBar('No se pudo seleccionar la imagen', isError: true);
     }
-    
+
     setState(() => _isUploadingImage = false);
   }
 
-  // 🆕 Subir imagen al backend
-  Future<void> _uploadProfileImage() async {
-    if (_selectedImage == null) {
-      _showCustomSnackBar('No hay imagen para subir', isError: true);
-      return;
-    }
+ Future<void> _saveChanges() async {
+  if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isUploadingImage = true);
-
-    try {
-      final result = await _authService.uploadProfileImage(_selectedImage!);
-      
-      if (result != null && mounted) {
-        setState(() {
-          _currentProfileImageUrl = result['profileImage'];
-          _selectedImage = null;
-        });
-        _showCustomSnackBar('Foto de perfil actualizada correctamente');
-      } else if (mounted) {
-        _showCustomSnackBar('Error al subir la imagen', isError: true);
-      }
-    } catch (e) {
-      print('❌ Error en _uploadProfileImage: $e');
-      _showCustomSnackBar('Error al subir la imagen', isError: true);
-    } finally {
-      setState(() => _isUploadingImage = false);
-    }
+  if (_passwordController.text.isNotEmpty &&
+      _passwordController.text != _confirmPasswordController.text) {
+    _showCustomSnackBar('Las contraseñas no coinciden', isError: true);
+    return;
   }
 
-  Future<void> _deleteImage() async {
-  final confirm = await showDialog<bool>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Eliminar foto'),
-      content: const Text('¿Estás seguro de que quieres eliminar tu foto de perfil?'),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: const Text('Cancelar'),
-        ),
-        TextButton(
-          onPressed: () => Navigator.pop(context, true),
-          style: TextButton.styleFrom(foregroundColor: Colors.red),
-          child: const Text('Eliminar'),
-        ),
-      ],
-    ),
-  );
+  setState(() => _isSaving = true);
 
-  if (confirm != true) return;
-
-  setState(() => _isUploadingImage = true);
+  String? finalProfileImageUrl = _currentProfileImageUrl;
 
   try {
-    final updatedUser = await _authService.deleteProfileImage();
-    
-    if (updatedUser != null && mounted) {
-      setState(() {
-        _currentProfileImageUrl = null;
-        _selectedImage = null;
-      });
-      _showCustomSnackBar('Foto de perfil eliminada correctamente');
-    } else {
-      _showCustomSnackBar('Error al eliminar la foto', isError: true);
+    // 1️⃣ Eliminar imagen si está marcado
+    if (_shouldDeleteImage) {
+      final deleted = await _authService.deleteProfileImage();
+      if (deleted != null) {
+        finalProfileImageUrl = null;
+        _shouldDeleteImage = false;
+      } else {
+        _showCustomSnackBar('Error al eliminar la foto', isError: true);
+        setState(() => _isSaving = false);
+        return;
+      }
     }
-  } catch (e) {
-    print('❌ Error eliminando imagen: $e');
-    _showCustomSnackBar('Error al eliminar la foto', isError: true);
-  } finally {
-    if (mounted) setState(() => _isUploadingImage = false);
-  }
-}
 
-  Future<void> _saveChanges() async {
-    if (!_formKey.currentState!.validate()) return;
-    
-    if (_passwordController.text.isNotEmpty && 
-        _passwordController.text != _confirmPasswordController.text) {
-      _showCustomSnackBar('Las contraseñas no coinciden', isError: true);
-      return;
+    // 2️⃣ Subir nueva imagen si se seleccionó
+    if (_selectedImage != null) {
+      final uploaded = await _authService.uploadProfileImage(_selectedImage!);
+      if (uploaded != null && uploaded['profileImage'] != null) {
+        finalProfileImageUrl = uploaded['profileImage'];
+      } else {
+        _showCustomSnackBar('Error al subir la nueva foto', isError: true);
+        setState(() => _isSaving = false);
+        return;
+      }
     }
-    
-    setState(() => _isSaving = true);
-    
+
+    // 3️⃣ Preparar datos de actualización
     String? formattedBirthDate;
     if (_birthDateController.text.isNotEmpty) {
       formattedBirthDate = _convertToISODate(_birthDateController.text);
     }
-    
-    final result = await _authService.updateUser(
+
+    final updateResult = await _authService.updateUser(
       name: _nameController.text.isNotEmpty ? _nameController.text : null,
       phone: _phoneController.text.isNotEmpty ? _phoneController.text : null,
       birthDate: formattedBirthDate,
       password: _passwordController.text.isNotEmpty ? _passwordController.text : null,
+      profileImage: finalProfileImageUrl, // null si se eliminó, o la nueva URL
     );
-    
-    setState(() => _isSaving = false);
-    
-    if (result != null && mounted) {
+
+    if (updateResult != null && mounted) {
+      await _authService.getProfile();
       _showCustomSnackBar('Perfil actualizado correctamente');
       Navigator.pop(context, true);
-    } else if (mounted) {
+    } else {
       _showCustomSnackBar('Error al actualizar el perfil', isError: true);
     }
+  } catch (e) {
+    print('❌ Error en _saveChanges: $e');
+    _showCustomSnackBar('Error al guardar los cambios', isError: true);
+  } finally {
+    if (mounted) setState(() => _isSaving = false);
   }
-  
+}
+
   Future<void> _selectDate() async {
     DateTime initialDate = DateTime.now();
-    
+
     if (_birthDateController.text.isNotEmpty) {
       try {
         if (_birthDateController.text.contains('/')) {
           final parts = _birthDateController.text.split('/');
           initialDate = DateTime(
-            int.parse(parts[2]), 
-            int.parse(parts[1]), 
-            int.parse(parts[0])
+            int.parse(parts[2]),
+            int.parse(parts[1]),
+            int.parse(parts[0]),
           );
         } else {
           initialDate = DateTime.parse(_birthDateController.text);
@@ -318,7 +295,7 @@ class _EditScreenState extends State<EditScreen> {
         initialDate = DateTime.now();
       }
     }
-    
+
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: initialDate,
@@ -326,7 +303,7 @@ class _EditScreenState extends State<EditScreen> {
       lastDate: DateTime.now(),
       helpText: 'Selecciona tu fecha de nacimiento',
     );
-    
+
     if (picked != null) {
       setState(() {
         _birthDateController.text = _formatDateForUI(picked);
@@ -343,9 +320,9 @@ class _EditScreenState extends State<EditScreen> {
       if (dateStr.contains('/')) {
         final parts = dateStr.split('/');
         final date = DateTime(
-          int.parse(parts[2]), 
-          int.parse(parts[1]), 
-          int.parse(parts[0])
+          int.parse(parts[2]),
+          int.parse(parts[1]),
+          int.parse(parts[0]),
         );
         return date.toIso8601String().split('T')[0];
       }
@@ -369,13 +346,17 @@ class _EditScreenState extends State<EditScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return CustomAppBar(
       title: 'Editar Perfil',
       showDrawer: true,
       showBackButton: true,
       child: _isLoading
-          ? Center(child: CircularProgressIndicator(color: theme.colorScheme.primary))
+          ? Center(
+              child: CircularProgressIndicator(
+                color: theme.colorScheme.primary,
+              ),
+            )
           : Form(
               key: _formKey,
               child: ListView(
@@ -417,7 +398,9 @@ class _EditScreenState extends State<EditScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Divider(color: theme.colorScheme.onSurface.withValues(alpha: 0.1)),
+                  Divider(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     'Cambiar contraseña (opcional)',
@@ -438,7 +421,9 @@ class _EditScreenState extends State<EditScreen> {
                       });
                     },
                     validator: (value) {
-                      if (value != null && value.isNotEmpty && value.length < 6) {
+                      if (value != null &&
+                          value.isNotEmpty &&
+                          value.length < 6) {
                         return 'La contraseña debe tener al menos 6 caracteres';
                       }
                       return null;
@@ -457,7 +442,8 @@ class _EditScreenState extends State<EditScreen> {
                       });
                     },
                     validator: (value) {
-                      if (_passwordController.text.isNotEmpty && value != _passwordController.text) {
+                      if (_passwordController.text.isNotEmpty &&
+                          value != _passwordController.text) {
                         return 'Las contraseñas no coinciden';
                       }
                       return null;
@@ -480,14 +466,14 @@ class _EditScreenState extends State<EditScreen> {
             radius: 60,
             backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
             // 🆕 Mostrar imagen seleccionada o descargada
-            backgroundImage: _selectedImage != null 
-              ? FileImage(_selectedImage!)
-              : _currentProfileImageUrl != null
+            backgroundImage: _selectedImage != null
+                ? FileImage(_selectedImage!)
+                : _currentProfileImageUrl != null
                 ? NetworkImage(_currentProfileImageUrl!)
                 : null,
             child: _selectedImage == null && _currentProfileImageUrl == null
-              ? Icon(Icons.person, size: 70, color: theme.colorScheme.primary)
-              : null,
+                ? Icon(Icons.person, size: 70, color: theme.colorScheme.primary)
+                : null,
           ),
           Positioned(
             bottom: 0,
@@ -506,7 +492,9 @@ class _EditScreenState extends State<EditScreen> {
                       size: 20,
                       color: theme.colorScheme.onPrimary,
                     ),
-                    onPressed: _isUploadingImage ? null : _showImagePickerOptions,
+                    onPressed: _isUploadingImage
+                        ? null
+                        : _showImagePickerOptions,
                   ),
                   // Mostrar indicador de carga si se está subiendo
                   if (_isUploadingImage)
@@ -536,41 +524,7 @@ class _EditScreenState extends State<EditScreen> {
   Widget _buildSaveButton() {
     return Column(
       children: [
-        // Botón para subir imagen si hay una seleccionada
-        if (_selectedImage != null)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: ElevatedButton(
-              onPressed: _isUploadingImage ? null : _uploadProfileImage,
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 56),
-                backgroundColor: Theme.of(context).colorScheme.primary,
-              ),
-              child: _isUploadingImage
-                  ? SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Theme.of(context).colorScheme.onPrimary,
-                        ),
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.cloud_upload, color: Theme.of(context).colorScheme.onPrimary),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Subir Foto de Perfil',
-                          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-                        ),
-                      ],
-                    ),
-            ),
-          ),
-        // Botón guardar cambios normales
+        // Botón guardar cambios (único)
         ElevatedButton(
           onPressed: _isSaving ? null : _saveChanges,
           style: ElevatedButton.styleFrom(
@@ -578,24 +532,27 @@ class _EditScreenState extends State<EditScreen> {
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
           child: _isSaving
-              ? SizedBox(
+              ? const SizedBox(
                   height: 20,
                   width: 20,
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      Theme.of(context).colorScheme.onPrimary,
-                    ),
                     strokeWidth: 2,
+                    color: Colors.white,
                   ),
                 )
               : Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.save, color: Theme.of(context).colorScheme.onPrimary),
+                    Icon(
+                      Icons.save,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       'Guardar Cambios',
-                      style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
                     ),
                   ],
                 ),
