@@ -140,9 +140,7 @@ class _EditScreenState extends State<EditScreen> {
                     title: const Text('Eliminar foto', style: TextStyle(color: Colors.red)),
                     onTap: () {
                       Navigator.pop(context);
-                      setState(() {
-                        _selectedImage = null;
-                      });
+                      _deleteImage();
                       _showCustomSnackBar('Foto removida');
                     },
                   ),
@@ -221,6 +219,34 @@ class _EditScreenState extends State<EditScreen> {
       _showCustomSnackBar('Error al subir la imagen', isError: true);
     } finally {
       setState(() => _isUploadingImage = false);
+    }
+  }
+
+  Future<void> _deleteImage() async {
+    setState(() => _isUploadingImage = true);
+
+    try {
+      final updatedUser = await _authService.deleteUserImage(
+        widget.product.id!,
+      );
+
+      if (updatedUser != null && mounted) {
+        setState(() {
+          _currentImageUrl = null;
+          _selectedImageFile = null;
+        });
+        _showSnackBar('Imagen eliminada correctamente');
+        
+        // Notificar al padre que el producto cambió
+        widget.onProductUpdated(updatedProduct);
+      } else {
+        _showSnackBar('Error al eliminar la imagen', isError: true);
+      }
+    } catch (e) {
+      print('❌ Error eliminando imagen: $e');
+      _showSnackBar('Error al eliminar la imagen', isError: true);
+    } finally {
+      if (mounted) setState(() => _isUploadingImage = false);
     }
   }
 

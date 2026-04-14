@@ -224,4 +224,7 @@ export class UsersController {
       });
     }
   }
+
+  @Delete(':id')
+  async deleteProdileImage(@Param('id') )
 }

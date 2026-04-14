@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../models/beauty_product.dart';
 import 'auth_service.dart';
@@ -8,44 +9,45 @@ class ProductService {
   final AuthService _authService = AuthService();
 
   Future<PaginatedProducts?> getProducts({
-  String? listType, 
-  int page = 1, 
-  int limit = 10
-}) async {
-  try {
-    final token = await _authService.getToken();
-    if (token == null) return null;
+    String? listType,
+    int page = 1,
+    int limit = 10,
+  }) async {
+    try {
+      final token = await _authService.getToken();
+      if (token == null) return null;
 
-    // Construir la URL con Query Parameters
-    final queryParams = {
-      'page': page.toString(),
-      'limit': limit.toString(),
-      'listType': ?listType,
-    };
-    
-    final uri = Uri.parse(ApiConfig.getProductsUrl())
-        .replace(queryParameters: queryParams);
+      // Construir la URL con Query Parameters
+      final queryParams = {
+        'page': page.toString(),
+        'limit': limit.toString(),
+        'listType': ?listType,
+      };
 
-    final response = await http.get(
-      uri,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
+      final uri = Uri.parse(
+        ApiConfig.getProductsUrl(),
+      ).replace(queryParameters: queryParams);
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['status'] == true) {
-        return PaginatedProducts.fromJson(data);
+      final response = await http.get(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == true) {
+          return PaginatedProducts.fromJson(data);
+        }
       }
+      return null;
+    } catch (e) {
+      print('❌ Error obteniendo productos paginados: $e');
+      return null;
     }
-    return null;
-  } catch (e) {
-    print('❌ Error obteniendo productos paginados: $e');
-    return null;
   }
-}
 
   Future<BeautyProduct?> createProduct(Map<String, dynamic> productData) async {
     try {
@@ -74,38 +76,41 @@ class ProductService {
     }
   }
 
-Future<BeautyProduct?> updateProduct(String id, Map<String, dynamic> productData) async {
-  try {
-    final token = await _authService.getToken();
-    if (token == null) return null;
+  Future<BeautyProduct?> updateProduct(
+    String id,
+    Map<String, dynamic> productData,
+  ) async {
+    try {
+      final token = await _authService.getToken();
+      if (token == null) return null;
 
-    final Map<String, dynamic> cleanedData = {};
-    productData.forEach((key, value) {
-      cleanedData[key] = value;
-      print('📦 Campo $key: ${value ?? 'null'}');
-    });
+      final Map<String, dynamic> cleanedData = {};
+      productData.forEach((key, value) {
+        cleanedData[key] = value;
+        print('📦 Campo $key: ${value ?? 'null'}');
+      });
 
-    final response = await http.patch(
-      Uri.parse('${ApiConfig.getProductsUrl()}/$id'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode(cleanedData),
-    );
+      final response = await http.patch(
+        Uri.parse('${ApiConfig.getProductsUrl()}/$id'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(cleanedData),
+      );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['status'] == true && data['data'] != null) {
-        return BeautyProduct.fromBackend(data['data']);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == true && data['data'] != null) {
+          return BeautyProduct.fromBackend(data['data']);
+        }
       }
+      return null;
+    } catch (e) {
+      print('❌ Error actualizando producto: $e');
+      return null;
     }
-    return null;
-  } catch (e) {
-    print('❌ Error actualizando producto: $e');
-    return null;
   }
-}
 
   Future<bool> deleteProduct(String id) async {
     try {
@@ -194,94 +199,158 @@ Future<BeautyProduct?> updateProduct(String id, Map<String, dynamic> productData
     }
   }
 
+  Future<BeautyProduct?> markAsOpened(String id, {DateTime? openedDate}) async {
+    try {
+      final token = await _authService.getToken();
+      if (token == null) return null;
 
-Future<BeautyProduct?> markAsOpened(String id, {DateTime? openedDate}) async {
-  try {
-    final token = await _authService.getToken();
-    if (token == null) return null;
+      // Si no se proporciona fecha, usar la fecha actual
+      final dateToSend = openedDate ?? DateTime.now();
 
-    // Si no se proporciona fecha, usar la fecha actual
-    final dateToSend = openedDate ?? DateTime.now();
-    
-    final response = await http.patch(
-      Uri.parse('${ApiConfig.getProductsUrl()}/$id/open'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode({
-        'openedDate': dateToSend.toIso8601String(),
-      }),
-    );
+      final response = await http.patch(
+        Uri.parse('${ApiConfig.getProductsUrl()}/$id/open'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({'openedDate': dateToSend.toIso8601String()}),
+      );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['status'] == true && data['data'] != null) {
-        return BeautyProduct.fromBackend(data['data']);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == true && data['data'] != null) {
+          return BeautyProduct.fromBackend(data['data']);
+        }
       }
+      return null;
+    } catch (e) {
+      print('❌ Error marcando como abierto: $e');
+      return null;
     }
-    return null;
-  } catch (e) {
-    print('❌ Error marcando como abierto: $e');
-    return null;
   }
-}
 
-Future<BeautyProduct?> markAsClosed(String id) async {
-  try {
-    final token = await _authService.getToken();
-    if (token == null) return null;
-    
-    final response = await http.patch(
-      Uri.parse('${ApiConfig.getProductsUrl()}/$id/close'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode({
-        'isOpened': false,
-        'openedDate': null,     // Limpiar fecha de apertura
-        'expirationDate': null, // Limpiar fecha de caducidad calculada
-        // NOTA: NO tocamos periodAfterOpening, se conserva
-      }),
-    );
+  Future<BeautyProduct?> markAsClosed(String id) async {
+    try {
+      final token = await _authService.getToken();
+      if (token == null) return null;
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['status'] == true && data['data'] != null) {
-        return BeautyProduct.fromBackend(data['data']);
+      final response = await http.patch(
+        Uri.parse('${ApiConfig.getProductsUrl()}/$id/close'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'isOpened': false,
+          'openedDate': null, // Limpiar fecha de apertura
+          'expirationDate': null, // Limpiar fecha de caducidad calculada
+          // NOTA: NO tocamos periodAfterOpening, se conserva
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == true && data['data'] != null) {
+          return BeautyProduct.fromBackend(data['data']);
+        }
       }
+      return null;
+    } catch (e) {
+      print('❌ Error marcando como cerrado: $e');
+      return null;
     }
-    return null;
-  } catch (e) {
-    print('❌ Error marcando como cerrado: $e');
-    return null;
   }
-}
 
-Future<BeautyProduct?> calculateExpiration(String id) async {
-  try {
-    final token = await _authService.getToken();
-    if (token == null) return null;
+  Future<BeautyProduct?> calculateExpiration(String id) async {
+    try {
+      final token = await _authService.getToken();
+      if (token == null) return null;
 
-    final response = await http.post(
-      Uri.parse('${ApiConfig.getProductsUrl()}/$id/calculate-expiration'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
+      final response = await http.post(
+        Uri.parse('${ApiConfig.getProductsUrl()}/$id/calculate-expiration'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['status'] == true && data['data'] != null) {
-        return BeautyProduct.fromBackend(data['data']);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == true && data['data'] != null) {
+          return BeautyProduct.fromBackend(data['data']);
+        }
       }
+      return null;
+    } catch (e) {
+      print('❌ Error calculando caducidad: $e');
+      return null;
     }
-    return null;
-  } catch (e) {
-    print('❌ Error calculando caducidad: $e');
-    return null;
   }
-}
+
+  // 🆕 Subir imagen de producto
+  Future<BeautyProduct?> uploadProductImage(
+    String productId,
+    File imageFile,
+  ) async {
+    try {
+      final token = await _authService.getToken();
+      if (token == null) return null;
+
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('${ApiConfig.getProductsUrl()}/$productId/upload-image'),
+      );
+
+      request.headers['Authorization'] = 'Bearer $token';
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'productImage', // El nombre del campo esperado por el backend
+          imageFile.path,
+        ),
+      );
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == true && data['data'] != null) {
+          return BeautyProduct.fromBackend(data['data']);
+        }
+      }
+
+      print('❌ Error subiendo imagen: ${response.body}');
+      return null;
+    } catch (e) {
+      print('❌ Error en uploadProductImage: $e');
+      return null;
+    }
+  }
+
+  // 🆕 Eliminar imagen de producto
+  Future<BeautyProduct?> deleteProductImage(String productId) async {
+    try {
+      final token = await _authService.getToken();
+      if (token == null) return null;
+
+      final response = await http.delete(
+        Uri.parse('${ApiConfig.getProductsUrl()}/$productId/image'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == true && data['data'] != null) {
+          return BeautyProduct.fromBackend(data['data']);
+        }
+      }
+      return null;
+    } catch (e) {
+      print('❌ Error eliminando imagen: $e');
+      return null;
+    }
+  }
 }

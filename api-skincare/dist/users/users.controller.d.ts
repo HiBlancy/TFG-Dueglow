@@ -45,4 +45,5 @@ export declare class UsersController {
         data: any;
     }>;
     deleteWithoutAuth(id: string): Promise<any>;
+    deleteProdileImage(: any): any;
 }

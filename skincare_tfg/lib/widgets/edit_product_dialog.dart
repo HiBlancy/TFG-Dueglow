@@ -1,22 +1,32 @@
 // lib/widgets/edit_product_dialog.dart
 
 import 'package:flutter/material.dart';
+import 'dart:io';
 import '../models/beauty_product.dart';
 import '../models/product_list_type.dart';
+import '../services/product_service.dart';
+import '../services/image_service.dart';
 import 'custom_button.dart';
 import 'custom_text_field.dart';
 
 class EditProductDialog extends StatefulWidget {
   final BeautyProduct product;
-  
+  final Function(BeautyProduct) onProductUpdated; // ✅ Callback para actualizar
 
-  const EditProductDialog({super.key, required this.product});
+  const EditProductDialog({
+    super.key, 
+    required this.product,
+    required this.onProductUpdated,
+  });
 
   @override
   State<EditProductDialog> createState() => _EditProductDialogState();
 }
 
 class _EditProductDialogState extends State<EditProductDialog> {
+  final ProductService _productService = ProductService();
+  final ImageService _imageService = ImageService();
+  
   late final TextEditingController _nameController;
   late final TextEditingController _brandController;
   late final TextEditingController _notesController;
@@ -28,13 +38,18 @@ class _EditProductDialogState extends State<EditProductDialog> {
   DateTime? _openedDate;
   late List<String> _categories;
   late ProductListType _selectedListType;
+  
+  // 🆕 Estado para la imagen
+  File? _selectedImageFile;
+  String? _currentImageUrl;
+  bool _isUploadingImage = false;
 
   @override
   void initState() {
     super.initState();
     final p = widget.product;
     _nameController = TextEditingController(text: p.name);
-    _brandController = TextEditingController(text: p.brand);
+    _brandController = TextEditingController(text: p.brand ?? '');
     _notesController = TextEditingController(text: p.notes ?? '');
     _periodAfterOpeningController = TextEditingController(
       text: p.periodAfterOpening ?? '',
@@ -44,6 +59,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
     _openedDate = p.openedDate;
     _categories = List.from(p.categories ?? []);
     _selectedListType = ProductListType.fromNullable(p.listType);
+    _currentImageUrl = p.imageUrl;
   }
 
   @override
@@ -54,6 +70,140 @@ class _EditProductDialogState extends State<EditProductDialog> {
     _periodAfterOpeningController.dispose();
     _newCategoryController.dispose();
     super.dispose();
+  }
+
+  // 🆕 Mostrar opciones para cambiar imagen
+  void _showImagePickerOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    'Cambiar imagen del producto',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.photo_camera),
+                  title: const Text('Tomar foto'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickImageFromCamera();
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.photo_library),
+                  title: const Text('Seleccionar de galería'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickImageFromGallery();
+                  },
+                ),
+                if (_currentImageUrl != null || _selectedImageFile != null)
+                  ListTile(
+                    leading: const Icon(Icons.delete_outline, color: Colors.red),
+                    title: const Text('Eliminar imagen', style: TextStyle(color: Colors.red)),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _deleteImage();
+                    },
+                  ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // 🆕 Seleccionar imagen de cámara
+  Future<void> _pickImageFromCamera() async {
+    setState(() => _isUploadingImage = true);
+    
+    final imageFile = await _imageService.takePhotoWithCamera();
+    
+    if (imageFile != null && mounted) {
+      setState(() {
+        _selectedImageFile = imageFile;
+      });
+      _showSnackBar('Imagen capturada correctamente');
+    } else if (mounted) {
+      _showSnackBar('No se pudo capturar la imagen', isError: true);
+    }
+    
+    setState(() => _isUploadingImage = false);
+  }
+
+  // 🆕 Seleccionar imagen de galería
+  Future<void> _pickImageFromGallery() async {
+    setState(() => _isUploadingImage = true);
+    
+    final imageFile = await _imageService.pickImageFromGallery();
+    
+    if (imageFile != null && mounted) {
+      setState(() {
+        _selectedImageFile = imageFile;
+      });
+      _showSnackBar('Imagen seleccionada correctamente');
+    } else if (mounted) {
+      _showSnackBar('No se pudo seleccionar la imagen', isError: true);
+    }
+    
+    setState(() => _isUploadingImage = false);
+  }
+
+  // 🆕 Eliminar imagen
+  Future<void> _deleteImage() async {
+    setState(() => _isUploadingImage = true);
+
+    try {
+      final updatedProduct = await _productService.deleteProductImage(
+        widget.product.id!,
+      );
+
+      if (updatedProduct != null && mounted) {
+        setState(() {
+          _currentImageUrl = null;
+          _selectedImageFile = null;
+        });
+        _showSnackBar('Imagen eliminada correctamente');
+        
+        // Notificar al padre que el producto cambió
+        widget.onProductUpdated(updatedProduct);
+      } else {
+        _showSnackBar('Error al eliminar la imagen', isError: true);
+      }
+    } catch (e) {
+      print('❌ Error eliminando imagen: $e');
+      _showSnackBar('Error al eliminar la imagen', isError: true);
+    } finally {
+      if (mounted) setState(() => _isUploadingImage = false);
+    }
+  }
+
+  void _showSnackBar(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red : Colors.green,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   Future<void> _selectDate({
@@ -83,41 +233,69 @@ class _EditProductDialogState extends State<EditProductDialog> {
     }
   }
 
-  void _saveProduct() {
-    if (_nameController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('El nombre es obligatorio')),
+  Future<void> _saveProduct() async {
+  if (_nameController.text.trim().isEmpty) {
+    _showSnackBar('El nombre es obligatorio', isError: true);
+    return;
+  }
+
+  setState(() => _isUploadingImage = true);
+
+  try {
+    // 1️⃣ Primero, subir la nueva imagen si hay una seleccionada
+    String? finalImageUrl = _currentImageUrl;
+    
+    if (_selectedImageFile != null) {
+      final uploadedProduct = await _productService.uploadProductImage(
+        widget.product.id!,
+        _selectedImageFile!,
       );
-      return;
+      if (uploadedProduct != null) {
+        finalImageUrl = uploadedProduct.imageUrl;
+        // Notificar al padre
+        widget.onProductUpdated(uploadedProduct);
+      }
     }
 
+    // 2️⃣ Preparar datos actualizados
     final hasOpenedDate = _openedDate != null;
 
-    final updatedProduct = BeautyProduct(
-      id: widget.product.id,
-      barcode: widget.product.barcode,
-      name: _nameController.text.trim(),
-      brand: _brandController.text.trim().isEmpty
-          ? null
-          : _brandController.text.trim(),
-      imageUrl: widget.product.imageUrl,
-      categories: _categories.isEmpty ? null : _categories,
-      notes: _notesController.text.trim().isEmpty
-          ? null
-          : _notesController.text.trim(),
-      rating: _rating,
-      listType: _selectedListType.value,
-      expirationDate: _expirationDate,
-      periodAfterOpening: _periodAfterOpeningController.text.trim().isEmpty
-          ? null
+    final updatedProductData = {
+      'name': _nameController.text.trim(),
+      'brand': _brandController.text.trim().isEmpty ? null : _brandController.text.trim(),
+      'imageUrl': finalImageUrl,
+      'categories': _categories.isEmpty ? null : _categories,
+      'notes': _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+      'rating': _rating,
+      'listType': _selectedListType.value,
+      'expirationDate': _expirationDate?.toIso8601String(),
+      'periodAfterOpening': _periodAfterOpeningController.text.trim().isEmpty 
+          ? null 
           : _periodAfterOpeningController.text.trim(),
-      openedDate: _openedDate,
-      addedAt: widget.product.addedAt,
-      isOpened: hasOpenedDate,
+      'openedDate': _openedDate?.toIso8601String(),
+      'isOpened': hasOpenedDate,
+    };
+
+    // 3️⃣ Actualizar el producto en el backend
+    final result = await _productService.updateProduct(
+      widget.product.id!,
+      updatedProductData,
     );
 
-    Navigator.pop(context, updatedProduct);
+    if (result != null && mounted) {
+      widget.onProductUpdated(result);
+      Navigator.pop(context, result);
+      _showSnackBar('Producto actualizado correctamente');
+    } else {
+      _showSnackBar('Error al guardar los cambios', isError: true);
+    }
+  } catch (e) {
+    print('❌ Error guardando producto: $e');
+    _showSnackBar('Error al guardar los cambios', isError: true);
+  } finally {
+    if (mounted) setState(() => _isUploadingImage = false);
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -141,6 +319,10 @@ class _EditProductDialogState extends State<EditProductDialog> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // 🆕 Selector de imagen
+                    _buildImageSelector(theme, subtleBorder),
+                    const SizedBox(height: 20),
+                    
                     // Selector de lista
                     _buildListSelector(theme, subtleBorder),
                     const SizedBox(height: 20),
@@ -151,10 +333,6 @@ class _EditProductDialogState extends State<EditProductDialog> {
                       label: 'Nombre del producto *',
                       prefixIcon: Icons.spa,
                       hint: 'Ej: Crema hidratante facial',
-                      validator: (v) =>
-                          v?.trim().isEmpty == true
-                              ? 'El nombre es obligatorio'
-                              : null,
                     ),
                     const SizedBox(height: 16),
                     
@@ -183,8 +361,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
                       onTap: () => _selectDate(
                         initialDate: _expirationDate,
                         firstDate: DateTime.now(),
-                        lastDate:
-                            DateTime.now().add(const Duration(days: 365 * 5)),
+                        lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
                         onDateSelected: (date) => _expirationDate = date,
                       ),
                       onClear: () => setState(() => _expirationDate = null),
@@ -223,12 +400,112 @@ class _EditProductDialogState extends State<EditProductDialog> {
     );
   }
 
+  // 🆕 Widget para selector de imagen
+  Widget _buildImageSelector(ThemeData theme, Color borderColor) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: Border.all(color: borderColor),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Imagen del producto',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
+          ),
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: _isUploadingImage ? null : _showImagePickerOptions,
+            child: Container(
+              height: 120,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: borderColor),
+              ),
+              child: _isUploadingImage
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const CircularProgressIndicator(),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Subiendo imagen...',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : (_selectedImageFile != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.file(
+                            _selectedImageFile!,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: 120,
+                          ),
+                        )
+                      : (_currentImageUrl != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.network(
+                                _currentImageUrl!,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: 120,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return _buildImagePlaceholder(theme);
+                                },
+                              ),
+                            )
+                          : _buildImagePlaceholder(theme))),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImagePlaceholder(ThemeData theme) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.add_photo_alternate,
+            size: 40,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Toca para añadir imagen',
+            style: TextStyle(
+              fontSize: 12,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildHeader(ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
 
     final bgColor = isDark ? theme.colorScheme.surface : theme.colorScheme.primary;
-    final fgColor =
-        isDark ? Color(0xfff4add8) : theme.colorScheme.onPrimary;
+    final fgColor = isDark ? const Color(0xfff4add8) : theme.colorScheme.onPrimary;
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -265,6 +542,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
     );
   }
 
+  // ... El resto de tus métodos existentes (_buildListSelector, _buildRatingSection, etc.) se mantienen igual ...
   Widget _buildListSelector(ThemeData theme, Color borderColor) {
     return Container(
       padding: const EdgeInsets.all(12),
@@ -540,35 +818,64 @@ class _EditProductDialogState extends State<EditProductDialog> {
   }
 
   Widget _buildActionButtons(Color borderColor) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: borderColor)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: CustomButton(
-              text: 'Cancelar',
-              onPressed: () => Navigator.pop(context),
-              type: ButtonType.secondary,
-              size: ButtonSize.full,
+  final theme = Theme.of(context);
+  
+  return Container(
+    padding: const EdgeInsets.all(20),
+    decoration: BoxDecoration(
+      border: Border(top: BorderSide(color: borderColor)),
+    ),
+    child: Row(
+      children: [
+        // Botón Cancelar con ElevatedButton
+        Expanded(
+          child: ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              foregroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              minimumSize: const Size(double.infinity, 56),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: borderColor),
+              ),
             ),
+            child: const Text('Cancelar'),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: CustomButton(
-              text: 'Guardar',
-              onPressed: _saveProduct,
-              type: ButtonType.primary,
-              size: ButtonSize.full,
-              icon: Icons.save,
+        ),
+        const SizedBox(width: 16),
+        // Botón Guardar con ElevatedButton
+        Expanded(
+          child: ElevatedButton(
+            onPressed: _isUploadingImage 
+                ? null 
+                : () {
+                    _saveProduct();
+                  },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
+              minimumSize: const Size(double.infinity, 56),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
+            child: _isUploadingImage
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Text('Guardar'),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 
   String _formatDate(DateTime date) => '${date.day}/${date.month}/${date.year}';
 }

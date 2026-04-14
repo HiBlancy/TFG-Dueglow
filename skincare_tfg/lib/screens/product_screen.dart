@@ -249,7 +249,15 @@ class _ProductScreenState extends State<ProductScreen> {
   Future<void> _editProduct() async {
     final editedProduct = await showDialog<BeautyProduct>(
       context: context,
-      builder: (context) => EditProductDialog(product: _currentProduct),
+      builder: (context) => EditProductDialog(
+        product: _currentProduct, // ✅ Usa _currentProduct, no product
+        onProductUpdated: (updatedProduct) {
+          // Actualizar directamente el producto actual
+          setState(() {
+            _currentProduct = updatedProduct;
+          });
+        },
+      ),
     );
 
     if (editedProduct != null && editedProduct != _currentProduct) {

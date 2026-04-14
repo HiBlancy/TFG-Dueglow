@@ -192,7 +192,7 @@ let ProductService = class ProductService {
     }
     async getStats(userId) {
         const products = await this.productModel.find({ userId }).exec();
-        const stats = { wishlist: 0, favorites: 0, have: 0, used: 0, deleted: 0, total: products.length };
+        const stats = { wishlist: 0, favorites: 0, have: 0, used: 0, total: products.length };
         products.forEach((product) => {
             if (stats[product.listType] !== undefined)
                 stats[product.listType]++;

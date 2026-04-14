@@ -38,7 +38,6 @@ export declare class ProductService {
         favorites: number;
         have: number;
         used: number;
-        deleted: number;
         total: number;
     }>;
     getExpiredProducts(userId: string): Promise<Product[]>;
