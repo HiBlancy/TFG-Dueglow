@@ -13,6 +13,8 @@ const product_service_1 = require("./product.service");
 const mongoose_1 = require("@nestjs/mongoose");
 const product_schema_1 = require("./schemas/product.schema");
 const users_module_1 = require("../users/users.module");
+const cloudinary_service_1 = require("../cloudinary/cloudinary.service");
+const image_compression_service_1 = require("../services/image-compression.service");
 let ProductModule = class ProductModule {
 };
 exports.ProductModule = ProductModule;
@@ -29,7 +31,7 @@ exports.ProductModule = ProductModule = __decorate([
             users_module_1.UserModule,
         ],
         controllers: [product_controller_1.ProductController],
-        providers: [product_service_1.ProductService],
+        providers: [product_service_1.ProductService, cloudinary_service_1.CloudinaryService, image_compression_service_1.ImageCompressionService,],
         exports: [product_service_1.ProductService],
     })
 ], ProductModule);

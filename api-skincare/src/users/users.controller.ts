@@ -23,6 +23,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from './guards/auth.guard';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { ImageCompressionService } from '../services/image-compression.service';
 
 @Controller('users')
 export class UsersController {
@@ -30,9 +31,9 @@ export class UsersController {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly imageCompressionService: ImageCompressionService, 
   ) {}
 
-  // Helper para respuestas consistentes
   private successResponse(message: string, data: any = null) {
     return { status: true, message, data };
   }
@@ -101,20 +102,19 @@ export class UsersController {
   }
 
   /**
-   * 🆕 ENDPOINT PARA SUBIR IMAGEN DE PERFIL
+   * 🆕 ENDPOINT PARA SUBIR IMAGEN DE PERFIL CON COMPRESIÓN
    * POST /users/me/upload-image
-   * Recibe multipart/form-data con archivo
    */
   @UseGuards(AuthGuard)
   @Patch('me/upload-image')
   @UseInterceptors(
     FileInterceptor('profileImage', {
       limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB
+        fileSize: 10 * 1024 * 1024, // Aumentamos a 10MB para permitir fotos de cámara
       },
       fileFilter: (req: any, file: Express.Multer.File, cb: any) => {
-        const allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
-
+        const allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
+        
         if (!allowedMimes.includes(file.mimetype)) {
           cb(
             new BadRequestException(
@@ -133,40 +133,27 @@ export class UsersController {
     @Req() req,
   ) {
     try {
-      // ✅ Validación: verificar que hay archivo
+      // Validar que hay archivo
       if (!file) {
         throw new BadRequestException('No se proporcionó ningún archivo');
       }
 
-      // ✅ Validación: verificar MIME type (double check)
-      const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
-      if (!allowedMimeTypes.includes(file.mimetype)) {
-        throw new BadRequestException(
-          `Tipo de archivo no permitido. Permitidos: ${allowedMimeTypes.join(', ')}`,
-        );
-      }
-
-      // ✅ Validación: verificar tamaño (máx 5MB)
-      const maxSizeBytes = 5 * 1024 * 1024; // 5MB
-      if (file.size > maxSizeBytes) {
-        throw new BadRequestException(
-          `El archivo es demasiado grande. Máximo: 5MB, Recibido: ${(file.size / 1024 / 1024).toFixed(2)}MB`,
-        );
-      }
-
-      console.log(`📤 Subiendo imagen de usuario ${req.user._id}`);
-      console.log(`   - Nombre original: ${file.originalname}`);
-      console.log(`   - MIME type: ${file.mimetype}`);
-      console.log(`   - Tamaño: ${(file.size / 1024).toFixed(2)}KB`);
-
-      // Subir a Cloudinary
-      const imageUrl = await this.cloudinaryService.uploadImage(
+      // ✅ COMPRIMIR LA IMAGEN
+      const compressedBuffer = await this.imageCompressionService.compressProfileImage(
         file.buffer,
-        `${req.user._id}_${file.originalname}`,
-        'user-profiles', // Carpeta en Cloudinary
+        file.mimetype,
       );
 
-      // Obtener la imagen anterior para eliminarla de Cloudinary (opcional)
+      console.log(`✅ Imagen comprimida exitosamente`);
+
+      // Subir la imagen comprimida a Cloudinary
+      const imageUrl = await this.cloudinaryService.uploadImage(
+        compressedBuffer,
+        `${req.user._id}_profile_${Date.now()}`,
+        'user-profiles',
+      );
+
+      // Eliminar imagen anterior si existe
       const currentUser = await this.usersService.findById(req.user._id);
       if (currentUser?.profileImage) {
         const publicId = this.cloudinaryService.extractPublicIdFromUrl(
@@ -174,7 +161,7 @@ export class UsersController {
         );
         if (publicId) {
           await this.cloudinaryService.deleteImage(publicId);
-          console.log(`🗑️  Imagen anterior eliminada: ${publicId}`);
+          console.log(`🗑️ Imagen anterior eliminada: ${publicId}`);
         }
       }
 
@@ -188,9 +175,7 @@ export class UsersController {
         updateDto,
       );
 
-      console.log(
-        `✅ Imagen de perfil actualizada para usuario ${req.user._id}`,
-      );
+      console.log(`✅ Imagen de perfil actualizada para usuario ${req.user._id}`);
       console.log(`   - URL: ${imageUrl}`);
 
       return this.successResponse(

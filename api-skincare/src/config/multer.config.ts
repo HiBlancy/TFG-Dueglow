@@ -1,4 +1,3 @@
-// src/config/multer.config.ts
 import { BadRequestException } from '@nestjs/common';
 
 /**

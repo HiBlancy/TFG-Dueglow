@@ -123,6 +123,7 @@ class CustomAppBar extends StatelessWidget {
       builder: (context, snapshot) {
         final userName = snapshot.data?['name'] ?? 'Usuario';
         final userEmail = snapshot.data?['email'] ?? '';
+        final profileImage = snapshot.data?['profileImage'];
 
         return Container(
           width: double.infinity,
@@ -134,13 +135,18 @@ class CustomAppBar extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CircleAvatar(
-                radius: 30,
-                backgroundColor: theme.colorScheme.onPrimary, // ✅ Contraste perfecto para el círculo
-                child: Icon(
-                  Icons.person,
-                  size: 40,
-                  color: theme.colorScheme.primary, // ✅ El icono vuelve al color de fondo
-                ),
+              radius: 30,
+              backgroundColor: theme.colorScheme.onPrimary,
+              backgroundImage: profileImage != null && profileImage.isNotEmpty
+                  ? NetworkImage(profileImage)
+                  : null,
+              child: profileImage == null || profileImage.isEmpty
+                  ? Icon(
+                      Icons.person,
+                      size: 40,
+                      color: theme.colorScheme.primary,
+                    )
+                  : null,
               ),
               const SizedBox(height: 12),
               Text(
@@ -172,7 +178,12 @@ class CustomAppBar extends StatelessWidget {
     final authService = AuthService();
     final name = await authService.getUserName();
     final email = await authService.getUserEmail();
-    return {'name': name, 'email': email};
+    final profileImage = await authService.getUserProfileImage(); 
+    return {
+      'name': name, 
+      'email': email,
+      'profileImage': profileImage
+      };
   }
 
   Widget _buildDrawerItem(

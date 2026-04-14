@@ -462,7 +462,7 @@ class _ProductScreenState extends State<ProductScreen> {
               _buildCategories(theme),
             const SizedBox(height: 24),
             _buildScrollableButtons(isProductSaved, showAddButton),
-            const SizedBox(height: 32),
+            const SizedBox(height: 128),
             if (isProductSaved)
               SizedBox(
                 width: double.infinity,

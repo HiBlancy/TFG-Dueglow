@@ -21,14 +21,17 @@ const update_user_dto_1 = require("./dto/update-user.dto");
 const jwt_1 = require("@nestjs/jwt");
 const auth_guard_1 = require("./guards/auth.guard");
 const cloudinary_service_1 = require("../cloudinary/cloudinary.service");
+const image_compression_service_1 = require("../services/image-compression.service");
 let UsersController = class UsersController {
     usersService;
     jwtService;
     cloudinaryService;
-    constructor(usersService, jwtService, cloudinaryService) {
+    imageCompressionService;
+    constructor(usersService, jwtService, cloudinaryService, imageCompressionService) {
         this.usersService = usersService;
         this.jwtService = jwtService;
         this.cloudinaryService = cloudinaryService;
+        this.imageCompressionService = imageCompressionService;
     }
     successResponse(message, data = null) {
         return { status: true, message, data };
@@ -88,25 +91,15 @@ let UsersController = class UsersController {
             if (!file) {
                 throw new common_1.BadRequestException('No se proporcionó ningún archivo');
             }
-            const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
-            if (!allowedMimeTypes.includes(file.mimetype)) {
-                throw new common_1.BadRequestException(`Tipo de archivo no permitido. Permitidos: ${allowedMimeTypes.join(', ')}`);
-            }
-            const maxSizeBytes = 5 * 1024 * 1024;
-            if (file.size > maxSizeBytes) {
-                throw new common_1.BadRequestException(`El archivo es demasiado grande. Máximo: 5MB, Recibido: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
-            }
-            console.log(`📤 Subiendo imagen de usuario ${req.user._id}`);
-            console.log(`   - Nombre original: ${file.originalname}`);
-            console.log(`   - MIME type: ${file.mimetype}`);
-            console.log(`   - Tamaño: ${(file.size / 1024).toFixed(2)}KB`);
-            const imageUrl = await this.cloudinaryService.uploadImage(file.buffer, `${req.user._id}_${file.originalname}`, 'user-profiles');
+            const compressedBuffer = await this.imageCompressionService.compressProfileImage(file.buffer, file.mimetype);
+            console.log(`✅ Imagen comprimida exitosamente`);
+            const imageUrl = await this.cloudinaryService.uploadImage(compressedBuffer, `${req.user._id}_profile_${Date.now()}`, 'user-profiles');
             const currentUser = await this.usersService.findById(req.user._id);
             if (currentUser?.profileImage) {
                 const publicId = this.cloudinaryService.extractPublicIdFromUrl(currentUser.profileImage);
                 if (publicId) {
                     await this.cloudinaryService.deleteImage(publicId);
-                    console.log(`🗑️  Imagen anterior eliminada: ${publicId}`);
+                    console.log(`🗑️ Imagen anterior eliminada: ${publicId}`);
                 }
             }
             const updateDto = {
@@ -191,10 +184,10 @@ __decorate([
     (0, common_1.Patch)('me/upload-image'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('profileImage', {
         limits: {
-            fileSize: 5 * 1024 * 1024,
+            fileSize: 10 * 1024 * 1024,
         },
         fileFilter: (req, file, cb) => {
-            const allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
+            const allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
             if (!allowedMimes.includes(file.mimetype)) {
                 cb(new common_1.BadRequestException(`Tipo de archivo no permitido. Permitidos: ${allowedMimes.join(', ')}`), false);
             }
@@ -226,6 +219,7 @@ exports.UsersController = UsersController = __decorate([
     (0, common_1.Controller)('users'),
     __metadata("design:paramtypes", [users_service_1.UsersService,
         jwt_1.JwtService,
-        cloudinary_service_1.CloudinaryService])
+        cloudinary_service_1.CloudinaryService,
+        image_compression_service_1.ImageCompressionService])
 ], UsersController);
 //# sourceMappingURL=users.controller.js.map

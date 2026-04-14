@@ -197,7 +197,6 @@ class _Corner extends StatelessWidget {
     final isLeft = alignment == Alignment.topLeft || alignment == Alignment.bottomLeft;
     final isTop = alignment == Alignment.topLeft || alignment == Alignment.topRight;
     
-    // ¡Adiós color verde genérico! Usamos el color primario dinámico de tu app
     final brandColor = Theme.of(context).colorScheme.primary;
 
     return Align(

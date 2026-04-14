@@ -8,6 +8,7 @@ import 'custom_text_field.dart';
 
 class EditProductDialog extends StatefulWidget {
   final BeautyProduct product;
+  
 
   const EditProductDialog({super.key, required this.product});
 

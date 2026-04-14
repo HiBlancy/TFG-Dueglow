@@ -12,15 +12,18 @@ import { Product } from './interfaces/product.interface';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PaginationDto } from '../pagination/pagination.dto';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { ImageCompressionService } from 'src/services/image-compression.service';
 
 @Injectable()
 export class ProductService {
   constructor(
     @InjectModel('Product') private readonly productModel: Model<Product>,
+    private readonly cloudinaryService: CloudinaryService,
+    private readonly imageCompressionService: ImageCompressionService,
   ) {}
 
-  // ==================== MÉTODOS PRINCIPALES ====================
-
+  // crear producto
   async create(userId: string, createProductDto: CreateProductDto): Promise<Product> {
     const newProduct = new this.productModel({
       ...createProductDto,
@@ -30,21 +33,52 @@ export class ProductService {
     return newProduct.save();
   }
 
-  async findAllByUser(userId: string, listType?: string): Promise<Product[]> {
+  // obtener todos los productos paginados
+  async findAllByUserPaginated(
+    userId: string,
+    paginationDto: PaginationDto,
+    listType?: string
+  ) {
+    const { page, limit } = paginationDto;
+    const skip = (page - 1) * limit;
+
+    // Filtro base
     const filter: any = { userId };
     if (listType) filter.listType = listType;
-    return this.productModel.find(filter).sort({ createdAt: -1 }).exec();
+
+    // Ejecutamos ambas consultas en paralelo para mejor performance
+    const [data, total] = await Promise.all([
+      this.productModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .exec(),
+      this.productModel.countDocuments(filter),
+    ]);
+
+    return {
+      data,
+      info: {
+        totalProducts: total,
+        totalPages: Math.ceil(total / limit),
+        page,
+        limit,
+      },
+    };
   }
 
+  // obtener producto segun su id
   async findById(id: string, userId: string): Promise<Product | null> {
     const product = await this.productModel.findById(id).exec();
     if (!product) return null;
-    if (product.userId.toString() !== userId) {
+    if (product.userId.toString() !== userId.toString()) {
       throw new ForbiddenException('No tienes permiso para ver este producto');
     }
     return product;
   }
 
+  // actualizar producto
   async update(id: string, userId: string, updateProductDto: UpdateProductDto): Promise<Product | null> {
     const product = await this.productModel.findById(id).exec();
     if (!product) throw new NotFoundException(`Producto ${id} no encontrado`);
@@ -90,15 +124,24 @@ export class ProductService {
     return updated;
   }
 
+  // eliminar producto
   async delete(id: string, userId: string): Promise<Product | null> {
     const product = await this.productModel.findById(id).exec();
     if (!product) throw new NotFoundException(`Producto ${id} no encontrado`);
     if (product.userId.toString() !== userId.toString()) {
       throw new ForbiddenException('No puedes eliminar este producto');
     }
+     if (product.imageUrl) {
+      const publicId = this.cloudinaryService.extractPublicIdFromUrl(product.imageUrl);
+      if (publicId) {
+        await this.cloudinaryService.deleteImage(publicId);
+        console.log(`🗑️ Imagen eliminada de Cloudinary al borrar producto: ${publicId}`);
+      }
+    }
     return this.productModel.findByIdAndDelete(id).exec();
   }
 
+  // cambiar el producto de lista
   async moveToList(id: string, userId: string, targetList: string): Promise<Product | null> {
     const product = await this.productModel.findById(id).exec();
     if (!product) throw new NotFoundException(`Producto ${id} no encontrado`);
@@ -110,8 +153,7 @@ export class ProductService {
       .exec();
   }
 
-  // ==================== MÉTODOS DE CADUCIDAD ====================
-
+  // marcar el producto como abierto y mandar a hacer el calculo de caducidad
   async markAsOpened(id: string, userId: string, customOpenedDate?: Date): Promise<Product | null> {
     const product = await this.productModel.findById(id).exec();
     if (!product) throw new NotFoundException(`Producto ${id} no encontrado`);
@@ -121,24 +163,16 @@ export class ProductService {
     if (product.isOpened) {
       throw new BadRequestException('El producto ya está abierto');
     }
-
-    // 2. AQUÍ ESTÁ LA MAGIA: Usamos la fecha enviada, o la de hoy si no viene nada
-    const openedDate = customOpenedDate || new Date();
-    
+    const openedDate = customOpenedDate || new Date();   
     let finalExpiration = product.expirationDate;
-
-    // Si tiene periodo después de abrir, calcular nueva fecha
     if (product.periodAfterOpening) {
-      const calculatedExpiration = this.calculateExpirationFromPeriod(openedDate, product.periodAfterOpening);
-      
-      // Si tiene fecha fija, tomar la que ocurra PRIMERO
+      const calculatedExpiration = this.calculateExpirationFromPeriod(openedDate, product.periodAfterOpening);     
       if (finalExpiration && calculatedExpiration) {
         finalExpiration = calculatedExpiration < finalExpiration ? calculatedExpiration : finalExpiration;
       } else if (calculatedExpiration) {
         finalExpiration = calculatedExpiration;
       }
     }
-
     const updated = await this.productModel
       .findByIdAndUpdate(
         id,
@@ -146,10 +180,10 @@ export class ProductService {
         { returnDocument: 'after' }
       )
       .exec();
-
     return updated;
   }
 
+  // cerrar producto y limpiar el campo de caducidad
   async markAsClosed(id: string, userId: string): Promise<Product | null> {
     const product = await this.productModel.findById(id).exec();
     if (!product) throw new NotFoundException(`Producto ${id} no encontrado`);
@@ -164,6 +198,7 @@ export class ProductService {
       .exec();
   }
 
+  // calcular fecha de caducidad
   async calculateExpirationFromOpening(id: string, userId: string): Promise<Product | null> {
     const product = await this.productModel.findById(id).exec();
     if (!product) throw new NotFoundException(`Producto ${id} no encontrado`);
@@ -179,20 +214,17 @@ export class ProductService {
     if (!product.periodAfterOpening) {
       throw new BadRequestException('El producto no tiene período después de abierto definido');
     }
-
     const newExpiration = this.calculateExpirationDate(
       product.openedDate,
       product.periodAfterOpening,
       product.expirationDate
     );
-
     return this.productModel
       .findByIdAndUpdate(id, { expirationDate: newExpiration }, { returnDocument: 'after' })
       .exec();
   }
 
-  // ==================== MÉTODOS DE ESTADÍSTICAS ====================
-
+  // ver la cantidad de productos segun la lista en la que estan
   async getStats(userId: string) {
     const products = await this.productModel.find({ userId }).exec();
     const stats = { wishlist: 0, favorites: 0, have: 0, used: 0, deleted: 0, total: products.length };
@@ -202,6 +234,7 @@ export class ProductService {
     return stats;
   }
 
+  // obtener productos caducados
   async getExpiredProducts(userId: string): Promise<Product[]> {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -211,6 +244,7 @@ export class ProductService {
       .exec();
   }
 
+  // obtener productos que van a caducar pronto
   async getExpiringSoon(userId: string, days: number = 30): Promise<Product[]> {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -223,24 +257,19 @@ export class ProductService {
       .exec();
   }
 
-  // ==================== MÉTODOS PRIVADOS DE AYUDA ====================
-
+  // metodo para calcular la fecha de caducidad
   private calculateExpirationDate(
     baseDate: Date | null | undefined,
     period: string | null | undefined,
     fixedExpiration: Date | null | undefined
   ): Date | null {
     if (!baseDate || !period) return fixedExpiration || null;
-
     const calculated = this.calculateExpirationFromPeriod(baseDate, period);
     if (!calculated) return fixedExpiration || null;
-
-    // Si tiene fecha fija, tomar la que ocurra PRIMERO
     if (fixedExpiration) {
       const fixed = new Date(fixedExpiration);
       return calculated < fixed ? calculated : fixed;
     }
-
     return calculated;
   }
 
@@ -253,6 +282,7 @@ export class ProductService {
     return expiration;
   }
 
+  // caluclar fecha segun el PAO
   private parsePeriodToMonths(period: string): number | null {
     if (!period) return null;
     
@@ -262,50 +292,10 @@ export class ProductService {
     const mMatch = cleaned.match(/^(\d+)\s*M$/);
     if (mMatch) return parseInt(mMatch[1]);
     
-    // Formato "6 meses" o "12 MESES"
-    const monthMatch = cleaned.match(/^(\d+)\s*MES(?:ES)?$/);
-    if (monthMatch) return parseInt(monthMatch[1]);
-    
     // Solo número "12"
     const numberMatch = cleaned.match(/^(\d+)$/);
     if (numberMatch) return parseInt(numberMatch[1]);
     
     return null;
-  }
-
-  // En product.service.ts
-
-  async findAllByUserPaginated(
-    userId: string,
-    paginationDto: PaginationDto,
-    listType?: string
-  ) {
-    const { page, limit } = paginationDto;
-    const skip = (page - 1) * limit;
-
-    // Filtro base
-    const filter: any = { userId };
-    if (listType) filter.listType = listType;
-
-    // Ejecutamos ambas consultas en paralelo para mejor performance
-    const [data, total] = await Promise.all([
-      this.productModel
-        .find(filter)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .exec(),
-      this.productModel.countDocuments(filter),
-    ]);
-
-    return {
-      data,
-      info: {
-        totalProducts: total,
-        totalPages: Math.ceil(total / limit),
-        page,
-        limit,
-      },
-    };
   }
 }

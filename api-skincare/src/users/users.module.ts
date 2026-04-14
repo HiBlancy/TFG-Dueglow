@@ -7,6 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthGuard } from './guards/auth.guard';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { ImageCompressionService } from '../services/image-compression.service';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { CloudinaryService } from '../cloudinary/cloudinary.service';
     }),
   ],
   controllers: [UsersController],
-  providers: [UsersService, AuthGuard, CloudinaryService],
+  providers: [UsersService, AuthGuard, CloudinaryService, ImageCompressionService],
   exports: [UsersService, AuthGuard, JwtModule, CloudinaryService],
 })
 export class UserModule {}

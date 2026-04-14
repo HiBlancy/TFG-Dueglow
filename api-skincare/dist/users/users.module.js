@@ -16,6 +16,7 @@ const jwt_1 = require("@nestjs/jwt");
 const auth_guard_1 = require("./guards/auth.guard");
 const config_1 = require("@nestjs/config");
 const cloudinary_service_1 = require("../cloudinary/cloudinary.service");
+const image_compression_service_1 = require("../services/image-compression.service");
 let UserModule = class UserModule {
 };
 exports.UserModule = UserModule;
@@ -40,7 +41,7 @@ exports.UserModule = UserModule = __decorate([
             }),
         ],
         controllers: [users_controller_1.UsersController],
-        providers: [users_service_1.UsersService, auth_guard_1.AuthGuard, cloudinary_service_1.CloudinaryService],
+        providers: [users_service_1.UsersService, auth_guard_1.AuthGuard, cloudinary_service_1.CloudinaryService, image_compression_service_1.ImageCompressionService],
         exports: [users_service_1.UsersService, auth_guard_1.AuthGuard, jwt_1.JwtModule, cloudinary_service_1.CloudinaryService],
     })
 ], UserModule);

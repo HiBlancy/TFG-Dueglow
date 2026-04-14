@@ -3,9 +3,13 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { MoveProductDto } from './dto/move-product.dto';
 import { PaginationDto } from '../pagination/pagination.dto';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { ImageCompressionService } from '../services/image-compression.service';
 export declare class ProductController {
     private readonly productService;
-    constructor(productService: ProductService);
+    private readonly cloudinaryService;
+    private readonly imageCompressionService;
+    constructor(productService: ProductService, cloudinaryService: CloudinaryService, imageCompressionService: ImageCompressionService);
     private successResponse;
     create(req: any, createProductDto: CreateProductDto): Promise<{
         status: boolean;
@@ -63,6 +67,16 @@ export declare class ProductController {
         data: any;
     }>;
     calculateExpiration(req: any, id: string): Promise<{
+        status: boolean;
+        message: string;
+        data: any;
+    }>;
+    uploadProductImage(productId: string, file: Express.Multer.File, req: any): Promise<{
+        status: boolean;
+        message: string;
+        data: any;
+    }>;
+    deleteProductImage(productId: string, req: any): Promise<{
         status: boolean;
         message: string;
         data: any;

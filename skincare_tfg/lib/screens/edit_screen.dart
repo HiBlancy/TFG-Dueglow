@@ -155,16 +155,6 @@ class _EditScreenState extends State<EditScreen> {
     );
   }
 
-  void _onUploadPressed() {
-  if (_isUploadingImage) return; // No hace nada si está subiendo
-  _uploadProfileImage();
-}
-
-void _onSavePressed() {
-  if (_isSaving) return; // No hace nada si está guardando
-  _saveChanges();
-}
-
   // 🆕 Seleccionar imagen desde cámara
   Future<void> _pickImageFromCamera() async {
     setState(() => _isUploadingImage = true);
@@ -235,65 +225,37 @@ void _onSavePressed() {
   }
 
   Future<void> _saveChanges() async {
-  if (!_formKey.currentState!.validate()) return;
-  
-  if (_passwordController.text.isNotEmpty && 
-      _passwordController.text != _confirmPasswordController.text) {
-    _showCustomSnackBar('Las contraseñas no coinciden', isError: true);
-    return;
-  }
-  
-  setState(() => _isSaving = true);
-  
-  try {
-    String? newProfileImageUrl;
-
-    // 1️⃣ Si hay una imagen seleccionada, subirla primero
-    if (_selectedImage != null) {
-      setState(() => _isUploadingImage = true); // opcional: mostrar indicador
-      final uploadResult = await _authService.uploadProfileImage(_selectedImage!);
-      if (uploadResult != null && uploadResult['profileImage'] != null) {
-        newProfileImageUrl = uploadResult['profileImage'];
-        // Actualizar la vista con la nueva URL
-        setState(() {
-          _currentProfileImageUrl = newProfileImageUrl;
-          _selectedImage = null; // limpiar selección local
-        });
-      } else {
-        _showCustomSnackBar('Error al subir la imagen', isError: true);
-        setState(() => _isSaving = false);
-        return;
-      }
-      setState(() => _isUploadingImage = false);
+    if (!_formKey.currentState!.validate()) return;
+    
+    if (_passwordController.text.isNotEmpty && 
+        _passwordController.text != _confirmPasswordController.text) {
+      _showCustomSnackBar('Las contraseñas no coinciden', isError: true);
+      return;
     }
-
-    // 2️⃣ Preparar datos de actualización (incluyendo la nueva URL si existe)
+    
+    setState(() => _isSaving = true);
+    
     String? formattedBirthDate;
     if (_birthDateController.text.isNotEmpty) {
       formattedBirthDate = _convertToISODate(_birthDateController.text);
     }
-
-    final updateResult = await _authService.updateUser(
+    
+    final result = await _authService.updateUser(
       name: _nameController.text.isNotEmpty ? _nameController.text : null,
       phone: _phoneController.text.isNotEmpty ? _phoneController.text : null,
       birthDate: formattedBirthDate,
       password: _passwordController.text.isNotEmpty ? _passwordController.text : null,
-      profileImage: newProfileImageUrl, // ← necesitas añadir este parámetro opcional
     );
-
-    if (updateResult != null && mounted) {
+    
+    setState(() => _isSaving = false);
+    
+    if (result != null && mounted) {
       _showCustomSnackBar('Perfil actualizado correctamente');
       Navigator.pop(context, true);
-    } else {
+    } else if (mounted) {
       _showCustomSnackBar('Error al actualizar el perfil', isError: true);
     }
-  } catch (e) {
-    print('❌ Error en _saveChanges: $e');
-    _showCustomSnackBar('Error al guardar los cambios', isError: true);
-  } finally {
-    if (mounted) setState(() => _isSaving = false);
   }
-}
   
   Future<void> _selectDate() async {
     DateTime initialDate = DateTime.now();
@@ -530,25 +492,73 @@ void _onSavePressed() {
   }
 
   Widget _buildSaveButton() {
-  return Column(
-    children: [
-      if (_selectedImage != null)
-        Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: context.primaryButton(
-            _isUploadingImage ? 'Subiendo foto...' : 'Subir Foto de Perfil',
-            _onUploadPressed, 
-            size: ButtonSize.full,
-            icon: Icons.cloud_upload,
+    return Column(
+      children: [
+        // Botón para subir imagen si hay una seleccionada
+        if (_selectedImage != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: ElevatedButton(
+              onPressed: _isUploadingImage ? null : _uploadProfileImage,
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 56),
+                backgroundColor: Theme.of(context).colorScheme.primary,
+              ),
+              child: _isUploadingImage
+                  ? SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Theme.of(context).colorScheme.onPrimary,
+                        ),
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.cloud_upload, color: Theme.of(context).colorScheme.onPrimary),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Subir Foto de Perfil',
+                          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                        ),
+                      ],
+                    ),
+            ),
           ),
+        // Botón guardar cambios normales
+        ElevatedButton(
+          onPressed: _isSaving ? null : _saveChanges,
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 56),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+          ),
+          child: _isSaving
+              ? SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Theme.of(context).colorScheme.onPrimary,
+                    ),
+                    strokeWidth: 2,
+                  ),
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.save, color: Theme.of(context).colorScheme.onPrimary),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Guardar Cambios',
+                      style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                    ),
+                  ],
+                ),
         ),
-      context.primaryButton(
-        _isSaving ? 'Guardando...' : 'Guardar Cambios',
-        _onSavePressed, 
-        size: ButtonSize.full,
-        icon: Icons.save,
-      ),
-    ],
-  );
-}
+      ],
+    );
+  }
 }

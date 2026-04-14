@@ -16,10 +16,16 @@ exports.ProductService = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
+const cloudinary_service_1 = require("../cloudinary/cloudinary.service");
+const image_compression_service_1 = require("../services/image-compression.service");
 let ProductService = class ProductService {
     productModel;
-    constructor(productModel) {
+    cloudinaryService;
+    imageCompressionService;
+    constructor(productModel, cloudinaryService, imageCompressionService) {
         this.productModel = productModel;
+        this.cloudinaryService = cloudinaryService;
+        this.imageCompressionService = imageCompressionService;
     }
     async create(userId, createProductDto) {
         const newProduct = new this.productModel({
@@ -29,17 +35,36 @@ let ProductService = class ProductService {
         });
         return newProduct.save();
     }
-    async findAllByUser(userId, listType) {
+    async findAllByUserPaginated(userId, paginationDto, listType) {
+        const { page, limit } = paginationDto;
+        const skip = (page - 1) * limit;
         const filter = { userId };
         if (listType)
             filter.listType = listType;
-        return this.productModel.find(filter).sort({ createdAt: -1 }).exec();
+        const [data, total] = await Promise.all([
+            this.productModel
+                .find(filter)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .exec(),
+            this.productModel.countDocuments(filter),
+        ]);
+        return {
+            data,
+            info: {
+                totalProducts: total,
+                totalPages: Math.ceil(total / limit),
+                page,
+                limit,
+            },
+        };
     }
     async findById(id, userId) {
         const product = await this.productModel.findById(id).exec();
         if (!product)
             return null;
-        if (product.userId.toString() !== userId) {
+        if (product.userId.toString() !== userId.toString()) {
             throw new common_1.ForbiddenException('No tienes permiso para ver este producto');
         }
         return product;
@@ -83,6 +108,13 @@ let ProductService = class ProductService {
             throw new common_1.NotFoundException(`Producto ${id} no encontrado`);
         if (product.userId.toString() !== userId.toString()) {
             throw new common_1.ForbiddenException('No puedes eliminar este producto');
+        }
+        if (product.imageUrl) {
+            const publicId = this.cloudinaryService.extractPublicIdFromUrl(product.imageUrl);
+            if (publicId) {
+                await this.cloudinaryService.deleteImage(publicId);
+                console.log(`🗑️ Imagen eliminada de Cloudinary al borrar producto: ${publicId}`);
+            }
         }
         return this.productModel.findByIdAndDelete(id).exec();
     }
@@ -213,44 +245,18 @@ let ProductService = class ProductService {
         const mMatch = cleaned.match(/^(\d+)\s*M$/);
         if (mMatch)
             return parseInt(mMatch[1]);
-        const monthMatch = cleaned.match(/^(\d+)\s*MES(?:ES)?$/);
-        if (monthMatch)
-            return parseInt(monthMatch[1]);
         const numberMatch = cleaned.match(/^(\d+)$/);
         if (numberMatch)
             return parseInt(numberMatch[1]);
         return null;
-    }
-    async findAllByUserPaginated(userId, paginationDto, listType) {
-        const { page, limit } = paginationDto;
-        const skip = (page - 1) * limit;
-        const filter = { userId };
-        if (listType)
-            filter.listType = listType;
-        const [data, total] = await Promise.all([
-            this.productModel
-                .find(filter)
-                .sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(limit)
-                .exec(),
-            this.productModel.countDocuments(filter),
-        ]);
-        return {
-            data,
-            info: {
-                totalProducts: total,
-                totalPages: Math.ceil(total / limit),
-                page,
-                limit,
-            },
-        };
     }
 };
 exports.ProductService = ProductService;
 exports.ProductService = ProductService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectModel)('Product')),
-    __metadata("design:paramtypes", [mongoose_2.Model])
+    __metadata("design:paramtypes", [mongoose_2.Model,
+        cloudinary_service_1.CloudinaryService,
+        image_compression_service_1.ImageCompressionService])
 ], ProductService);
 //# sourceMappingURL=product.service.js.map
