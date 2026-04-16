@@ -6,7 +6,6 @@ import '../models/beauty_product.dart';
 import '../models/product_list_type.dart';
 import '../services/product_service.dart';
 import '../services/image_service.dart';
-import 'custom_button.dart';
 import 'custom_text_field.dart';
 
 class EditProductDialog extends StatefulWidget {
@@ -255,8 +254,6 @@ class _EditProductDialogState extends State<EditProductDialog> {
         // Actualizar la URL local para que el PATCH no la toque
         _currentImageUrl = uploadedProduct.imageUrl;
 
-        print('🔍 uploadedProduct.imageUrl = ${uploadedProduct?.imageUrl}');
-print('🔍 uploadedProduct completo: ${uploadedProduct?.toBackendJson()}');
       } else {
         _showSnackBar('Error al subir la imagen', isError: true);
         return;

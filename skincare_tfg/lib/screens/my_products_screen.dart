@@ -137,10 +137,8 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
         return 'No tienes productos en "Tengo"';
       case ProductListType.wishlist:
         return 'No tienes productos en "Deseados"';
-      case ProductListType.favorites:
-        return 'No tienes productos favoritos';
       case ProductListType.used:
-        return 'No has registrado productos usados';
+        return 'No has registrado productos terminados';
     }
   }
 
@@ -153,16 +151,11 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
         return 'Los productos que marques como "Tengo" aparecerán aquí';
       case ProductListType.wishlist:
         return 'Agrega productos a tu wishlist desde la pantalla de detalles';
-      case ProductListType.favorites:
-        return 'Marca productos como favoritos desde la pantalla de detalles';
       case ProductListType.used:
-        return 'Los productos que marques como usados aparecerán aquí';
+        return 'Los productos que has acabado este mes aparecen en esta lista';
     }
   }
 
-  int _getProductCountByType(ProductListType type) {
-    return _allProducts.where((p) => p.listType == type.value).length;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -252,10 +245,9 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
         child: Row(
           children: ProductListType.values.map((type) {
             final isSelected = _selectedListType == type;
-            final count = _getProductCountByType(type);
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: _buildFilterChip(type, isSelected, count, theme),
+              child: _buildFilterChip(type, isSelected, theme),
             );
           }).toList(),
         ),
@@ -266,7 +258,6 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
   Widget _buildFilterChip(
     ProductListType type,
     bool isSelected,
-    int count,
     ThemeData theme,
   ) {
     final isDark = theme.brightness == Brightness.dark;
@@ -309,26 +300,6 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
                 fontSize: 13,
               ),
             ),
-            if (count > 0) ...[
-              const SizedBox(width: 6),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? Colors.white.withValues(alpha: 0.3)
-                      : type.color.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  '$count',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: isSelected ? Colors.white : type.color,
-                  ),
-                ),
-              ),
-            ],
           ],
         ),
       ),

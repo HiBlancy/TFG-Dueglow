@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../models/beauty_product.dart';
 import '../models/product_list_type.dart';
 import '../services/product_service.dart';
@@ -304,8 +305,23 @@ class _ProductScreenState extends State<ProductScreen> {
   }
 
   Future<void> _markAsFinished() async {
-    await _showMessage('Funcionalidad "Producto acabado" en desarrollo');
+  if (!await _confirmAction(
+    'Marcar como terminado',
+    '¿Estás seguro de que has terminado "${_currentProduct.name}"?\n\n'
+    'El producto se moverá a la lista de terminados y se registrará en tu historial mensual.',
+  )) {
+    return;
   }
+
+  await _executeAction(
+    action: () => _productService.updateProduct(_currentProduct.id!, {
+      'listType': 'used',
+      'finishedDate': DateTime.now().toIso8601String(), // Guardar fecha
+    }),
+    successMessage: '✓ "${_currentProduct.name}" marcado como terminado',
+    loadingKey: 'finishing',
+  );
+}
 
   Future<void> _markAsOpened() async {
     final theme = Theme.of(context);
@@ -431,19 +447,21 @@ class _ProductScreenState extends State<ProductScreen> {
       backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: isDark ? Color(0xff3a1a2f) : theme.colorScheme.surface,
+        backgroundColor: isDark
+            ? const Color(0xff3a1a2f) // Mismo color oscuro
+            : theme.colorScheme.surface, // Mismo color claro
         foregroundColor: isDark
-            ? Color(0xfff4add8)
-            : theme.colorScheme.onPrimary,
+            ? const Color(0xfff4add8) // Mismo rosa
+            : theme.colorScheme.primary, // Mismo color primario
         title: Text(
           'DueGlow',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.displaySmall?.copyWith(
-            color: isDark ? Color(0xfff4add8) : theme.colorScheme.primary,
-            fontWeight: FontWeight.bold,
-            fontSize: 28,
-            fontStyle: FontStyle.italic
+          style: GoogleFonts.crimsonText(
+            fontSize: 30,
+            fontWeight: FontWeight.w600,
+            fontStyle: FontStyle.italic,
+            color: isDark ? const Color(0xfff4add8) : theme.colorScheme.primary,
           ),
         ),
         actions: [
@@ -452,6 +470,9 @@ class _ProductScreenState extends State<ProductScreen> {
               icon: const Icon(Icons.edit),
               onPressed: _isLoading('editing') ? null : _editProduct,
               tooltip: 'Editar producto',
+              color: isDark
+                  ? const Color(0xfff4add8)
+                  : theme.colorScheme.primary,
             ),
         ],
       ),

@@ -15,6 +15,7 @@ class BeautyProduct {
   final String? periodAfterOpening;
   final DateTime? openedDate;
   final DateTime? addedAt;
+  final DateTime? finishedDate;
   final bool? isOpened;
 
   const BeautyProduct({
@@ -30,6 +31,7 @@ class BeautyProduct {
     this.expirationDate,
     this.periodAfterOpening,
     this.openedDate,
+    this.finishedDate,
     this.addedAt,
     this.isOpened,
   });

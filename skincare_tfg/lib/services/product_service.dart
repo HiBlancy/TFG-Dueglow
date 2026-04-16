@@ -133,6 +133,36 @@ class ProductService {
     }
   }
 
+ // Obtener productos próximos a caducar
+Future<List<BeautyProduct>> getExpiringSoon({int days = 30}) async {
+  try {
+    final token = await _authService.getToken();
+    if (token == null) return [];
+
+    final response = await http.get(
+      Uri.parse(ApiConfig.getExpiringSoonUrl(days: days)),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      
+      if (data['status'] == true && data['data'] is List) {
+        return (data['data'] as List)
+            .map((product) => BeautyProduct.fromBackend(product))
+            .toList();
+      }
+    }
+    return [];
+  } catch (e) {
+    print('❌ Error: $e');
+    return [];
+  }
+}
+
   Future<BeautyProduct?> moveProduct(String id, String targetList) async {
     try {
       final token = await _authService.getToken();

@@ -20,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String _userName = '';
   bool _isLoading = true;
-  List<BeautyProduct> _products = [];
+  List<BeautyProduct> _expiringSoonProducts = [];
 
   @override
   void initState() {
@@ -31,12 +31,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _loadUserData() async {
     setState(() => _isLoading = true);
     final name = await _authService.getUserName();
-    final response = await _productService.getProducts(page: 1, limit: 10);
+    final expiringProducts = await _productService.getExpiringSoon(days: 30);
 
     if (mounted) {
       setState(() {
         _userName = name ?? 'Usuario';
-        _products = response?.products ?? [];
+        _expiringSoonProducts = expiringProducts;
         _isLoading = false;
       });
     }
@@ -118,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             height: 80,
                             child: Icon(
                               Icons
-                                  .eco_outlined, // Puedes cambiarlo por Icons.eco, Icons.blur_on, etc.
+                                  .eco_outlined,
                               size: 80,
                               color: theme.colorScheme.surfaceTint.withValues(
                                 alpha: 0.2,
@@ -157,33 +157,13 @@ class _HomeScreenState extends State<HomeScreen> {
     AppLocalizations l10n,
     bool isDark,
   ) {
-    // En modo oscuro: usamos colores más saturados y con variación
-    // En modo claro: los tonos más suaves que ya tienes
-
     final color1 = isDark
         ? theme.colorScheme.primaryContainer.withValues(alpha: 0.6)
         : theme.colorScheme.primaryContainer.withValues(alpha: 0.4);
 
-    final color2 = isDark
-        ? Color(0xffe8d5f2).withValues(alpha: 0.5) // Púrpura suave
-        : theme.colorScheme.primaryContainer.withValues(alpha: 0.2);
-
-    final color3 = isDark
-        ? Color(0xffd9a3c8).withValues(alpha: 0.4) // Rosa más saturada
-        : theme.colorScheme.primaryContainer.withValues(alpha: 0.2);
-
-    final color4 = isDark
-        ? Color(0xffb095a8).withValues(alpha: 0.3) // Rosa neutral suave
-        : theme.colorScheme.primaryContainer.withValues(alpha: 0.1);
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: _buildActionCard(
+      child: _buildActionCard(
                   Icons.shopping_bag_outlined,
                   l10n.myProducts,
                   l10n.seeAll,
@@ -195,63 +175,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   theme,
                   isDark,
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildActionCard(
-                  Icons.face_retouching_natural_outlined,
-                  l10n.routines,
-                  'Próximamente',
-                  color2,
-                  () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Próximamente')),
-                    );
-                  },
-                  theme,
-                  isDark,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildActionCard(
-                  Icons.category_outlined,
-                  l10n.categories,
-                  'Próximamente',
-                  color3,
-                  () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Próximamente')),
-                    );
-                  },
-                  theme,
-                  isDark,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildActionCard(
-                  Icons.history,
-                  'Usados',
-                  'Próximamente',
-                  color4,
-                  () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Próximamente')),
-                    );
-                  },
-                  theme,
-                  isDark,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 
@@ -259,14 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final theme = Theme.of(context);
   final l10n = AppLocalizations.of(context)!;
 
-  final now = DateTime.now();
-  final expiringSoon = _products.where((product) {
-    if (product.expirationDate == null) return false;
-    final days = product.expirationDate!.difference(now).inDays;
-    return days >= 0 && days <= 30;
-  }).toList();
-
-  final displayProducts = expiringSoon.take(6).toList();
+  final displayProducts = _expiringSoonProducts.take(6).toList();
 
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -287,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    'Prioriza estos productos antes de que caduquen', // Asegúrate de agregar esta clave en tu archivo .arb
+                    'Prioriza estos productos antes de que caduquen',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: isDark
                           ? theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7)
@@ -314,28 +230,28 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       const SizedBox(height: 16),
-      if (expiringSoon.isEmpty)
+      if (_expiringSoonProducts.isEmpty)
         _buildEmptyCard(theme, l10n, isDark)
       else
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 220, // Ancho máximo de cada tarjeta (ajústalo según prefieras)
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 0.75, // Mantén la proporción vertical
-            ),
+        SizedBox(
+          height: 260, // Altura fija para el scroll horizontal (ajústala según el tamaño de tus tarjetas)
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal, // Scroll horizontal
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             itemCount: displayProducts.length,
-            itemBuilder: (context, index) =>
-                _buildExpiringProductCardVertical(
+            itemBuilder: (context, index) => Padding(
+              padding: const EdgeInsets.only(right: 12), // Espacio entre tarjetas
+              child: SizedBox(
+                width: 160, // Ancho fijo para cada tarjeta
+                child: _buildExpiringProductCardVertical(
                   displayProducts[index],
                   isDark,
                 ),
+              ),
+            ),
           ),
         ),
+      const SizedBox(height: 24), // Espacio extra al final
     ],
   );
 }

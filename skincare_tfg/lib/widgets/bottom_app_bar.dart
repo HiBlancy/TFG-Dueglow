@@ -1,7 +1,7 @@
-import 'package:dueglow/screens/add_product_screen.dart';
+import '../screens/add_product_screen.dart';
+import '../screens/my_products_screen.dart';
 import 'package:flutter/material.dart';
 import '../screens/home_screen.dart';
-import '../screens/search_screen.dart';
 import '../screens/scan_screen.dart';
 import '../screens/profile_screen.dart';
 
@@ -33,7 +33,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
     _currentIndex = widget.initialIndex;
     _screens = const [
       HomeScreen(),
-      SearchScreen(),
+      MyProductsScreen(),
       AddProductScreen(),
       ScanScreen(),
       ProfileScreen(),
@@ -61,9 +61,9 @@ class _BottomNavBarState extends State<BottomNavBar> {
         label: 'Inicio',
       ),
       BottomNavigationBarItem(
-        icon: Icon(Icons.search),
-        activeIcon: Icon(Icons.search),
-        label: 'Búsqueda',
+        icon: Icon(Icons.shopping_bag_outlined),
+        activeIcon: Icon(Icons.shopping_bag),
+        label: 'Productos',
       ),
       BottomNavigationBarItem(
         icon: Icon(Icons.add),

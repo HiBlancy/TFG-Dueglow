@@ -44,7 +44,7 @@ export class CreateProductDto {
   rating?: number;
 
   @IsOptional()
-  @IsIn(['wishlist', 'favorites', 'have', 'used'])
+  @IsIn(['wishlist', 'have', 'used'])
   listType?: string;
 
   @IsOptional()

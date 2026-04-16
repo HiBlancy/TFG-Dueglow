@@ -17,7 +17,7 @@ class MoveProductDto {
 exports.MoveProductDto = MoveProductDto;
 __decorate([
     (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsIn)(['wishlist', 'favorites', 'have', 'used']),
+    (0, class_validator_1.IsIn)(['wishlist', 'have', 'used']),
     __metadata("design:type", String)
 ], MoveProductDto.prototype, "targetList", void 0);
 //# sourceMappingURL=move-product.dto.js.map

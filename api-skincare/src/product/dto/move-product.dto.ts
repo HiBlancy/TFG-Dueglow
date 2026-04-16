@@ -2,6 +2,6 @@ import { IsIn, IsNotEmpty } from 'class-validator';
 
 export class MoveProductDto {
   @IsNotEmpty()
-  @IsIn(['wishlist', 'favorites', 'have', 'used'])
+  @IsIn(['wishlist', 'have', 'used'])
   targetList: string;
 }

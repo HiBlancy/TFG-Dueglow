@@ -35,7 +35,6 @@ export declare class ProductService {
     calculateExpirationFromOpening(id: string, userId: string): Promise<Product | null>;
     getStats(userId: string): Promise<{
         wishlist: number;
-        favorites: number;
         have: number;
         used: number;
         total: number;

@@ -22,7 +22,7 @@ export const ProductSchema = new Schema(
     },
     listType: {
       type: String,
-      enum: ['wishlist', 'favorites', 'have', 'used'],
+      enum: ['wishlist', 'have', 'used'],
       default: 'have',
     },
     expirationDate: { type: Date, required: false },

@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 enum ProductListType {
   have('have', 'Tengo', Icons.check_circle_outline, Colors.green),
   wishlist('wishlist', 'Deseados', Icons.favorite_border, Colors.pink),
-  favorites('favorites', 'Favoritos', Icons.star_border, Colors.amber),
-  used('used', 'Usados', Icons.history, Colors.blue);
+  used('used', 'Terminados', Icons.history, Colors.blue);
 
   final String value;
   final String label;

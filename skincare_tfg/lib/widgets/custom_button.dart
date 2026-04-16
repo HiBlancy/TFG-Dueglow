@@ -150,7 +150,7 @@ class _CustomButtonState extends State<CustomButton>
     Color defaultBorderColor;
     Color? defaultHoverColor;
 
-    double _getDefaultHeight() {
+    double getDefaultHeight() {
       switch (widget.size) {
         case ButtonSize.small:
           return 36;
@@ -225,7 +225,7 @@ class _CustomButtonState extends State<CustomButton>
           ? Colors.transparent
           : theme.colorScheme.shadow.withValues(alpha: 0.3),
       padding: widget.padding ?? _getDefaultPadding(),
-      minimumSize: Size(_getWidth() ?? 0, widget.height ?? _getDefaultHeight()),
+      minimumSize: Size(_getWidth() ?? 0, widget.height ?? getDefaultHeight()),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(widget.borderRadius),
         side:

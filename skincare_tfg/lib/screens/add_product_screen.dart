@@ -1,7 +1,10 @@
+// add_product_screen.dart
+import 'dart:io';
 import 'package:dueglow/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import '../models/beauty_product.dart';
 import '../services/product_service.dart';
+import '../services/image_service.dart';
 import '../widgets/main_toolbar.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_text_field.dart';
@@ -16,6 +19,7 @@ class AddProductScreen extends StatefulWidget {
 class _AddProductScreenState extends State<AddProductScreen> {
   final _formKey = GlobalKey<FormState>();
   final ProductService _productService = ProductService();
+  final ImageService _imageService = ImageService();
 
   final _nameController = TextEditingController();
   final _brandController = TextEditingController();
@@ -28,6 +32,13 @@ class _AddProductScreenState extends State<AddProductScreen> {
   DateTime? _openedDate;
   final List<String> _categories = [];
   bool _isLoading = false;
+  
+  // Estado para la imagen
+  File? _selectedImageFile;
+  bool _isUploadingImage = false;
+  
+  // Opciones predefinidas de PAO
+  final List<String> _paoOptions = ['3M', '6M', '12M', '18M', '24M'];
 
   @override
   void dispose() {
@@ -40,7 +51,94 @@ class _AddProductScreenState extends State<AddProductScreen> {
     super.dispose();
   }
 
-  // --- LÓGICA DE NEGOCIO (Igual que antes) ---
+  // Mostrar opciones para seleccionar imagen
+  void _showImagePickerOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    'Añadir imagen del producto',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.photo_camera),
+                  title: const Text('Tomar foto'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickImageFromCamera();
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.photo_library),
+                  title: const Text('Seleccionar de galería'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickImageFromGallery();
+                  },
+                ),
+                if (_selectedImageFile != null)
+                  ListTile(
+                    leading: const Icon(Icons.delete_outline, color: Colors.red),
+                    title: const Text('Eliminar imagen', style: TextStyle(color: Colors.red)),
+                    onTap: () {
+                      Navigator.pop(context);
+                      setState(() => _selectedImageFile = null);
+                      _showSnackBar('Imagen eliminada');
+                    },
+                  ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Seleccionar imagen de cámara
+  Future<void> _pickImageFromCamera() async {
+    final imageFile = await _imageService.takePhotoWithCamera();
+    
+    if (imageFile != null && mounted) {
+      setState(() {
+        _selectedImageFile = imageFile;
+      });
+      _showSnackBar('Imagen capturada correctamente');
+    } else if (mounted) {
+      _showSnackBar('No se pudo capturar la imagen', isError: true);
+    }
+  }
+
+  // Seleccionar imagen de galería
+  Future<void> _pickImageFromGallery() async {
+    final imageFile = await _imageService.pickImageFromGallery();
+    
+    if (imageFile != null && mounted) {
+      setState(() {
+        _selectedImageFile = imageFile;
+      });
+      _showSnackBar('Imagen seleccionada correctamente');
+    } else if (mounted) {
+      _showSnackBar('No se pudo seleccionar la imagen', isError: true);
+    }
+  }
+
+  // --- LÓGICA DE NEGOCIO ---
   Future<void> _selectDate({
     required DateTime? initialDate,
     required DateTime firstDate,
@@ -65,10 +163,19 @@ class _AddProductScreenState extends State<AddProductScreen> {
       });
     }
   }
+  
+  // Seleccionar PAO de las opciones
+  void _selectPao(String pao) {
+    setState(() {
+      _paoController.text = pao;
+    });
+  }
 
   Future<void> _saveProductManually() async {
     if (!_formKey.currentState!.validate()) return;
+    
     setState(() => _isLoading = true);
+
     try {
       final newProduct = BeautyProduct(
         barcode: _barcodeController.text.trim(),
@@ -83,29 +190,70 @@ class _AddProductScreenState extends State<AddProductScreen> {
         addedAt: DateTime.now(),
         isOpened: _openedDate != null,
       );
-      final addedProduct = await _productService.addProductToHave(newProduct);
-      if (mounted) {
-        setState(() => _isLoading = false);
-        if (addedProduct != null) {
+
+      var addedProduct = await _productService.addProductToHave(newProduct);
+
+      if (addedProduct != null && mounted) {
+        if (_selectedImageFile != null) {
+          setState(() => _isUploadingImage = true);
+          
+          final updatedProduct = await _productService.uploadProductImage(
+            addedProduct.id!,
+            _selectedImageFile!,
+          );
+          
+          setState(() => _isUploadingImage = false);
+          
+          if (updatedProduct != null) {
+            addedProduct = updatedProduct;
+          } else {
+            _showSnackBar('Producto guardado pero la imagen no se pudo subir', isError: true);
+          }
+        }
+
+        if (mounted) {
+          setState(() => _isLoading = false);
           _showSnackBar('✓ Producto añadido correctamente');
           _clearForm();
         }
+      } else {
+        if (mounted) {
+          setState(() => _isLoading = false);
+          _showSnackBar('Error al guardar el producto', isError: true);
+        }
       }
     } catch (e) {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+        _showSnackBar('Error al guardar el producto', isError: true);
+      }
     }
   }
 
   void _clearForm() {
     setState(() {
-      _nameController.clear(); _brandController.clear(); _barcodeController.clear();
-      _paoController.clear(); _notesController.clear(); _newCategoryController.clear();
-      _expirationDate = null; _openedDate = null; _categories.clear();
+      _nameController.clear(); 
+      _brandController.clear(); 
+      _barcodeController.clear();
+      _paoController.clear(); 
+      _notesController.clear(); 
+      _newCategoryController.clear();
+      _expirationDate = null; 
+      _openedDate = null; 
+      _categories.clear();
+      _selectedImageFile = null;
     });
   }
 
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  void _showSnackBar(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red : Colors.green,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   // --- DISEÑO ---
@@ -113,42 +261,17 @@ class _AddProductScreenState extends State<AddProductScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorPrincipal = theme.colorScheme.primaryContainer;
+    final cardBackgroundColor = theme.colorScheme.primaryContainer.withValues(alpha: 0.15);
 
     return CustomAppBar(
       title: 'Añadir Producto',
       showDrawer: true,
       showBackButton: false,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // 1. TÍTULO Y DESCRIPCIÓN CENTRADA
-            Center(
-              child: Column(
-                children: [
-                  Text(
-                    '¿Nuevo producto?',
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.primary,
-                      fontFamily: 'Sora',
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Escanea o rellena los datos abajo',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            
-            const SizedBox(height: 32),
-
-            // 2. ACCIONES RÁPIDAS (Estilo Esencia con opacidad)
+            // 1. TARJETAS DE ACCIONES RÁPIDAS (mismo fondo, icono con círculo)
             Row(
               children: [
                 Expanded(
@@ -156,8 +279,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                     icon: Icons.qr_code_scanner,
                     title: 'Escanear',
                     subtitle: 'Código de barras',
-                    color: colorPrincipal.withValues(alpha: 0.4),
-                    onTap: () => Navigator.pushNamed(context, AppConstants.routeScan), 
+                    color: cardBackgroundColor,
+                    onTap: () => Navigator.pushNamed(context, AppConstants.routeScan),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -165,90 +288,97 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   child: _buildQuickActionCard(
                     icon: Icons.search,
                     title: 'Buscar',
-                    subtitle: 'Base de datos',
-                    color: colorPrincipal.withValues(alpha: 0.2),
+                    subtitle: 'Producto online',
+                    color: cardBackgroundColor,
                     onTap: () => Navigator.pushNamed(context, '/search'),
                   ),
                 ),
               ],
             ),
-            
             const SizedBox(height: 32),
             
-            // Divisor sutil
+            // Separador sutil
             Row(
               children: [
-                Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('DATOS MANUALES', style: TextStyle(fontSize: 10, letterSpacing: 1.5, fontWeight: FontWeight.bold)),
+                Expanded(child: Divider(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5))),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    'O AÑADE MANUALMENTE',
+                    style: TextStyle(
+                      fontSize: 10,
+                      letterSpacing: 1.2,
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
+                  ),
                 ),
-                Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
+                Expanded(child: Divider(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5))),
               ],
             ),
-            
-            const SizedBox(height: 32),
+            const SizedBox(height: 28),
 
-            // 3. FORMULARIO EN TARJETA NEUTRA
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.1)),
-              ),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    CustomTextField(
-                      controller: _nameController,
-                      label: 'Nombre *',
-                      prefixIcon: Icons.spa_outlined,
-                      hint: 'Ej: Crema Hidratante',
-                      validator: (v) => v?.trim().isEmpty == true ? 'Obligatorio' : null,
+            // 2. FORMULARIO - SIN CAJA BLANCA (campos integrados)
+            Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  // Selector de imagen (mismo fondo que las tarjetas)
+                  _buildImageSelector(theme, cardBackgroundColor),
+                  const SizedBox(height: 24),
+                  
+                  CustomTextField(
+                    controller: _nameController,
+                    label: 'Nombre del producto *',
+                    prefixIcon: Icons.spa_outlined,
+                    hint: 'Ej: Crema Hidratante',
+                    validator: (v) => v?.trim().isEmpty == true ? 'Obligatorio' : null,
+                  ),
+                  const SizedBox(height: 20),
+                  
+                  CustomTextField(
+                    controller: _brandController,
+                    label: 'Marca',
+                    prefixIcon: Icons.branding_watermark_outlined,
+                    hint: 'Ej: Nivea',
+                  ),
+                  const SizedBox(height: 20),
+                  
+                  // Fecha de caducidad
+                  _buildDateSelector(
+                    icon: Icons.calendar_today_outlined,
+                    text: _expirationDate != null
+                        ? 'Caduca: ${_formatDate(_expirationDate!)}'
+                        : 'Fecha de caducidad',
+                    isActive: _expirationDate != null,
+                    onTap: () => _selectDate(
+                      initialDate: _expirationDate,
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+                      onDateSelected: (date) => setState(() => _expirationDate = date),
                     ),
-                    const SizedBox(height: 20),
-                    CustomTextField(
-                      controller: _brandController,
-                      label: 'Marca',
-                      prefixIcon: Icons.branding_watermark_outlined,
-                      hint: 'Ej: Nivea',
-                    ),
-                    const SizedBox(height: 20),
-                    _buildDateSelector(
-                      icon: Icons.calendar_today_outlined,
-                      text: _expirationDate != null
-                          ? 'Caduca: ${_formatDate(_expirationDate!)}'
-                          : 'Fecha de caducidad',
-                      isActive: _expirationDate != null,
-                      onTap: () => _selectDate(
-                        initialDate: _expirationDate,
-                        firstDate: DateTime.now(),
-                        lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
-                        onDateSelected: (date) => setState(() => _expirationDate = date),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    CustomTextField(
-                      controller: _paoController,
-                      label: 'Duración tras abrir (PAO)',
-                      prefixIcon: Icons.timer,
-                      hint: 'Ej: 6 meses, 12M',
-                    ),
-                    const SizedBox(height: 20),
-                    _buildCategoriesSection(theme),
-                    const SizedBox(height: 32),
-                    CustomButton(
-                      text: 'Guardar en mi tocador',
-                      onPressed: _saveProductManually,
-                      isLoading: _isLoading,
-                      type: ButtonType.primary,
-                      size: ButtonSize.full,
-                      icon: Icons.add_task_rounded,
-                    ),
-                  ],
-                ),
+                    onClear: () => setState(() => _expirationDate = null),
+                  ),
+                  const SizedBox(height: 20),
+                  
+                  // PAO - Selector visual
+                  _buildPaoSelector(theme),
+                  const SizedBox(height: 20),
+                  
+                  // Categorías
+                  _buildCategoriesSection(theme),
+                  const SizedBox(height: 24),
+                  
+                  // Botón guardar
+                  CustomButton(
+                    text: 'Guardar en mi tocador',
+                    onPressed: _saveProductManually,
+                    isLoading: _isLoading || _isUploadingImage,
+                    type: ButtonType.primary,
+                    size: ButtonSize.full,
+                    icon: Icons.add_task_rounded,
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 40),
@@ -258,6 +388,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     );
   }
 
+  // Nueva tarjeta de acción rápida con icono dentro de círculo
   Widget _buildQuickActionCard({
     required IconData icon,
     required String title,
@@ -266,25 +397,287 @@ class _AddProductScreenState extends State<AddProductScreen> {
     required VoidCallback onTap,
   }) {
     final theme = Theme.of(context);
-    return Card(
-      elevation: 0,
-      color: color,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: InkWell(
-        onTap: onTap,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Column(
+          children: [
+            // Icono dentro de círculo
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                size: 28,
+                color: theme.colorScheme.primary,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              title,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Selector de imagen con el mismo fondo que las tarjetas
+  Widget _buildImageSelector(ThemeData theme, Color cardBackgroundColor) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cardBackgroundColor,
         borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.image_outlined, size: 18, color: theme.colorScheme.primary),
+              const SizedBox(width: 8),
+              Text(
+                'Imagen del producto',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: _isUploadingImage ? null : _showImagePickerOptions,
+            child: Container(
+              height: 130,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+                ),
+              ),
+              child: _selectedImageFile != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.file(
+                        _selectedImageFile!,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: 130,
+                      ),
+                    )
+                  : Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.add_photo_alternate_outlined,
+                            size: 42,
+                            color: theme.colorScheme.primary.withValues(alpha: 0.5),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Toca para añadir imagen',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Selector visual de PAO con icono de tarro abierto
+  Widget _buildPaoSelector(ThemeData theme) {
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.timer_outlined, size: 18, color: theme.colorScheme.primary),
+            const SizedBox(width: 8),
+            Text(
+              'Duración tras abrir (PAO)',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+            ),
+          ),
           child: Column(
             children: [
-              Icon(icon, size: 32, color: theme.colorScheme.primary),
+              // Información visual del PAO (como en la imagen)
+              Row(
+                children: [
+                  // Icono de tarro abierto
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.auto_awesome_outlined,
+                          size: 28,
+                          color: theme.colorScheme.primary,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'PAO',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Periodo después de la apertura',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Busca el icono del tarro abierto en el envase',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              // Opciones de PAO
+              Wrap(
+                spacing: 12,
+                runSpacing: 10,
+                children: _paoOptions.map((pao) {
+                  final isSelected = _paoController.text.trim() == pao;
+                  return GestureDetector(
+                    onTap: () => _selectPao(pao),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: isSelected 
+                            ? theme.colorScheme.primary 
+                            : theme.colorScheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(30),
+                        border: Border.all(
+                          color: isSelected 
+                              ? theme.colorScheme.primary 
+                              : theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.schedule,
+                            size: 16,
+                            color: isSelected 
+                                ? theme.colorScheme.onPrimary 
+                                : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            pao,
+                            style: TextStyle(
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              color: isSelected 
+                                  ? theme.colorScheme.onPrimary 
+                                  : theme.colorScheme.onSurface,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+              // Campo opcional para PAO personalizado
               const SizedBox(height: 12),
-              Text(title, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
-              Text(subtitle, style: theme.textTheme.bodySmall?.copyWith(fontSize: 10), textAlign: TextAlign.center),
+              TextField(
+                controller: _paoController,
+                decoration: InputDecoration(
+                  hintText: 'O escribe uno personalizado (ej: 9M)',
+                  hintStyle: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide(color: theme.colorScheme.primary),
+                  ),
+                ),
+                style: const TextStyle(fontSize: 13),
+              ),
             ],
           ),
         ),
-      ),
+      ],
     );
   }
 
@@ -293,6 +686,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     required String text,
     required bool isActive,
     required VoidCallback onTap,
+    required VoidCallback onClear,
   }) {
     final theme = Theme.of(context);
     return InkWell(
@@ -303,13 +697,20 @@ class _AddProductScreenState extends State<AddProductScreen> {
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: theme.colorScheme.outlineVariant),
+          border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
         ),
         child: Row(
           children: [
             Icon(icon, color: isActive ? theme.colorScheme.primary : theme.colorScheme.outline, size: 20),
             const SizedBox(width: 12),
             Expanded(child: Text(text, style: TextStyle(color: isActive ? theme.colorScheme.onSurface : theme.colorScheme.outline))),
+            if (isActive)
+              IconButton(
+                icon: Icon(Icons.clear, size: 18, color: theme.colorScheme.error),
+                onPressed: onClear,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
             Icon(Icons.edit_calendar_outlined, size: 18, color: theme.colorScheme.primary.withValues(alpha: 0.5)),
           ],
         ),
@@ -335,7 +736,11 @@ class _AddProductScreenState extends State<AddProductScreen> {
             IconButton.filled(
               onPressed: _addCategory,
               icon: const Icon(Icons.add),
-              style: IconButton.styleFrom(backgroundColor: theme.colorScheme.primaryContainer, foregroundColor: theme.colorScheme.primary),
+              style: IconButton.styleFrom(
+                backgroundColor: theme.colorScheme.primaryContainer, 
+                foregroundColor: theme.colorScheme.primary,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
             ),
           ],
         ),
@@ -345,10 +750,11 @@ class _AddProductScreenState extends State<AddProductScreen> {
             spacing: 8,
             runSpacing: 8,
             children: _categories.map((cat) => Chip(
-              label: Text(cat, style: const TextStyle(fontSize: 11)),
+              label: Text(cat, style: const TextStyle(fontSize: 12)),
               onDeleted: () => setState(() => _categories.remove(cat)),
               backgroundColor: theme.colorScheme.surface,
-              side: BorderSide(color: theme.colorScheme.outlineVariant),
+              side: BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
+              deleteIconColor: theme.colorScheme.error,
             )).toList(),
           ),
         ],

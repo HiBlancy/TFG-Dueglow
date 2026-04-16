@@ -82,14 +82,13 @@ class AppThemes {
       useMaterial3: true,
       colorScheme: colorScheme,
       
-      // Tipografía: Sora para títulos, Lato para cuerpo
       textTheme: TextTheme(
         displayLarge: GoogleFonts.crimsonText(
           fontSize: 48,
           color: colorScheme.onSurface,
         ),
         displaySmall: GoogleFonts.crimsonText(
-          fontSize: 24,
+          fontSize: 30,
           color: colorScheme.onSurface,
         ),
         headlineMedium: GoogleFonts.sora(
