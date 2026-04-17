@@ -44,7 +44,11 @@ export declare class UsersController {
         message: string;
         data: any;
     }>;
-    deleteWithoutAuth(id: string): Promise<any>;
+    deleteMyAccount(req: any): Promise<{
+        status: boolean;
+        message: string;
+        data: any;
+    }>;
     deleteProfileImage(req: any): Promise<{
         status: boolean;
         message: string;

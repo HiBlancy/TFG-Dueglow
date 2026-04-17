@@ -16,7 +16,6 @@ export class UsersService {
 
   // REGISTER
   async create(createUserDto: CreateUserDto): Promise<User> {
-
     const emailExists = await this.userModel.findOne({
       email: createUserDto.email.toLowerCase(),
     });

@@ -6,33 +6,37 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ProductModule = void 0;
+exports.RoutineModule = void 0;
 const common_1 = require("@nestjs/common");
-const product_controller_1 = require("./product.controller");
-const product_service_1 = require("./product.service");
 const mongoose_1 = require("@nestjs/mongoose");
-const product_schema_1 = require("./schemas/product.schema");
+const routine_controller_1 = require("./routine.controller");
+const routine_service_1 = require("./routine.service");
+const routine_schema_1 = require("./schemas/routine.schema");
 const users_module_1 = require("../users/users.module");
-const cloudinary_service_1 = require("../cloudinary/cloudinary.service");
-const image_compression_service_1 = require("../services/image-compression.service");
-let ProductModule = class ProductModule {
+const product_schema_1 = require("../product/schemas/product.schema");
+let RoutineModule = class RoutineModule {
 };
-exports.ProductModule = ProductModule;
-exports.ProductModule = ProductModule = __decorate([
+exports.RoutineModule = RoutineModule;
+exports.RoutineModule = RoutineModule = __decorate([
     (0, common_1.Module)({
         imports: [
             mongoose_1.MongooseModule.forFeature([
                 {
+                    name: 'Routine',
+                    schema: routine_schema_1.RoutineSchema,
+                    collection: 'routine',
+                },
+                {
                     name: 'Product',
                     schema: product_schema_1.ProductSchema,
-                    collection: 'products',
+                    collection: 'products'
                 },
             ]),
             users_module_1.UserModule,
         ],
-        controllers: [product_controller_1.ProductController],
-        providers: [product_service_1.ProductService, cloudinary_service_1.CloudinaryService, image_compression_service_1.ImageCompressionService],
-        exports: [product_service_1.ProductService],
+        controllers: [routine_controller_1.RoutineController],
+        providers: [routine_service_1.RoutineService],
+        exports: [routine_service_1.RoutineService],
     })
-], ProductModule);
-//# sourceMappingURL=product.module.js.map
+], RoutineModule);
+//# sourceMappingURL=routine.module.js.map

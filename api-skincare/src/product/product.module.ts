@@ -19,7 +19,7 @@ import { ImageCompressionService } from '../services/image-compression.service';
     UserModule,
   ],
   controllers: [ProductController],
-  providers: [ProductService, CloudinaryService, ImageCompressionService,],
+  providers: [ProductService, CloudinaryService, ImageCompressionService],
   exports: [ProductService],
 })
 export class ProductModule {}

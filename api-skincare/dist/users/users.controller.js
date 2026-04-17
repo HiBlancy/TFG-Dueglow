@@ -121,30 +121,10 @@ let UsersController = class UsersController {
         const users = await this.usersService.getAllUsers();
         return this.successResponse('Usuarios obtenidos', users);
     }
-    async deleteWithoutAuth(id) {
-        try {
-            const deletedUser = await this.usersService.delete(id);
-            if (!deletedUser) {
-                throw new common_1.NotFoundException({
-                    status: false,
-                    message: `Usuario con ID ${id} no encontrado`,
-                });
-            }
-            return {
-                status: true,
-                message: 'Usuario eliminado exitosamente',
-                data: deletedUser,
-            };
-        }
-        catch (error) {
-            if (error instanceof common_1.NotFoundException) {
-                throw error;
-            }
-            throw new common_1.BadRequestException({
-                status: false,
-                message: error.message || 'Error al eliminar el usuario',
-            });
-        }
+    async deleteMyAccount(req) {
+        const userId = req.user._id;
+        const deletedUser = await this.usersService.delete(userId);
+        return this.successResponse('Cuenta eliminada exitosamente', deletedUser);
     }
     async deleteProfileImage(req) {
         try {
@@ -236,12 +216,13 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findAllUsers", null);
 __decorate([
-    (0, common_1.Delete)('delete/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
+    (0, common_1.Delete)('me'),
+    __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
-], UsersController.prototype, "deleteWithoutAuth", null);
+], UsersController.prototype, "deleteMyAccount", null);
 __decorate([
     (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
     (0, common_1.Delete)('me/image'),

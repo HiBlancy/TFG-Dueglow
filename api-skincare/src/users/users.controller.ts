@@ -197,32 +197,12 @@ export class UsersController {
     return this.successResponse('Usuarios obtenidos', users);
   }
 
-  @Delete('delete/:id')
-  async deleteWithoutAuth(@Param('id') id: string): Promise<any> {
-    try {
-      const deletedUser = await this.usersService.delete(id);
-
-      if (!deletedUser) {
-        throw new NotFoundException({
-          status: false,
-          message: `Usuario con ID ${id} no encontrado`,
-        });
-      }
-
-      return {
-        status: true,
-        message: 'Usuario eliminado exitosamente',
-        data: deletedUser,
-      };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      throw new BadRequestException({
-        status: false,
-        message: error.message || 'Error al eliminar el usuario',
-      });
-    }
+  @UseGuards(AuthGuard)
+  @Delete('me')
+  async deleteMyAccount(@Req() req) {
+    const userId = req.user._id;
+    const deletedUser = await this.usersService.delete(userId);
+    return this.successResponse('Cuenta eliminada exitosamente', deletedUser);
   }
 
   @UseGuards(AuthGuard)
