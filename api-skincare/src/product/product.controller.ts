@@ -1,4 +1,3 @@
-// products/products.controller.ts
 import {
   Controller,
   Get,
@@ -21,15 +20,15 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { MoveProductDto } from './dto/move-product.dto';
 import { AuthGuard } from '../users/guards/auth.guard';
 import { PaginationDto } from '../pagination/pagination.dto';
-import { CloudinaryService } from '../cloudinary/cloudinary.service';
-import { ImageCompressionService } from '../services/image-compression.service';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { CleanupService } from '../monthly-stats/services/cleanup.service';
 
 @Controller('products')
 @UseGuards(AuthGuard)
 export class ProductController {
   constructor(
-    private readonly productService: ProductService
+    private readonly productService: ProductService,
+    private readonly cleanupService: CleanupService,
   ) {}
 
   private successResponse(message: string, data: any = null) {
@@ -101,7 +100,7 @@ export class ProductController {
     return this.successResponse('Producto obtenido', product);
   }
 
-  // actualizar parcial un producto
+  // actualizar parcialmente un producto
   @Patch(':id')
   async update(
     @Req() req,
@@ -229,5 +228,40 @@ export class ProductController {
       req.user._id,
     );
     return this.successResponse('Imagen de producto eliminada', updated);
+  }
+
+  // historial de los productos usados segun mes
+  @Get('stats/monthly-history')
+  async getMonthlyHistory(@Req() req) {
+    const stats = await this.productService.getMonthlyHistory(req.user._id);
+    return this.successResponse('Historial mensual obtenido', stats);
+  }
+
+  // historial de los productos usados a lo largo del anio
+  @Get('stats/yearly-overview')
+  async getYearlyOverview(@Req() req) {
+    const stats = await this.productService.getYearlyOverview(req.user._id);
+    return this.successResponse('Vista anual obtenida', stats);
+  }
+
+  // historial del mes actual
+  @Get('stats/current-month')
+  async getCurrentMonthStats(@Req() req) {
+    const stats = await this.productService.getCurrentMonthStats(req.user._id);
+    return this.successResponse('Estadísticas del mes actual', stats);
+  }
+
+  // Endpoint de pruebas (mes actual)
+  @Post('cleanup/test')
+  async triggerTestCleanup(@Req() req) {
+    const result = await this.cleanupService.testCleanupNow();
+    return this.successResponse(result.message, result);
+  }
+
+  // llamada de prueba para hacer limpieza sin tener que ser fin de mes
+  @Post('cleanup/execute')
+  async triggerCleanup(@Req() req) {
+    const result = await this.cleanupService.cleanupUsedProducts();
+    return this.successResponse('Limpieza ejecutada (mes anterior)');
   }
 }

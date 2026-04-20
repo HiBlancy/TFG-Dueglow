@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { ProductModule } from './product/product.module';
 import { RoutineModule } from './routines/routine.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { RoutineModule } from './routines/routine.module';
         process.env.JWT_SECRET || 'mi_clave_secreta_temporal_para_desarrollo',
       signOptions: { expiresIn: '3h' },
     }),
+    ScheduleModule.forRoot(),
     UserModule,
     ProductModule,
     RoutineModule,

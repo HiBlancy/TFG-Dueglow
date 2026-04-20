@@ -3,9 +3,11 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { MoveProductDto } from './dto/move-product.dto';
 import { PaginationDto } from '../pagination/pagination.dto';
+import { CleanupService } from '../monthly-stats/services/cleanup.service';
 export declare class ProductController {
     private readonly productService;
-    constructor(productService: ProductService);
+    private readonly cleanupService;
+    constructor(productService: ProductService, cleanupService: CleanupService);
     private successResponse;
     create(req: any, createProductDto: CreateProductDto): Promise<{
         status: boolean;
@@ -73,6 +75,31 @@ export declare class ProductController {
         data: any;
     }>;
     deleteProductImage(productId: string, req: any): Promise<{
+        status: boolean;
+        message: string;
+        data: any;
+    }>;
+    getMonthlyHistory(req: any): Promise<{
+        status: boolean;
+        message: string;
+        data: any;
+    }>;
+    getYearlyOverview(req: any): Promise<{
+        status: boolean;
+        message: string;
+        data: any;
+    }>;
+    getCurrentMonthStats(req: any): Promise<{
+        status: boolean;
+        message: string;
+        data: any;
+    }>;
+    triggerTestCleanup(req: any): Promise<{
+        status: boolean;
+        message: string;
+        data: any;
+    }>;
+    triggerCleanup(req: any): Promise<{
         status: boolean;
         message: string;
         data: any;

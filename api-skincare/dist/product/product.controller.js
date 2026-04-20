@@ -21,10 +21,13 @@ const move_product_dto_1 = require("./dto/move-product.dto");
 const auth_guard_1 = require("../users/guards/auth.guard");
 const pagination_dto_1 = require("../pagination/pagination.dto");
 const platform_express_1 = require("@nestjs/platform-express");
+const cleanup_service_1 = require("../monthly-stats/services/cleanup.service");
 let ProductController = class ProductController {
     productService;
-    constructor(productService) {
+    cleanupService;
+    constructor(productService, cleanupService) {
         this.productService = productService;
+        this.cleanupService = cleanupService;
     }
     successResponse(message, data = null) {
         return { status: true, message, data };
@@ -102,6 +105,26 @@ let ProductController = class ProductController {
     async deleteProductImage(productId, req) {
         const updated = await this.productService.deleteProductImage(productId, req.user._id);
         return this.successResponse('Imagen de producto eliminada', updated);
+    }
+    async getMonthlyHistory(req) {
+        const stats = await this.productService.getMonthlyHistory(req.user._id);
+        return this.successResponse('Historial mensual obtenido', stats);
+    }
+    async getYearlyOverview(req) {
+        const stats = await this.productService.getYearlyOverview(req.user._id);
+        return this.successResponse('Vista anual obtenida', stats);
+    }
+    async getCurrentMonthStats(req) {
+        const stats = await this.productService.getCurrentMonthStats(req.user._id);
+        return this.successResponse('Estadísticas del mes actual', stats);
+    }
+    async triggerTestCleanup(req) {
+        const result = await this.cleanupService.testCleanupNow();
+        return this.successResponse(result.message, result);
+    }
+    async triggerCleanup(req) {
+        const result = await this.cleanupService.cleanupUsedProducts();
+        return this.successResponse('Limpieza ejecutada (mes anterior)');
     }
 };
 exports.ProductController = ProductController;
@@ -232,9 +255,45 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], ProductController.prototype, "deleteProductImage", null);
+__decorate([
+    (0, common_1.Get)('stats/monthly-history'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ProductController.prototype, "getMonthlyHistory", null);
+__decorate([
+    (0, common_1.Get)('stats/yearly-overview'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ProductController.prototype, "getYearlyOverview", null);
+__decorate([
+    (0, common_1.Get)('stats/current-month'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ProductController.prototype, "getCurrentMonthStats", null);
+__decorate([
+    (0, common_1.Post)('cleanup/test'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ProductController.prototype, "triggerTestCleanup", null);
+__decorate([
+    (0, common_1.Post)('cleanup/execute'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ProductController.prototype, "triggerCleanup", null);
 exports.ProductController = ProductController = __decorate([
     (0, common_1.Controller)('products'),
     (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
-    __metadata("design:paramtypes", [product_service_1.ProductService])
+    __metadata("design:paramtypes", [product_service_1.ProductService,
+        cleanup_service_1.CleanupService])
 ], ProductController);
 //# sourceMappingURL=product.controller.js.map

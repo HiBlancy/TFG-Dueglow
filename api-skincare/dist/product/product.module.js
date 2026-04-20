@@ -15,6 +15,8 @@ const product_schema_1 = require("./schemas/product.schema");
 const users_module_1 = require("../users/users.module");
 const cloudinary_service_1 = require("../cloudinary/cloudinary.service");
 const image_compression_service_1 = require("../services/image-compression.service");
+const cleanup_service_1 = require("../monthly-stats/services/cleanup.service");
+const monthly_stats_schema_1 = require("../monthly-stats/schemas/monthly-stats.schema");
 let ProductModule = class ProductModule {
 };
 exports.ProductModule = ProductModule;
@@ -27,11 +29,21 @@ exports.ProductModule = ProductModule = __decorate([
                     schema: product_schema_1.ProductSchema,
                     collection: 'products',
                 },
+                {
+                    name: 'MonthlyStats',
+                    schema: monthly_stats_schema_1.MonthlyStatsSchema,
+                    collection: 'monthly_stats',
+                },
             ]),
             users_module_1.UserModule,
         ],
         controllers: [product_controller_1.ProductController],
-        providers: [product_service_1.ProductService, cloudinary_service_1.CloudinaryService, image_compression_service_1.ImageCompressionService],
+        providers: [
+            product_service_1.ProductService,
+            cloudinary_service_1.CloudinaryService,
+            image_compression_service_1.ImageCompressionService,
+            cleanup_service_1.CleanupService,
+        ],
         exports: [product_service_1.ProductService],
     })
 ], ProductModule);

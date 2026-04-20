@@ -3,8 +3,8 @@ export declare const ProductSchema: Schema<any, import("mongoose").Model<any, an
     timestamps: true;
     strict: false;
 }, {
-    name: string;
     userId: import("mongoose").Types.ObjectId;
+    name: string;
     brand: string;
     categories: string[];
     listType: "wishlist" | "have" | "used";
@@ -13,12 +13,12 @@ export declare const ProductSchema: Schema<any, import("mongoose").Model<any, an
     barcode?: string | null | undefined;
     notes?: string | null | undefined;
     rating?: number | null | undefined;
-    expirationDate?: string | null | undefined;
-    periodAfterOpening?: string | null | undefined;
+    expirationDate?: NativeDate | null | undefined;
+    periodAfterOpening?: NativeDate | null | undefined;
     openedDate?: NativeDate | null | undefined;
 } & import("mongoose").DefaultTimestampProps, import("mongoose").Document<unknown, {}, {
-    name: string;
     userId: import("mongoose").Types.ObjectId;
+    name: string;
     brand: string;
     categories: string[];
     listType: "wishlist" | "have" | "used";
@@ -27,8 +27,8 @@ export declare const ProductSchema: Schema<any, import("mongoose").Model<any, an
     barcode?: string | null | undefined;
     notes?: string | null | undefined;
     rating?: number | null | undefined;
-    expirationDate?: string | null | undefined;
-    periodAfterOpening?: string | null | undefined;
+    expirationDate?: NativeDate | null | undefined;
+    periodAfterOpening?: NativeDate | null | undefined;
     openedDate?: NativeDate | null | undefined;
 } & import("mongoose").DefaultTimestampProps, {
     id: string;
@@ -36,8 +36,8 @@ export declare const ProductSchema: Schema<any, import("mongoose").Model<any, an
     timestamps: true;
     strict: false;
 }> & Omit<{
-    name: string;
     userId: import("mongoose").Types.ObjectId;
+    name: string;
     brand: string;
     categories: string[];
     listType: "wishlist" | "have" | "used";
@@ -46,8 +46,8 @@ export declare const ProductSchema: Schema<any, import("mongoose").Model<any, an
     barcode?: string | null | undefined;
     notes?: string | null | undefined;
     rating?: number | null | undefined;
-    expirationDate?: string | null | undefined;
-    periodAfterOpening?: string | null | undefined;
+    expirationDate?: NativeDate | null | undefined;
+    periodAfterOpening?: NativeDate | null | undefined;
     openedDate?: NativeDate | null | undefined;
 } & import("mongoose").DefaultTimestampProps & {
     _id: import("mongoose").Types.ObjectId;
@@ -56,8 +56,8 @@ export declare const ProductSchema: Schema<any, import("mongoose").Model<any, an
 }, "id"> & {
     id: string;
 }, unknown, {
-    name: string;
     userId: import("mongoose").Types.ObjectId;
+    name: string;
     brand: string;
     categories: string[];
     listType: "wishlist" | "have" | "used";
@@ -66,8 +66,8 @@ export declare const ProductSchema: Schema<any, import("mongoose").Model<any, an
     barcode?: string | null | undefined;
     notes?: string | null | undefined;
     rating?: number | null | undefined;
-    expirationDate?: string | null | undefined;
-    periodAfterOpening?: string | null | undefined;
+    expirationDate?: NativeDate | null | undefined;
+    periodAfterOpening?: NativeDate | null | undefined;
     openedDate?: NativeDate | null | undefined;
     createdAt: NativeDate;
     updatedAt: NativeDate;

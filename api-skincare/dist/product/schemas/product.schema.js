@@ -26,9 +26,9 @@ exports.ProductSchema = new mongoose_1.Schema({
         enum: ['wishlist', 'have', 'used'],
         default: 'have',
     },
-    expirationDate: { type: String, match: /^\d{4}-\d{2}-\d{2}$/ },
+    expirationDate: { type: Date, match: /^\d{4}-\d{2}-\d{2}$/ },
     periodAfterOpening: {
-        type: String,
+        type: Date,
         required: false,
         match: /^\d+\s*[Mm]$/,
     },

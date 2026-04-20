@@ -5,11 +5,13 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { PaginationDto } from '../pagination/pagination.dto';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { ImageCompressionService } from 'src/services/image-compression.service';
+import { MonthlyStats } from '../monthly-stats/interfaces/monthly-stats.interface';
 export declare class ProductService {
     private readonly productModel;
+    private readonly monthlyStatsModel;
     private readonly cloudinaryService;
     private readonly imageCompressionService;
-    constructor(productModel: Model<Product>, cloudinaryService: CloudinaryService, imageCompressionService: ImageCompressionService);
+    constructor(productModel: Model<Product>, monthlyStatsModel: Model<MonthlyStats>, cloudinaryService: CloudinaryService, imageCompressionService: ImageCompressionService);
     create(userId: string, createProductDto: CreateProductDto): Promise<Product>;
     findAllByUserPaginated(userId: string, paginationDto: PaginationDto, listType?: string): Promise<{
         data: (mongoose.Document<unknown, {}, Product, {}, mongoose.DefaultSchemaOptions> & Product & Required<{
@@ -47,4 +49,15 @@ export declare class ProductService {
     private parsePeriodToMonths;
     uploadProductImage(productId: string, userId: string, fileBuffer: Buffer, mimeType: string): Promise<Product>;
     deleteProductImage(productId: string, userId: string): Promise<Product>;
+    getMonthlyHistory(userId: string): Promise<any>;
+    updateOrCreateMonthlyStats(userId: string, year: number, month: number, incrementCount: number): Promise<(mongoose.Document<unknown, {}, MonthlyStats, {}, mongoose.DefaultSchemaOptions> & MonthlyStats & {
+        _id: mongoose.Types.ObjectId;
+    } & {
+        __v: number;
+    } & {
+        id: string;
+    }) | null>;
+    getYearlyOverview(userId: string): Promise<any>;
+    getCurrentMonthStats(userId: string): Promise<any>;
+    private getMonthName;
 }

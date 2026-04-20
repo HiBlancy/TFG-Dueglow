@@ -16,6 +16,7 @@ const config_1 = require("@nestjs/config");
 const jwt_1 = require("@nestjs/jwt");
 const product_module_1 = require("./product/product.module");
 const routine_module_1 = require("./routines/routine.module");
+const schedule_1 = require("@nestjs/schedule");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -28,6 +29,7 @@ exports.AppModule = AppModule = __decorate([
                 secret: process.env.JWT_SECRET || 'mi_clave_secreta_temporal_para_desarrollo',
                 signOptions: { expiresIn: '3h' },
             }),
+            schedule_1.ScheduleModule.forRoot(),
             users_module_1.UserModule,
             product_module_1.ProductModule,
             routine_module_1.RoutineModule,

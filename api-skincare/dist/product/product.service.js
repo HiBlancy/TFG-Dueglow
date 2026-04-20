@@ -53,10 +53,12 @@ const cloudinary_service_1 = require("../cloudinary/cloudinary.service");
 const image_compression_service_1 = require("../services/image-compression.service");
 let ProductService = class ProductService {
     productModel;
+    monthlyStatsModel;
     cloudinaryService;
     imageCompressionService;
-    constructor(productModel, cloudinaryService, imageCompressionService) {
+    constructor(productModel, monthlyStatsModel, cloudinaryService, imageCompressionService) {
         this.productModel = productModel;
+        this.monthlyStatsModel = monthlyStatsModel;
         this.cloudinaryService = cloudinaryService;
         this.imageCompressionService = imageCompressionService;
     }
@@ -112,17 +114,24 @@ let ProductService = class ProductService {
         const updateData = Object.fromEntries(Object.entries(updateProductDto).filter(([_, v]) => v !== undefined));
         this.applyBusinessRules(product, updateData);
         const updated = await this.productModel
-            .findByIdAndUpdate(id, updateData, { returnDocument: 'after', runValidators: false })
+            .findByIdAndUpdate(id, updateData, {
+            returnDocument: 'after',
+            runValidators: false,
+        })
             .exec();
         return updated;
     }
     applyBusinessRules(product, updateData) {
         if (product.isOpened && updateData.periodAfterOpening !== undefined) {
-            const newExpiration = this.calculateExpirationDate(updateData.openedDate || product.openedDate, updateData.periodAfterOpening || product.periodAfterOpening, updateData.expirationDate !== undefined ? updateData.expirationDate : product.expirationDate);
+            const newExpiration = this.calculateExpirationDate(updateData.openedDate || product.openedDate, updateData.periodAfterOpening || product.periodAfterOpening, updateData.expirationDate !== undefined
+                ? updateData.expirationDate
+                : product.expirationDate);
             if (newExpiration)
                 updateData.expirationDate = newExpiration;
         }
-        if (updateData.isOpened === true && product.periodAfterOpening && !updateData.expirationDate) {
+        if (updateData.isOpened === true &&
+            product.periodAfterOpening &&
+            !updateData.expirationDate) {
             const openedDate = updateData.openedDate || new Date();
             updateData.openedDate = openedDate;
             const calculated = this.calculateExpirationFromPeriod(openedDate, product.periodAfterOpening);
@@ -172,7 +181,10 @@ let ProductService = class ProductService {
         if (product.periodAfterOpening) {
             const calculatedExpiration = this.calculateExpirationFromPeriod(openedDate, product.periodAfterOpening);
             if (finalExpiration && calculatedExpiration) {
-                finalExpiration = calculatedExpiration < finalExpiration ? calculatedExpiration : finalExpiration;
+                finalExpiration =
+                    calculatedExpiration < finalExpiration
+                        ? calculatedExpiration
+                        : finalExpiration;
             }
             else if (calculatedExpiration) {
                 finalExpiration = calculatedExpiration;
@@ -224,8 +236,10 @@ let ProductService = class ProductService {
             { $group: { _id: '$listType', count: { $sum: 1 } } },
         ]);
         const result = { wishlist: 0, have: 0, used: 0, total: 0 };
-        stats.forEach(({ _id, count }) => { if (result[_id] !== undefined)
-            result[_id] = count; });
+        stats.forEach(({ _id, count }) => {
+            if (result[_id] !== undefined)
+                result[_id] = count;
+        });
         result.total = stats.reduce((acc, s) => acc + s.count, 0);
         return result;
     }
@@ -233,7 +247,11 @@ let ProductService = class ProductService {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         return this.productModel
-            .find({ userId, expirationDate: { $lt: today }, listType: { $ne: 'deleted' } })
+            .find({
+            userId,
+            expirationDate: { $lt: today },
+            listType: { $ne: 'deleted' },
+        })
             .sort({ expirationDate: 1 })
             .exec();
     }
@@ -244,7 +262,11 @@ let ProductService = class ProductService {
         futureDate.setDate(today.getDate() + days);
         futureDate.setHours(23, 59, 59, 999);
         return this.productModel
-            .find({ userId, expirationDate: { $gte: today, $lte: futureDate }, listType: { $ne: 'deleted' } })
+            .find({
+            userId,
+            expirationDate: { $gte: today, $lte: futureDate },
+            listType: { $ne: 'deleted' },
+        })
             .sort({ expirationDate: 1 })
             .exec();
     }
@@ -313,17 +335,143 @@ let ProductService = class ProductService {
             await this.cloudinaryService.deleteImage(publicId);
             console.log(`🗑️ Imagen eliminada de Cloudinary: ${publicId}`);
         }
-        const updatedProduct = await this.update(productId, userId, { imageUrl: null });
+        const updatedProduct = await this.update(productId, userId, {
+            imageUrl: null,
+        });
         if (!updatedProduct)
             throw new common_1.BadRequestException('No se pudo eliminar la imagen del producto');
         return updatedProduct;
+    }
+    async getMonthlyHistory(userId) {
+        const stats = await this.monthlyStatsModel
+            .find({ userId })
+            .sort({ year: -1, month: -1 })
+            .exec();
+        return {
+            total: stats.length,
+            data: stats.map((stat) => ({
+                year: stat.year,
+                month: stat.month,
+                monthName: this.getMonthName(stat.month),
+                productsUsedCount: stat.productsUsedCount,
+                archivedAt: stat.archivedAt,
+            })),
+        };
+    }
+    async updateOrCreateMonthlyStats(userId, year, month, incrementCount) {
+        const filter = {
+            userId: new mongoose_2.default.Types.ObjectId(userId),
+            year,
+            month,
+        };
+        const update = {
+            $inc: { productsUsedCount: incrementCount },
+            $set: { archivedAt: new Date() },
+        };
+        const options = { upsert: true, returnDocument: 'after' };
+        return this.monthlyStatsModel
+            .findOneAndUpdate(filter, update, options)
+            .exec();
+    }
+    async getYearlyOverview(userId) {
+        const now = new Date();
+        const startDate = new Date(now.getFullYear(), now.getMonth() - 11, 1);
+        const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        const stats = await this.monthlyStatsModel.aggregate([
+            {
+                $match: {
+                    userId: new mongoose_2.default.Types.ObjectId(userId),
+                    $expr: {
+                        $and: [
+                            {
+                                $or: [
+                                    { $gt: ['$year', startDate.getFullYear()] },
+                                    {
+                                        $and: [
+                                            { $eq: ['$year', startDate.getFullYear()] },
+                                            { $gte: ['$month', startDate.getMonth() + 1] },
+                                        ],
+                                    },
+                                ],
+                            },
+                            {
+                                $or: [
+                                    { $lt: ['$year', endDate.getFullYear()] },
+                                    {
+                                        $and: [
+                                            { $eq: ['$year', endDate.getFullYear()] },
+                                            { $lte: ['$month', endDate.getMonth() + 1] },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                },
+            },
+            { $sort: { year: 1, month: 1 } },
+        ]);
+        const data = [];
+        for (let i = 11; i >= 0; i--) {
+            const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const found = stats.find((s) => s.year === year && s.month === month);
+            data.push({
+                year,
+                month,
+                monthName: this.getMonthName(month),
+                productsUsedCount: found ? found.productsUsedCount : 0,
+                date: date.toISOString(),
+            });
+        }
+        return {
+            period: '12_months',
+            data,
+            total: data.reduce((sum, m) => sum + m.productsUsedCount, 0),
+        };
+    }
+    async getCurrentMonthStats(userId) {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth() + 1;
+        const currentUsedCount = await this.productModel.countDocuments({
+            userId,
+            listType: 'used',
+        });
+        return {
+            year,
+            month,
+            monthName: this.getMonthName(month),
+            productsUsedCount: currentUsedCount,
+            status: 'current',
+        };
+    }
+    getMonthName(month) {
+        const months = [
+            'Enero',
+            'Febrero',
+            'Marzo',
+            'Abril',
+            'Mayo',
+            'Junio',
+            'Julio',
+            'Agosto',
+            'Septiembre',
+            'Octubre',
+            'Noviembre',
+            'Diciembre',
+        ];
+        return months[month - 1] || '';
     }
 };
 exports.ProductService = ProductService;
 exports.ProductService = ProductService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectModel)('Product')),
+    __param(1, (0, mongoose_1.InjectModel)('MonthlyStats')),
     __metadata("design:paramtypes", [mongoose_2.Model,
+        mongoose_2.Model,
         cloudinary_service_1.CloudinaryService,
         image_compression_service_1.ImageCompressionService])
 ], ProductService);
