@@ -167,7 +167,7 @@ let RoutineService = class RoutineService {
             .find({ _id: { $in: productIds }, userId })
             .exec();
         if (products.length !== productIds.length) {
-            throw new common_1.BadRequestException('Uno o más productos no existen o no te pertenecen');
+            throw new common_1.NotFoundException('Uno o más productos no existen');
         }
     }
 };

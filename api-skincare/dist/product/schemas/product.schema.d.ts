@@ -14,7 +14,7 @@ export declare const ProductSchema: Schema<any, import("mongoose").Model<any, an
     notes?: string | null | undefined;
     rating?: number | null | undefined;
     expirationDate?: NativeDate | null | undefined;
-    periodAfterOpening?: NativeDate | null | undefined;
+    periodAfterOpening?: string | null | undefined;
     openedDate?: NativeDate | null | undefined;
 } & import("mongoose").DefaultTimestampProps, import("mongoose").Document<unknown, {}, {
     userId: import("mongoose").Types.ObjectId;
@@ -28,7 +28,7 @@ export declare const ProductSchema: Schema<any, import("mongoose").Model<any, an
     notes?: string | null | undefined;
     rating?: number | null | undefined;
     expirationDate?: NativeDate | null | undefined;
-    periodAfterOpening?: NativeDate | null | undefined;
+    periodAfterOpening?: string | null | undefined;
     openedDate?: NativeDate | null | undefined;
 } & import("mongoose").DefaultTimestampProps, {
     id: string;
@@ -47,7 +47,7 @@ export declare const ProductSchema: Schema<any, import("mongoose").Model<any, an
     notes?: string | null | undefined;
     rating?: number | null | undefined;
     expirationDate?: NativeDate | null | undefined;
-    periodAfterOpening?: NativeDate | null | undefined;
+    periodAfterOpening?: string | null | undefined;
     openedDate?: NativeDate | null | undefined;
 } & import("mongoose").DefaultTimestampProps & {
     _id: import("mongoose").Types.ObjectId;
@@ -67,7 +67,7 @@ export declare const ProductSchema: Schema<any, import("mongoose").Model<any, an
     notes?: string | null | undefined;
     rating?: number | null | undefined;
     expirationDate?: NativeDate | null | undefined;
-    periodAfterOpening?: NativeDate | null | undefined;
+    periodAfterOpening?: string | null | undefined;
     openedDate?: NativeDate | null | undefined;
     createdAt: NativeDate;
     updatedAt: NativeDate;

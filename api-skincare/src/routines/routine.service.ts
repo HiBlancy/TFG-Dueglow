@@ -245,19 +245,20 @@ export class RoutineService {
   }
 
   private async validateProducts(
-    userId: string,
-    productIds: string[],
-  ): Promise<void> {
-    if (productIds.length === 0) return;
+  userId: string,
+  productIds: string[],
+): Promise<void> {
+  if (productIds.length === 0) return;
 
-    const products = await this.productModel
-      .find({ _id: { $in: productIds }, userId })
-      .exec();
+  const products = await this.productModel
+    .find({ _id: { $in: productIds }, userId })
+    .exec();
 
-    if (products.length !== productIds.length) {
-      throw new BadRequestException(
-        'Uno o más productos no existen o no te pertenecen',
-      );
-    }
+  if (products.length !== productIds.length) {
+    // Lanzar 404 en lugar de 400
+    throw new NotFoundException(
+      'Uno o más productos no existen',
+    );
   }
+}
 }

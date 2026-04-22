@@ -29,13 +29,13 @@ export declare class ProductService {
         };
     }>;
     findById(id: string, userId: string): Promise<Product | null>;
-    update(id: string, userId: string, updateProductDto: UpdateProductDto): Promise<Product | null>;
+    update(id: string, userId: string, updateProductDto: UpdateProductDto): Promise<Product>;
     private applyBusinessRules;
-    delete(id: string, userId: string): Promise<Product | null>;
-    moveToList(id: string, userId: string, targetList: string): Promise<Product | null>;
-    markAsOpened(id: string, userId: string, customOpenedDate?: Date): Promise<Product | null>;
-    markAsClosed(id: string, userId: string): Promise<Product | null>;
-    calculateExpirationFromOpening(id: string, userId: string): Promise<Product | null>;
+    delete(id: string, userId: string): Promise<Product>;
+    moveToList(id: string, userId: string, targetList: string): Promise<Product>;
+    markAsOpened(id: string, userId: string, customOpenedDate?: Date): Promise<Product>;
+    markAsClosed(id: string, userId: string): Promise<Product>;
+    calculateExpirationFromOpening(id: string, userId: string): Promise<Product>;
     getStats(userId: string): Promise<{
         wishlist: number;
         have: number;

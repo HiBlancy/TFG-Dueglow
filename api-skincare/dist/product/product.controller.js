@@ -46,12 +46,18 @@ let ProductController = class ProductController {
     }
     async getExpired(req) {
         const products = await this.productService.getExpiredProducts(req.user._id);
-        return this.successResponse('Productos caducados', products);
+        return this.successResponse('Productos caducados', {
+            count: products.length,
+            products,
+        });
     }
     async getExpiringSoon(req, days) {
         const daysNum = days ? parseInt(days) : 30;
         const products = await this.productService.getExpiringSoon(req.user._id, daysNum);
-        return this.successResponse(`Productos que caducan en ${daysNum} días`, products);
+        return this.successResponse(`Productos que caducan en ${daysNum} días`, {
+            count: products.length,
+            products,
+        });
     }
     async findOne(req, id) {
         const product = await this.productService.findById(id, req.user._id);

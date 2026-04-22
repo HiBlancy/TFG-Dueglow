@@ -29,7 +29,7 @@ export class ProductController {
   constructor(
     private readonly productService: ProductService,
     private readonly cleanupService: CleanupService,
-  ) {}
+  ) { }
 
   private successResponse(message: string, data: any = null) {
     return { status: true, message, data };
@@ -73,7 +73,10 @@ export class ProductController {
   @Get('expired/all')
   async getExpired(@Req() req) {
     const products = await this.productService.getExpiredProducts(req.user._id);
-    return this.successResponse('Productos caducados', products);
+    return this.successResponse('Productos caducados', {
+      count: products.length,
+      products,
+    });
   }
 
   // obtener productos que caducan pronto
@@ -86,7 +89,10 @@ export class ProductController {
     );
     return this.successResponse(
       `Productos que caducan en ${daysNum} días`,
-      products,
+      {
+        count: products.length,
+        products,
+      }
     );
   }
 

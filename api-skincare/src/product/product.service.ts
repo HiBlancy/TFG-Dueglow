@@ -1,8 +1,8 @@
 import {
-  Injectable, 
-  NotFoundException, 
+  Injectable,
+  NotFoundException,
   ForbiddenException,
-  BadRequestException 
+  BadRequestException
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
@@ -22,7 +22,7 @@ export class ProductService {
     private readonly monthlyStatsModel: Model<MonthlyStats>,
     private readonly cloudinaryService: CloudinaryService,
     private readonly imageCompressionService: ImageCompressionService,
-  ) {}
+  ) { }
 
   // crear producto
   async create(
@@ -85,29 +85,44 @@ export class ProductService {
     id: string,
     userId: string,
     updateProductDto: UpdateProductDto,
-  ): Promise<Product | null> {
-    const product = await this.productModel.findById(id).exec();
-    if (!product) throw new NotFoundException(`Producto ${id} no encontrado`);
-    if (product.userId.toString() !== userId.toString()) {
-      throw new ForbiddenException('No puedes modificar este producto');
+  ): Promise<Product> {
+    try {
+      const product = await this.productModel.findById(id).exec();
+      if (!product) {
+        throw new NotFoundException(`Producto ${id} no encontrado`);
+      }
+      if (product.userId.toString() !== userId.toString()) {
+        throw new ForbiddenException('No puedes modificar este producto');
+      }
+
+      // Limpiar campos undefined
+      const updateData = Object.fromEntries(
+        Object.entries(updateProductDto).filter(([_, v]) => v !== undefined),
+      );
+
+      // Aplicar reglas de negocio (caducidad, etc.)
+      this.applyBusinessRules(product, updateData);
+
+      const updated = await this.productModel
+        .findByIdAndUpdate(id, updateData, {
+          returnDocument: 'after',
+          runValidators: false,
+        })
+        .exec();
+
+      if (!updated) {
+        throw new NotFoundException(`Producto ${id} no encontrado después de actualizar`);
+      }
+
+      return updated;
+    } catch (error) {
+      // Capturar error de cast de MongoDB (ID inválido)
+      if (error instanceof mongoose.Error.CastError) {
+        throw new NotFoundException(`Producto no encontrado`);
+      }
+      // Relanzar cualquier otro error (ForbiddenException, BadRequestException, etc.)
+      throw error;
     }
-
-    // !!!!!!!!!!!!!!!!!!!!!
-    const updateData = Object.fromEntries(
-      Object.entries(updateProductDto).filter(([_, v]) => v !== undefined),
-    );
-
-    // Aplicar lógica de negocio específica (caducidad, etc.)
-    this.applyBusinessRules(product, updateData);
-
-    const updated = await this.productModel
-      .findByIdAndUpdate(id, updateData, {
-        returnDocument: 'after',
-        runValidators: false,
-      })
-      .exec();
-
-    return updated;
   }
 
   private applyBusinessRules(product: Product, updateData: any): void {
@@ -140,24 +155,36 @@ export class ProductService {
   }
 
   // eliminar producto y su imagen de cloudinary
-  async delete(id: string, userId: string): Promise<Product | null> {
-    const product = await this.productModel.findById(id).exec();
-    if (!product) throw new NotFoundException(`Producto ${id} no encontrado`);
-    if (product.userId.toString() !== userId.toString()) {
-      throw new ForbiddenException('No puedes eliminar este producto');
-    }
-    if (product.imageUrl) {
-      const publicId = this.cloudinaryService.extractPublicIdFromUrl(
-        product.imageUrl,
-      );
-      if (publicId) {
-        await this.cloudinaryService.deleteImage(publicId);
-        console.log(
-          `🗑️ Imagen eliminada de Cloudinary al borrar producto: ${publicId}`,
-        );
+  async delete(id: string, userId: string): Promise<Product> {
+    try {
+      const product = await this.productModel.findById(id).exec();
+      if (!product) {
+        throw new NotFoundException(`Producto ${id} no encontrado`);
       }
+      if (product.userId.toString() !== userId.toString()) {
+        throw new ForbiddenException('No puedes eliminar este producto');
+      }
+
+      // Eliminar imagen de Cloudinary si existe
+      if (product.imageUrl) {
+        const publicId = this.cloudinaryService.extractPublicIdFromUrl(product.imageUrl);
+        if (publicId) {
+          await this.cloudinaryService.deleteImage(publicId);
+          console.log(`🗑️ Imagen eliminada de Cloudinary al borrar producto: ${publicId}`);
+        }
+      }
+
+      const deleted = await this.productModel.findByIdAndDelete(id).exec();
+      if (!deleted) {
+        throw new NotFoundException(`Producto ${id} no encontrado después de eliminar`);
+      }
+      return deleted;
+    } catch (error) {
+      if (error instanceof mongoose.Error.CastError) {
+        throw new NotFoundException(`Producto ${id} no encontrado`);
+      }
+      throw error;
     }
-    return this.productModel.findByIdAndDelete(id).exec();
   }
 
   // cambiar el producto de lista
@@ -165,19 +192,34 @@ export class ProductService {
     id: string,
     userId: string,
     targetList: string,
-  ): Promise<Product | null> {
-    const product = await this.productModel.findById(id).exec();
-    if (!product) throw new NotFoundException(`Producto ${id} no encontrado`);
-    if (product.userId.toString() !== userId.toString()) {
-      throw new ForbiddenException('No puedes mover este producto');
+  ): Promise<Product> {
+    try {
+      const product = await this.productModel.findById(id).exec();
+      if (!product) {
+        throw new NotFoundException(`Producto ${id} no encontrado`);
+      }
+
+      const updated = await this.productModel
+        .findByIdAndUpdate(
+          id,
+          { listType: targetList },
+          { returnDocument: 'after' },
+        )
+        .exec();
+
+      if (!updated) {
+        throw new NotFoundException(`Producto ${id} no encontrado después de mover`);
+      }
+
+      return updated;
+    } catch (error) {
+      // Capturar error de cast de MongoDB (ID inválido)
+      if (error instanceof mongoose.Error.CastError) {
+        throw new NotFoundException(`Producto ${id} no encontrado`);
+      }
+      // Relanzar cualquier otro error (ForbiddenException, BadRequestException, etc.)
+      throw error;
     }
-    return this.productModel
-      .findByIdAndUpdate(
-        id,
-        { listType: targetList },
-        { returnDocument: 'after' },
-      )
-      .exec();
   }
 
   // marcar el producto como abierto y mandar a hacer el calculo de caducidad
@@ -185,91 +227,138 @@ export class ProductService {
     id: string,
     userId: string,
     customOpenedDate?: Date,
-  ): Promise<Product | null> {
-    const product = await this.productModel.findById(id).exec();
-    if (!product) throw new NotFoundException(`Producto ${id} no encontrado`);
-    if (product.userId.toString() !== userId.toString()) {
-      throw new ForbiddenException('No puedes modificar este producto');
-    }
-    if (product.isOpened) {
-      throw new BadRequestException('El producto ya está abierto');
-    }
-    const openedDate = customOpenedDate || new Date();
-    let finalExpiration = product.expirationDate;
-    if (product.periodAfterOpening) {
-      const calculatedExpiration = this.calculateExpirationFromPeriod(
-        openedDate,
-        product.periodAfterOpening,
-      );
-      if (finalExpiration && calculatedExpiration) {
-        finalExpiration =
-          calculatedExpiration < finalExpiration
-            ? calculatedExpiration
-            : finalExpiration;
-      } else if (calculatedExpiration) {
-        finalExpiration = calculatedExpiration;
+  ): Promise<Product> {
+    try {
+      const product = await this.productModel.findById(id).exec();
+      if (!product) {
+        throw new NotFoundException(`Producto ${id} no encontrado`);
       }
+      if (product.userId.toString() !== userId.toString()) {
+        throw new ForbiddenException('No puedes modificar este producto');
+      }
+      if (product.isOpened) {
+        throw new BadRequestException('El producto ya está abierto');
+      }
+
+      const openedDate = customOpenedDate || new Date();
+      let finalExpiration = product.expirationDate;
+
+      if (product.periodAfterOpening) {
+        const calculatedExpiration = this.calculateExpirationFromPeriod(
+          openedDate,
+          product.periodAfterOpening,
+        );
+        if (finalExpiration && calculatedExpiration) {
+          finalExpiration = calculatedExpiration < finalExpiration ? calculatedExpiration : finalExpiration;
+        } else if (calculatedExpiration) {
+          finalExpiration = calculatedExpiration;
+        }
+      }
+
+      const updated = await this.productModel
+        .findByIdAndUpdate(
+          id,
+          { openedDate, isOpened: true, expirationDate: finalExpiration },
+          { returnDocument: 'after' },
+        )
+        .exec();
+
+      if (!updated) {
+        throw new NotFoundException(`Producto ${id} no encontrado después de abrir`);
+      }
+
+      return updated;
+    } catch (error) {
+      if (error instanceof mongoose.Error.CastError) {
+        throw new NotFoundException(`Producto ${id} no encontrado`);
+      }
+      throw error;
     }
-    const updated = await this.productModel
-      .findByIdAndUpdate(
-        id,
-        { openedDate, isOpened: true, expirationDate: finalExpiration },
-        { returnDocument: 'after' },
-      )
-      .exec();
-    return updated;
   }
 
   // cerrar producto y limpiar el campo de caducidad
-  async markAsClosed(id: string, userId: string): Promise<Product | null> {
-    const product = await this.productModel.findById(id).exec();
-    if (!product) throw new NotFoundException(`Producto ${id} no encontrado`);
-    if (product.userId.toString() !== userId.toString()) {
-      throw new ForbiddenException('No puedes modificar este producto');
+  async markAsClosed(id: string, userId: string): Promise<Product> {
+    try {
+      const product = await this.productModel.findById(id).exec();
+      if (!product) {
+        throw new NotFoundException(`Producto ${id} no encontrado`);
+      }
+      if (product.userId.toString() !== userId.toString()) {
+        throw new ForbiddenException('No puedes modificar este producto');
+      }
+      if (!product.isOpened) {
+        throw new BadRequestException('El producto no está abierto');
+      }
+
+      const updated = await this.productModel
+        .findByIdAndUpdate(id, { isOpened: false }, { returnDocument: 'after' })
+        .exec();
+
+      if (!updated) {
+        throw new NotFoundException(`Producto ${id} no encontrado después de cerrar`);
+      }
+
+      return updated;
+    } catch (error) {
+      if (error instanceof mongoose.Error.CastError) {
+        throw new NotFoundException(`Producto ${id} no encontrado`);
+      }
+      throw error;
     }
-    if (!product.isOpened) {
-      throw new BadRequestException('El producto no está abierto');
-    }
-    return this.productModel
-      .findByIdAndUpdate(id, { isOpened: false }, { returnDocument: 'after' })
-      .exec();
   }
 
   // calcular fecha de caducidad
   async calculateExpirationFromOpening(
     id: string,
     userId: string,
-  ): Promise<Product | null> {
-    const product = await this.productModel.findById(id).exec();
-    if (!product) throw new NotFoundException(`Producto ${id} no encontrado`);
-    if (product.userId.toString() !== userId.toString()) {
-      throw new ForbiddenException('No puedes modificar este producto');
-    }
-    if (!product.isOpened) {
-      throw new BadRequestException('El producto no ha sido abierto aún');
-    }
-    if (!product.openedDate) {
-      throw new BadRequestException(
-        'El producto no tiene fecha de apertura registrada',
+  ): Promise<Product> {
+    try {
+      const product = await this.productModel.findById(id).exec();
+      if (!product) {
+        throw new NotFoundException(`Producto ${id} no encontrado`);
+      }
+      if (product.userId.toString() !== userId.toString()) {
+        throw new ForbiddenException('No puedes modificar este producto');
+      }
+      if (!product.isOpened) {
+        throw new BadRequestException('El producto no ha sido abierto aún');
+      }
+      if (!product.openedDate) {
+        throw new BadRequestException(
+          'El producto no tiene fecha de apertura registrada',
+        );
+      }
+      if (!product.periodAfterOpening) {
+        throw new BadRequestException(
+          'El producto no tiene período después de abierto definido',
+        );
+      }
+
+      const newExpiration = this.calculateExpirationDate(
+        product.openedDate,
+        product.periodAfterOpening,
+        product.expirationDate,
       );
+
+      const updated = await this.productModel
+        .findByIdAndUpdate(
+          id,
+          { expirationDate: newExpiration },
+          { returnDocument: 'after' },
+        )
+        .exec();
+
+      if (!updated) {
+        throw new NotFoundException(`Producto ${id} no encontrado después de actualizar`);
+      }
+
+      return updated;
+    } catch (error) {
+      if (error instanceof mongoose.Error.CastError) {
+        throw new NotFoundException(`Producto ${id} no encontrado`);
+      }
+      throw error;
     }
-    if (!product.periodAfterOpening) {
-      throw new BadRequestException(
-        'El producto no tiene período después de abierto definido',
-      );
-    }
-    const newExpiration = this.calculateExpirationDate(
-      product.openedDate,
-      product.periodAfterOpening,
-      product.expirationDate,
-    );
-    return this.productModel
-      .findByIdAndUpdate(
-        id,
-        { expirationDate: newExpiration },
-        { returnDocument: 'after' },
-      )
-      .exec();
   }
 
   // ver la cantidad de productos segun la lista en la que estan
@@ -289,12 +378,13 @@ export class ProductService {
   // obtener productos caducados
   async getExpiredProducts(userId: string): Promise<Product[]> {
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    today.setHours(23, 59, 59, 999); // Final del día de hoy
+
     return this.productModel
       .find({
         userId,
-        expirationDate: { $lt: today },
-        listType: { $ne: 'deleted' },
+        expirationDate: { $lte: today }, // ≤ hoy (incluye cualquier hora)
+        listType: { $ne: 'used' },
       })
       .sort({ expirationDate: 1 })
       .exec();
@@ -311,7 +401,7 @@ export class ProductService {
       .find({
         userId,
         expirationDate: { $gte: today, $lte: futureDate },
-        listType: { $ne: 'deleted' },
+        listType: { $ne: 'used' },
       })
       .sort({ expirationDate: 1 })
       .exec();
