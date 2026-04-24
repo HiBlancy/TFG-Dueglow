@@ -36,6 +36,7 @@ export declare class ProductService {
     moveToList(id: string, userId: string, targetList: string): Promise<Product>;
     markAsOpened(id: string, userId: string, customOpenedDate?: Date): Promise<Product>;
     markAsClosed(id: string, userId: string): Promise<Product>;
+    private isExpirationFromPAO;
     calculateExpirationFromOpening(id: string, userId: string): Promise<Product>;
     getStats(userId: string): Promise<{
         wishlist: number;
@@ -48,7 +49,7 @@ export declare class ProductService {
     private calculateExpirationDate;
     private calculateExpirationFromPeriod;
     private parsePeriodToMonths;
-    uploadProductImage(productId: string, userId: string, fileBuffer: Buffer, mimeType: string): Promise<Product>;
+    updateProductImage(productId: string, userId: string, fileBuffer: Buffer, mimeType: string): Promise<Product>;
     deleteProductImage(productId: string, userId: string): Promise<Product>;
     getMonthlyHistory(userId: string): Promise<any>;
     updateOrCreateMonthlyStats(userId: string, year: number, month: number, incrementCount: number): Promise<(mongoose.Document<unknown, {}, MonthlyStats, {}, mongoose.DefaultSchemaOptions> & MonthlyStats & {

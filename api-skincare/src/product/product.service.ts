@@ -24,6 +24,7 @@ export class ProductService {
     private readonly imageCompressionService: ImageCompressionService,
   ) { }
 
+  // extrae la url de la imagen del producto para eliminarla de la nube
   private async deleteCloudinaryImageByUrl(imageUrl?: string | null, logPrefix?: string) {
     if (!imageUrl) return;
     const publicId = this.cloudinaryService.extractPublicIdFromUrl(imageUrl);
@@ -96,8 +97,6 @@ export class ProductService {
       if (!product) {
         throw new NotFoundException(`Producto ${id} no encontrado`);
       }
-
-      // Limpiar campos undefined
       const updateData = Object.fromEntries(
         Object.entries(updateProductDto).filter(([_, v]) => v !== undefined),
       );
@@ -208,76 +207,94 @@ export class ProductService {
   }
 
   // marcar el producto como abierto y mandar a hacer el calculo de caducidad
+  // marcar el producto como abierto y mandar a hacer el calculo de caducidad
   async markAsOpened(
     id: string,
     userId: string,
     customOpenedDate?: Date,
   ): Promise<Product> {
-    try {
-      const product = await this.productModel.findById(id).exec();
-      if (!product) {
-        throw new NotFoundException(`Producto ${id} no encontrado`);
-      }
-      if (product.isOpened) {
-        throw new BadRequestException('El producto ya está abierto');
-      }
-
-      const openedDate = customOpenedDate || new Date();
-      let finalExpiration = product.expirationDate;
-
-      if (product.periodAfterOpening) {
-        const calculatedExpiration = this.calculateExpirationFromPeriod(
-          openedDate,
-          product.periodAfterOpening,
-        );
-        if (finalExpiration && calculatedExpiration) {
-          finalExpiration = calculatedExpiration < finalExpiration ? calculatedExpiration : finalExpiration;
-        } else if (calculatedExpiration) {
-          finalExpiration = calculatedExpiration;
-        }
-      }
-
-      const updated = await this.productModel
-        .findByIdAndUpdate(
-          id,
-          { openedDate, isOpened: true, expirationDate: finalExpiration },
-          { returnDocument: 'after' },
-        )
-        .exec();
-
-      if (!updated) {
-        throw new NotFoundException(`Producto ${id} no encontrado después de abrir`);
-      }
-
-      return updated;
-    } catch (error) {
-      throw new NotFoundException(error, `Producto ${id} no encontrado`);
+    const product = await this.productModel.findById(id).exec();
+    if (!product) {
+      throw new NotFoundException(`Producto ${id} no encontrado`);
     }
+    if (product.isOpened) {
+      throw new BadRequestException('El producto ya está abierto');
+    }
+
+    const openedDate = customOpenedDate || new Date();
+    let finalExpiration = product.expirationDate;
+
+    if (product.periodAfterOpening) {
+      const calculatedExpiration = this.calculateExpirationFromPeriod(
+        openedDate,
+        product.periodAfterOpening,
+      );
+      if (finalExpiration && calculatedExpiration) {
+        finalExpiration = calculatedExpiration < finalExpiration ? calculatedExpiration : finalExpiration;
+      } else if (calculatedExpiration) {
+        finalExpiration = calculatedExpiration;
+      }
+    }
+
+    const updated = await this.productModel
+      .findByIdAndUpdate(
+        id,
+        { openedDate, isOpened: true, expirationDate: finalExpiration },
+        { returnDocument: 'after' },
+      )
+      .exec();
+
+    if (!updated) {
+      throw new NotFoundException(`Producto ${id} no encontrado después de abrir`);
+    }
+
+    return updated;
   }
 
-  // cerrar producto y limpiar el campo de caducidad
+  // cerrar producto y limpiar campos de caducidad y fecha de apertura
   async markAsClosed(id: string, userId: string): Promise<Product> {
-    try {
-      const product = await this.productModel.findById(id).exec();
-      if (!product) {
-        throw new NotFoundException(`Producto ${id} no encontrado`);
-      }
-      if (!product.isOpened) {
-        throw new BadRequestException('El producto no está abierto');
-      }
-
-      const updated = await this.productModel
-        .findByIdAndUpdate(id, { isOpened: false }, { returnDocument: 'after' })
-        .exec();
-
-      if (!updated) {
-        throw new NotFoundException(`Producto ${id} no encontrado después de cerrar`);
-      }
-
-      return updated;
-    } catch (error) {
-      throw new NotFoundException(error, `Producto ${id} no encontrado`);
+    const product = await this.productModel.findById(id).exec();
+    if (!product) {
+      throw new NotFoundException(`Producto ${id} no encontrado`);
     }
+    if (!product.isOpened) {
+      throw new BadRequestException('El producto no está abierto');
+    }
+
+    const expirationComesFromPAO = this.isExpirationFromPAO(product);
+
+    const updateData: any = { isOpened: false };
+
+    if (expirationComesFromPAO) {
+      updateData.expirationDate = null;
+      updateData.openedDate = null;
+    }
+
+    const updated = await this.productModel
+      .findByIdAndUpdate(id, updateData, { returnDocument: 'after' })
+      .exec();
+
+    if (!updated) {
+      throw new NotFoundException(`Producto ${id} no encontrado después de cerrar`);
+    }
+
+    return updated;
+  }
+
+// helper para determinar si la caducidad viene del PAO
+  private isExpirationFromPAO(product: Product): boolean {
+    if (!product.expirationDate) return false;
+    if (!product.periodAfterOpening) return false;
+    if (!product.openedDate) return false;
+
+    const paoExpiration = this.calculateExpirationFromPeriod(
+      product.openedDate,
+      product.periodAfterOpening
+    );
+
+    if (!paoExpiration) return false;
+
+    return new Date(product.expirationDate).toDateString() === new Date(paoExpiration).toDateString();
   }
 
   // calcular fecha de caducidad
@@ -420,43 +437,41 @@ export class ProductService {
   }
 
   // subir imagen para el producto
-  async uploadProductImage(
+  async updateProductImage(
     productId: string,
     userId: string,
     fileBuffer: Buffer,
-    mimeType: string,
+    mimeType: string
   ): Promise<Product> {
+    // 1. Verificar que el producto existe y pertenece al usuario
     const product = await this.findById(productId, userId);
     if (!product) {
       throw new NotFoundException(`Producto ${productId} no encontrado`);
     }
 
-    console.log(`📸 Subiendo imagen para producto: ${product.name}`);
+    // 2. Comprimir
+    const compressedBuffer = await this.imageCompressionService.compressProductImage(
+      fileBuffer,
+      mimeType
+    );
 
-    const compressedBuffer =
-      await this.imageCompressionService.compressProductImage(
-        fileBuffer,
-        mimeType,
-      );
-
+    // 3. Subir a Cloudinary
     const imageUrl = await this.cloudinaryService.uploadImage(
       compressedBuffer,
       `product_${productId}_${Date.now()}`,
-      'products',
+      'products'
     );
 
-    // Eliminar imagen anterior (si existe)
-    await this.deleteCloudinaryImageByUrl(product.imageUrl, '🗑️ Imagen anterior eliminada');
+    // 4. Eliminar imagen anterior (si existe)
+    await this.deleteCloudinaryImageByUrl(
+      product.imageUrl,
+      '🗑️ Imagen anterior del producto eliminada',
+    );
 
-    // Actualizar el producto con la nueva URL
+    // 5. Actualizar producto
     const updatedProduct = await this.update(productId, userId, { imageUrl });
-    if (!updatedProduct) {
-      throw new BadRequestException(
-        'No se pudo actualizar el producto con la nueva imagen',
-      );
-    }
 
-    console.log(`✅ Imagen actualizada para: ${product.name}`);
+    console.log(`✅ Imagen actualizada para producto: ${product.name}`);
     return updatedProduct;
   }
 

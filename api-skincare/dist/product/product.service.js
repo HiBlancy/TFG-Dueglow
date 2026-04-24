@@ -188,57 +188,65 @@ let ProductService = class ProductService {
         }
     }
     async markAsOpened(id, userId, customOpenedDate) {
-        try {
-            const product = await this.productModel.findById(id).exec();
-            if (!product) {
-                throw new common_1.NotFoundException(`Producto ${id} no encontrado`);
-            }
-            if (product.isOpened) {
-                throw new common_1.BadRequestException('El producto ya está abierto');
-            }
-            const openedDate = customOpenedDate || new Date();
-            let finalExpiration = product.expirationDate;
-            if (product.periodAfterOpening) {
-                const calculatedExpiration = this.calculateExpirationFromPeriod(openedDate, product.periodAfterOpening);
-                if (finalExpiration && calculatedExpiration) {
-                    finalExpiration = calculatedExpiration < finalExpiration ? calculatedExpiration : finalExpiration;
-                }
-                else if (calculatedExpiration) {
-                    finalExpiration = calculatedExpiration;
-                }
-            }
-            const updated = await this.productModel
-                .findByIdAndUpdate(id, { openedDate, isOpened: true, expirationDate: finalExpiration }, { returnDocument: 'after' })
-                .exec();
-            if (!updated) {
-                throw new common_1.NotFoundException(`Producto ${id} no encontrado después de abrir`);
-            }
-            return updated;
+        const product = await this.productModel.findById(id).exec();
+        if (!product) {
+            throw new common_1.NotFoundException(`Producto ${id} no encontrado`);
         }
-        catch (error) {
-            throw new common_1.NotFoundException(error, `Producto ${id} no encontrado`);
+        if (product.isOpened) {
+            throw new common_1.BadRequestException('El producto ya está abierto');
         }
+        const openedDate = customOpenedDate || new Date();
+        let finalExpiration = product.expirationDate;
+        if (product.periodAfterOpening) {
+            const calculatedExpiration = this.calculateExpirationFromPeriod(openedDate, product.periodAfterOpening);
+            if (finalExpiration && calculatedExpiration) {
+                finalExpiration = calculatedExpiration < finalExpiration ? calculatedExpiration : finalExpiration;
+            }
+            else if (calculatedExpiration) {
+                finalExpiration = calculatedExpiration;
+            }
+        }
+        const updated = await this.productModel
+            .findByIdAndUpdate(id, { openedDate, isOpened: true, expirationDate: finalExpiration }, { returnDocument: 'after' })
+            .exec();
+        if (!updated) {
+            throw new common_1.NotFoundException(`Producto ${id} no encontrado después de abrir`);
+        }
+        return updated;
     }
     async markAsClosed(id, userId) {
-        try {
-            const product = await this.productModel.findById(id).exec();
-            if (!product) {
-                throw new common_1.NotFoundException(`Producto ${id} no encontrado`);
-            }
-            if (!product.isOpened) {
-                throw new common_1.BadRequestException('El producto no está abierto');
-            }
-            const updated = await this.productModel
-                .findByIdAndUpdate(id, { isOpened: false }, { returnDocument: 'after' })
-                .exec();
-            if (!updated) {
-                throw new common_1.NotFoundException(`Producto ${id} no encontrado después de cerrar`);
-            }
-            return updated;
+        const product = await this.productModel.findById(id).exec();
+        if (!product) {
+            throw new common_1.NotFoundException(`Producto ${id} no encontrado`);
         }
-        catch (error) {
-            throw new common_1.NotFoundException(error, `Producto ${id} no encontrado`);
+        if (!product.isOpened) {
+            throw new common_1.BadRequestException('El producto no está abierto');
         }
+        const expirationComesFromPAO = this.isExpirationFromPAO(product);
+        const updateData = { isOpened: false };
+        if (expirationComesFromPAO) {
+            updateData.expirationDate = null;
+            updateData.openedDate = null;
+        }
+        const updated = await this.productModel
+            .findByIdAndUpdate(id, updateData, { returnDocument: 'after' })
+            .exec();
+        if (!updated) {
+            throw new common_1.NotFoundException(`Producto ${id} no encontrado después de cerrar`);
+        }
+        return updated;
+    }
+    isExpirationFromPAO(product) {
+        if (!product.expirationDate)
+            return false;
+        if (!product.periodAfterOpening)
+            return false;
+        if (!product.openedDate)
+            return false;
+        const paoExpiration = this.calculateExpirationFromPeriod(product.openedDate, product.periodAfterOpening);
+        if (!paoExpiration)
+            return false;
+        return new Date(product.expirationDate).toDateString() === new Date(paoExpiration).toDateString();
     }
     async calculateExpirationFromOpening(id, userId) {
         try {
@@ -340,20 +348,16 @@ let ProductService = class ProductService {
             return parseInt(numberMatch[1]);
         return null;
     }
-    async uploadProductImage(productId, userId, fileBuffer, mimeType) {
+    async updateProductImage(productId, userId, fileBuffer, mimeType) {
         const product = await this.findById(productId, userId);
         if (!product) {
             throw new common_1.NotFoundException(`Producto ${productId} no encontrado`);
         }
-        console.log(`📸 Subiendo imagen para producto: ${product.name}`);
         const compressedBuffer = await this.imageCompressionService.compressProductImage(fileBuffer, mimeType);
         const imageUrl = await this.cloudinaryService.uploadImage(compressedBuffer, `product_${productId}_${Date.now()}`, 'products');
-        await this.deleteCloudinaryImageByUrl(product.imageUrl, '🗑️ Imagen anterior eliminada');
+        await this.deleteCloudinaryImageByUrl(product.imageUrl, '🗑️ Imagen anterior del producto eliminada');
         const updatedProduct = await this.update(productId, userId, { imageUrl });
-        if (!updatedProduct) {
-            throw new common_1.BadRequestException('No se pudo actualizar el producto con la nueva imagen');
-        }
-        console.log(`✅ Imagen actualizada para: ${product.name}`);
+        console.log(`✅ Imagen actualizada para producto: ${product.name}`);
         return updatedProduct;
     }
     async deleteProductImage(productId, userId) {

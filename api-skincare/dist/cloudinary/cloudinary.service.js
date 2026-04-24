@@ -21,7 +21,7 @@ let CloudinaryService = class CloudinaryService {
             api_secret: process.env.CLOUDINARY_API_SECRET,
         });
     }
-    async uploadImage(fileBuffer, fileName, folder = 'user-profiles') {
+    async uploadImage(fileBuffer, fileName, folder) {
         return new Promise((resolve, reject) => {
             const stream = stream_1.Readable.from(fileBuffer);
             const uploadStream = cloudinary_1.v2.uploader.upload_stream({
@@ -30,11 +30,6 @@ let CloudinaryService = class CloudinaryService {
                 resource_type: 'auto',
                 quality: 'auto',
                 fetch_format: 'auto',
-                width: 500,
-                height: 500,
-                crop: 'fill',
-                gravity: 'face',
-                dpr: 'auto',
             }, (error, result) => {
                 if (error) {
                     console.error('❌ Error en Cloudinary:', error);
@@ -64,15 +59,19 @@ let CloudinaryService = class CloudinaryService {
     }
     extractPublicIdFromUrl(url) {
         try {
-            const match = url.match(/\/upload\/(?:v\d+\/)?(.+?)\.(jpg|jpeg|png|webp|gif)(?:\?|$)/i);
+            const match = url.match(/\/upload\/(?:v\d+\/)?(.+?)\.(jpg|jpeg|png|webp|gif|heic)(?:\?|$)/i);
             if (match && match[1]) {
                 return match[1];
             }
-            const simpleMatch = url.match(/\/([^\/]+\/[^\/]+)\.[a-z]+$/i);
-            return simpleMatch ? simpleMatch[1] : null;
+            const parts = url.split('/upload/');
+            if (parts.length < 2)
+                return null;
+            const afterUpload = parts[1].split('.')[0];
+            const versionRemoved = afterUpload.replace(/^v\d+\//, '');
+            return versionRemoved;
         }
         catch (error) {
-            console.error('❌ Error extrayendo public_id:', error);
+            console.error('Error extrayendo public_id:', error);
             return null;
         }
     }

@@ -4,7 +4,8 @@ class ApiConfig {
   // Para Flutter Web (Chrome) usa localhost
   // Si tu backend corre en http://localhost:3000
   static const String _baseUrlWeb = 'http://localhost:3000';
-  static const String _baseUrlMobile = 'http://192.168.1.32:3000'; // Para Android Emulator
+  //static const String _baseUrlMobile = 'http://192.168.1.32:3000'; // Para Android Emulator
+  static const String _baseUrlMobile = 'http://192.168.1.116:3000'; // Para Android Emulator
   
   static String get baseUrl {
     // Detectar si es web

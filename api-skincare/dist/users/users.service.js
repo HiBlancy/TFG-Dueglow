@@ -51,16 +51,27 @@ const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const bcrypt = __importStar(require("bcrypt"));
 const cloudinary_service_1 = require("../cloudinary/cloudinary.service");
+const image_compression_service_1 = require("../services/image-compression.service");
 let UsersService = class UsersService {
     userModel;
     productModel;
-    routineModel;
     cloudinaryService;
-    constructor(userModel, productModel, routineModel, cloudinaryService) {
+    imageCompressionService;
+    constructor(userModel, productModel, cloudinaryService, imageCompressionService) {
         this.userModel = userModel;
         this.productModel = productModel;
-        this.routineModel = routineModel;
         this.cloudinaryService = cloudinaryService;
+        this.imageCompressionService = imageCompressionService;
+    }
+    async deleteCloudinaryImageByUrl(imageUrl, logPrefix) {
+        if (!imageUrl)
+            return;
+        const publicId = this.cloudinaryService.extractPublicIdFromUrl(imageUrl);
+        if (!publicId)
+            return;
+        await this.cloudinaryService.deleteImage(publicId);
+        if (logPrefix)
+            console.log(`${logPrefix}: ${publicId}`);
     }
     async create(createUserDto) {
         const emailExists = await this.userModel.findOne({
@@ -122,28 +133,42 @@ let UsersService = class UsersService {
             .select('imageUrl')
             .exec();
         for (const product of products) {
-            if (product.imageUrl) {
-                const publicId = this.cloudinaryService.extractPublicIdFromUrl(product.imageUrl);
-                if (publicId) {
-                    await this.cloudinaryService.deleteImage(publicId);
-                    console.log(`🗑️ Imagen de producto eliminada: ${publicId}`);
-                }
-            }
+            await this.deleteCloudinaryImageByUrl(product.imageUrl, '🗑️ Imagen de producto eliminada');
         }
-        if (user.profileImage) {
-            const publicId = this.cloudinaryService.extractPublicIdFromUrl(user.profileImage);
-            if (publicId) {
-                await this.cloudinaryService.deleteImage(publicId);
-                console.log(`🗑️ Imagen de perfil eliminada: ${publicId}`);
-            }
-        }
+        await this.deleteCloudinaryImageByUrl(user.profileImage, '🗑️ Imagen de perfil eliminada');
         await this.productModel.deleteMany({ userId: id });
-        await this.routineModel.deleteMany({ userId: id });
         const deletedUser = await this.userModel
             .findByIdAndDelete(id)
             .select('-password')
             .exec();
         return deletedUser;
+    }
+    async deleteProfileImage(userId) {
+        const user = await this.findById(userId);
+        if (!user) {
+            throw new common_1.NotFoundException('Usuario no encontrado');
+        }
+        if (!user.profileImage) {
+            throw new common_1.BadRequestException('No hay imagen de perfil para eliminar');
+        }
+        await this.deleteCloudinaryImageByUrl(user.profileImage, '🗑️ Imagen de perfil eliminada de Cloudinary');
+        const updatedUser = await this.update(userId, { profileImage: null });
+        if (!updatedUser) {
+            throw new common_1.NotFoundException(`Usuario ${userId} no encontrado`);
+        }
+        return updatedUser;
+    }
+    async updateProfileImage(userId, fileBuffer, mimeType) {
+        const compressedBuffer = await this.imageCompressionService.compressProfileImage(fileBuffer, mimeType);
+        const imageUrl = await this.cloudinaryService.uploadImage(compressedBuffer, `${userId}_profile_${Date.now()}`, 'user-profiles');
+        const currentUser = await this.findById(userId);
+        await this.deleteCloudinaryImageByUrl(currentUser?.profileImage, '🗑️ Imagen anterior eliminada');
+        const updatedUser = await this.update(userId, { profileImage: imageUrl });
+        if (!updatedUser) {
+            throw new common_1.NotFoundException(`Usuario ${userId} no encontrado`);
+        }
+        console.log(`✅ Imagen de perfil actualizada para usuario ${userId}`);
+        return updatedUser;
     }
 };
 exports.UsersService = UsersService;
@@ -151,10 +176,9 @@ exports.UsersService = UsersService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectModel)('Users')),
     __param(1, (0, mongoose_1.InjectModel)('Product')),
-    __param(2, (0, mongoose_1.InjectModel)('Routine')),
     __metadata("design:paramtypes", [mongoose_2.Model,
         mongoose_2.Model,
-        mongoose_2.Model,
-        cloudinary_service_1.CloudinaryService])
+        cloudinary_service_1.CloudinaryService,
+        image_compression_service_1.ImageCompressionService])
 ], UsersService);
 //# sourceMappingURL=users.service.js.map

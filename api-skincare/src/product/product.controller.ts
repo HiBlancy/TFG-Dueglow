@@ -10,9 +10,8 @@ import {
   UseGuards,
   Req,
   BadRequestException,
-  NotFoundException,
   UseInterceptors,
-  UploadedFile,
+  UploadedFile, NotFoundException,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -22,21 +21,7 @@ import { AuthGuard } from '../users/guards/auth.guard';
 import { PaginationDto } from '../pagination/pagination.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CleanupService } from '../monthly-stats/services/cleanup.service';
-
-function createMulterImageFilter(allowedMimes: string[]) {
-  return (req: any, file: Express.Multer.File, cb: any) => {
-    if (!allowedMimes.includes(file.mimetype)) {
-      cb(
-        new BadRequestException(
-          `Tipo de archivo no permitido. Permitidos: ${allowedMimes.join(', ')}`,
-        ),
-        false,
-      );
-    } else {
-      cb(null, true);
-    }
-  };
-}
+import { multerImageFilter } from '../common/multer.utils';
 
 @Controller('products')
 @UseGuards(AuthGuard)
@@ -46,6 +31,7 @@ export class ProductController {
     private readonly cleanupService: CleanupService,
   ) {}
 
+  // respuesta 200 / 201
   private successResponse(message: string, data: any = null) {
     return { status: true, message, data };
   }
@@ -75,7 +61,7 @@ export class ProductController {
     return this.successResponse('Productos obtenidos con paginación', result);
   }
 
-  // obtener la cantidad de productos segun la lista que están
+  // obtener la cantidad de productos segun la lista que estan
   @Get('stats/summary')
   async getStats(@Req() req) {
     const stats = await this.productService.getStats(req.user._id);
@@ -191,19 +177,7 @@ export class ProductController {
   @UseInterceptors(
     FileInterceptor('productImage', {
       limits: { fileSize: 10 * 1024 * 1024 },
-      fileFilter: (req: any, file: Express.Multer.File, cb: any) => {
-        const allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
-        if (!allowedMimes.includes(file.mimetype)) {
-          cb(
-            new BadRequestException(
-              `Tipo de archivo no permitido. Permitidos: ${allowedMimes.join(', ')}`,
-            ),
-            false,
-          );
-        } else {
-          cb(null, true);
-        }
-      },
+      fileFilter: multerImageFilter(['image/jpeg', 'image/png', 'image/webp']),
     }),
   )
   async uploadProductImage(
@@ -214,16 +188,15 @@ export class ProductController {
     if (!file) {
       throw new BadRequestException('No se proporcionó ningún archivo');
     }
-    const updatedProduct = await this.productService.uploadProductImage(
+
+    const updatedProduct = await this.productService.updateProductImage(
       productId,
       req.user._id,
       file.buffer,
       file.mimetype,
     );
-    return this.successResponse(
-      'Imagen de producto actualizada exitosamente',
-      updatedProduct,
-    );
+
+    return this.successResponse('Imagen de producto actualizada exitosamente', updatedProduct);
   }
 
   // eliminar foto del producto

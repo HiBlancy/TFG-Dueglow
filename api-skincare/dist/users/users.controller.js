@@ -20,28 +20,13 @@ const create_user_dto_1 = require("./dto/create-user.dto");
 const update_user_dto_1 = require("./dto/update-user.dto");
 const jwt_1 = require("@nestjs/jwt");
 const auth_guard_1 = require("./guards/auth.guard");
-const cloudinary_service_1 = require("../cloudinary/cloudinary.service");
-const image_compression_service_1 = require("../services/image-compression.service");
-function createMulterImageFilter(allowedMimes) {
-    return (req, file, cb) => {
-        if (!allowedMimes.includes(file.mimetype)) {
-            cb(new common_1.BadRequestException(`Tipo de archivo no permitido. Permitidos: ${allowedMimes.join(', ')}`), false);
-        }
-        else {
-            cb(null, true);
-        }
-    };
-}
+const multer_utils_1 = require("../common/multer.utils");
 let UsersController = class UsersController {
     usersService;
     jwtService;
-    cloudinaryService;
-    imageCompressionService;
-    constructor(usersService, jwtService, cloudinaryService, imageCompressionService) {
+    constructor(usersService, jwtService) {
         this.usersService = usersService;
         this.jwtService = jwtService;
-        this.cloudinaryService = cloudinaryService;
-        this.imageCompressionService = imageCompressionService;
     }
     successResponse(message, data = null) {
         return { status: true, message, data };
@@ -97,35 +82,11 @@ let UsersController = class UsersController {
         return this.successResponse('Perfil actualizado', updatedUser);
     }
     async uploadProfileImage(file, req) {
-        try {
-            if (!file) {
-                throw new common_1.BadRequestException('No se proporcionó ningún archivo');
-            }
-            const compressedBuffer = await this.imageCompressionService.compressProfileImage(file.buffer, file.mimetype);
-            console.log(`✅ Imagen comprimida exitosamente`);
-            const imageUrl = await this.cloudinaryService.uploadImage(compressedBuffer, `${req.user._id}_profile_${Date.now()}`, 'user-profiles');
-            const currentUser = await this.usersService.findById(req.user._id);
-            if (currentUser?.profileImage) {
-                const publicId = this.cloudinaryService.extractPublicIdFromUrl(currentUser.profileImage);
-                if (publicId) {
-                    await this.cloudinaryService.deleteImage(publicId);
-                    console.log(`🗑️ Imagen anterior eliminada: ${publicId}`);
-                }
-            }
-            const updateDto = {
-                profileImage: imageUrl,
-            };
-            const updatedUser = await this.usersService.update(req.user._id, updateDto);
-            console.log(`✅ Imagen de perfil actualizada para usuario ${req.user._id}`);
-            console.log(`   - URL: ${imageUrl}`);
-            return this.successResponse('Imagen de perfil actualizada exitosamente', updatedUser);
+        if (!file) {
+            throw new common_1.BadRequestException('No se proporcionó ningún archivo');
         }
-        catch (error) {
-            console.error('❌ Error al subir imagen:', error);
-            if (error instanceof common_1.BadRequestException)
-                throw error;
-            throw new common_1.BadRequestException(error.message || 'Error al subir la imagen');
-        }
+        const updatedUser = await this.usersService.updateProfileImage(req.user._id, file.buffer, file.mimetype);
+        return this.successResponse('Imagen de perfil actualizada exitosamente', updatedUser);
     }
     async findAllUsers() {
         const users = await this.usersService.getAllUsers();
@@ -137,31 +98,8 @@ let UsersController = class UsersController {
         return this.successResponse('Cuenta eliminada exitosamente', deletedUser);
     }
     async deleteProfileImage(req) {
-        try {
-            const userId = req.user._id;
-            const user = await this.usersService.findById(userId);
-            if (!user) {
-                throw new common_1.NotFoundException('Usuario no encontrado');
-            }
-            if (!user.profileImage) {
-                throw new common_1.BadRequestException('No hay imagen de perfil para eliminar');
-            }
-            const publicId = this.cloudinaryService.extractPublicIdFromUrl(user.profileImage);
-            if (publicId) {
-                await this.cloudinaryService.deleteImage(publicId);
-                console.log(`🗑️ Imagen de perfil eliminada de Cloudinary: ${publicId}`);
-            }
-            const updatedUser = await this.usersService.update(userId, { profileImage: null });
-            return this.successResponse('Imagen de perfil eliminada exitosamente', updatedUser);
-        }
-        catch (error) {
-            console.error('❌ Error al eliminar imagen de perfil:', error);
-            if (error instanceof common_1.BadRequestException)
-                throw error;
-            if (error instanceof common_1.NotFoundException)
-                throw error;
-            throw new common_1.BadRequestException(error.message || 'Error al eliminar la imagen');
-        }
+        const updatedUser = await this.usersService.deleteProfileImage(req.user._id);
+        return this.successResponse('Imagen de perfil eliminada exitosamente', updatedUser);
     }
 };
 exports.UsersController = UsersController;
@@ -200,15 +138,8 @@ __decorate([
     (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
     (0, common_1.Patch)('me/upload-image'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('profileImage', {
-        limits: {
-            fileSize: 10 * 1024 * 1024,
-        },
-        fileFilter: createMulterImageFilter([
-            'image/jpeg',
-            'image/png',
-            'image/webp',
-            'image/heic',
-        ]),
+        limits: { fileSize: 10 * 1024 * 1024 },
+        fileFilter: (0, multer_utils_1.multerImageFilter)(['image/jpeg', 'image/png', 'image/webp', 'image/heic']),
     })),
     __param(0, (0, common_1.UploadedFile)()),
     __param(1, (0, common_1.Req)()),
@@ -241,8 +172,6 @@ __decorate([
 exports.UsersController = UsersController = __decorate([
     (0, common_1.Controller)('users'),
     __metadata("design:paramtypes", [users_service_1.UsersService,
-        jwt_1.JwtService,
-        cloudinary_service_1.CloudinaryService,
-        image_compression_service_1.ImageCompressionService])
+        jwt_1.JwtService])
 ], UsersController);
 //# sourceMappingURL=users.controller.js.map

@@ -22,16 +22,7 @@ const auth_guard_1 = require("../users/guards/auth.guard");
 const pagination_dto_1 = require("../pagination/pagination.dto");
 const platform_express_1 = require("@nestjs/platform-express");
 const cleanup_service_1 = require("../monthly-stats/services/cleanup.service");
-function createMulterImageFilter(allowedMimes) {
-    return (req, file, cb) => {
-        if (!allowedMimes.includes(file.mimetype)) {
-            cb(new common_1.BadRequestException(`Tipo de archivo no permitido. Permitidos: ${allowedMimes.join(', ')}`), false);
-        }
-        else {
-            cb(null, true);
-        }
-    };
-}
+const multer_utils_1 = require("../common/multer.utils");
 let ProductController = class ProductController {
     productService;
     cleanupService;
@@ -105,7 +96,7 @@ let ProductController = class ProductController {
         if (!file) {
             throw new common_1.BadRequestException('No se proporcionó ningún archivo');
         }
-        const updatedProduct = await this.productService.uploadProductImage(productId, req.user._id, file.buffer, file.mimetype);
+        const updatedProduct = await this.productService.updateProductImage(productId, req.user._id, file.buffer, file.mimetype);
         return this.successResponse('Imagen de producto actualizada exitosamente', updatedProduct);
     }
     async deleteProductImage(productId, req) {
@@ -236,15 +227,7 @@ __decorate([
     (0, common_1.Post)(':id/upload-image'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('productImage', {
         limits: { fileSize: 10 * 1024 * 1024 },
-        fileFilter: (req, file, cb) => {
-            const allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
-            if (!allowedMimes.includes(file.mimetype)) {
-                cb(new common_1.BadRequestException(`Tipo de archivo no permitido. Permitidos: ${allowedMimes.join(', ')}`), false);
-            }
-            else {
-                cb(null, true);
-            }
-        },
+        fileFilter: (0, multer_utils_1.multerImageFilter)(['image/jpeg', 'image/png', 'image/webp']),
     })),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.UploadedFile)()),

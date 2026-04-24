@@ -2,14 +2,10 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtService } from '@nestjs/jwt';
-import { CloudinaryService } from '../cloudinary/cloudinary.service';
-import { ImageCompressionService } from '../services/image-compression.service';
 export declare class UsersController {
     private readonly usersService;
     private readonly jwtService;
-    private readonly cloudinaryService;
-    private readonly imageCompressionService;
-    constructor(usersService: UsersService, jwtService: JwtService, cloudinaryService: CloudinaryService, imageCompressionService: ImageCompressionService);
+    constructor(usersService: UsersService, jwtService: JwtService);
     private successResponse;
     register(createUserDto: CreateUserDto): Promise<{
         status: boolean;
