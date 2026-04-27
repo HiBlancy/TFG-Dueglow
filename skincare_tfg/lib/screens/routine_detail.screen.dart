@@ -77,10 +77,15 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
     if (_routine.id == null) return;
     setState(() => _isLoading = true);
     try {
+      final sortedDays = _editingDays.toList()..sort();
+      // Optimistic UI update so changes are visible immediately.
+      setState(() {
+        _routine = _routine.copyWith(type: _editingType, days: sortedDays);
+      });
       final updated = await _routineService.updateRoutine(_routine.id!, {
         'name': _nameController.text.trim(),
         'type': _editingType == RoutineType.morning ? 'morning' : 'night',
-        'days': _editingDays.toList(),
+        'days': sortedDays,
       });
       setState(() {
         _routine = updated;
@@ -89,7 +94,7 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
       });
       _showSnackBar('Rutina actualizada');
     } catch (e) {
-      _showSnackBar('Error al actualizar', isError: true);
+      _showSnackBar('Error al actualizar: $e', isError: true);
     } finally {
       setState(() => _isLoading = false);
     }
@@ -383,6 +388,7 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
         title: _routine.name,
         showDrawer: false,
         showBackButton: true,
+        onBack: () => Navigator.pop(context, _hasChanges),
         child: _isLoading && _routine.products.isEmpty
             ? const Center(child: CircularProgressIndicator())
             : CustomScrollView(

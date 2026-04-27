@@ -60,14 +60,27 @@ class _AddRoutineScreenState extends State<AddRoutineScreen> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_selectedDays.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Selecciona al menos 1 día'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
 
     setState(() => _isLoading = true);
 
     try {
+      final days = _selectedDays.toList()..sort();
       final routine = Routine(
         name: _nameController.text.trim(),
         type: _selectedType,
-        days: _selectedDays.toList(),
+        days: days,
       );
 
       await _routineService.createRoutine(routine);
@@ -86,8 +99,8 @@ class _AddRoutineScreenState extends State<AddRoutineScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Error al crear la rutina'),
+          SnackBar(
+            content: Text('Error al crear la rutina: $e'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
