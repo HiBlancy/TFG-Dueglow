@@ -73,8 +73,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
         label: l10n.newTab,
       ),
       BottomNavigationBarItem(
-        icon: Icon(Icons.camera_alt_outlined),
-        activeIcon: Icon(Icons.camera_alt),
+        icon: Icon(Icons.access_time),
+        activeIcon: Icon(Icons.access_time_filled),
         label: l10n.routines,
       ),
       BottomNavigationBarItem(

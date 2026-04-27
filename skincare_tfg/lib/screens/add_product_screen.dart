@@ -181,7 +181,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       final newProduct = BeautyProduct(
         barcode: _barcodeController.text.trim(),
         name: _nameController.text.trim(),
-        brand: _brandController.text.trim().isEmpty ? null : _brandController.text.trim(),
+        brand: _brandController.text.trim(),
         categories: _categories.isEmpty ? null : _categories,
         notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
         periodAfterOpening: _paoController.text.trim().isEmpty ? null : _paoController.text.trim(),
@@ -342,6 +342,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                     label: AppLocalizations.of(context)!.brand,
                     prefixIcon: Icons.branding_watermark_outlined,
                     hint: AppLocalizations.of(context)!.brandHint,
+                    validator: (v) => v?.trim().isEmpty == true ? AppLocalizations.of(context)!.requiredField : null,
                   ),
                   const SizedBox(height: 20),
 

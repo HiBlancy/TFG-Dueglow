@@ -283,14 +283,33 @@ Future<List<BeautyProduct>> getExpiringSoon({int days = 30}) async {
       if (token == null) return null;
 
 
-      final productData = {
+      final productData = <String, dynamic>{
         'name': product.name,
         'brand': product.brand,
-        'barcode': product.barcode,
-        'imageUrl': product.imageUrl,
-        'categories': product.categories,
         'listType': 'have',
       };
+
+      if (product.barcode?.trim().isNotEmpty == true) {
+        productData['barcode'] = product.barcode!.trim();
+      }
+      if (product.imageUrl?.trim().isNotEmpty == true) {
+        productData['imageUrl'] = product.imageUrl!.trim();
+      }
+      if (product.categories != null && product.categories!.isNotEmpty) {
+        productData['categories'] = product.categories;
+      }
+      if (product.notes?.trim().isNotEmpty == true) {
+        productData['notes'] = product.notes!.trim();
+      }
+      if (product.periodAfterOpening?.trim().isNotEmpty == true) {
+        productData['periodAfterOpening'] = product.periodAfterOpening!.trim();
+      }
+      if (product.expirationDate != null) {
+        productData['expirationDate'] = product.expirationDate!.toIso8601String();
+      }
+      if (product.openedDate != null) {
+        productData['openedDate'] = product.openedDate!.toIso8601String();
+      }
 
       // API call
       final response = await http.post(
