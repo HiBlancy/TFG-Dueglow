@@ -6,6 +6,83 @@ import '../models/beauty_product.dart';
 import 'auth_service.dart';
 import 'api_config.dart';
 
+class MonthlyStatsItem {
+  final int year;
+  final int month;
+  final String monthName;
+  final int productsUsedCount;
+
+  const MonthlyStatsItem({
+    required this.year,
+    required this.month,
+    required this.monthName,
+    required this.productsUsedCount,
+  });
+
+  factory MonthlyStatsItem.fromJson(Map<String, dynamic> json) {
+    return MonthlyStatsItem(
+      year: (json['year'] as num?)?.toInt() ?? 0,
+      month: (json['month'] as num?)?.toInt() ?? 0,
+      monthName: (json['monthName'] as String?) ?? '',
+      productsUsedCount: (json['productsUsedCount'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
+class YearlyOverviewStats {
+  final String period;
+  final List<MonthlyStatsItem> data;
+  final int total;
+
+  const YearlyOverviewStats({
+    required this.period,
+    required this.data,
+    required this.total,
+  });
+
+  factory YearlyOverviewStats.empty() {
+    return const YearlyOverviewStats(period: '12_months', data: [], total: 0);
+  }
+
+  factory YearlyOverviewStats.fromJson(Map<String, dynamic> json) {
+    final list = (json['data'] as List?)
+            ?.map((e) => MonthlyStatsItem.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        <MonthlyStatsItem>[];
+    return YearlyOverviewStats(
+      period: (json['period'] as String?) ?? '12_months',
+      data: list,
+      total: (json['total'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
+class CurrentMonthStats {
+  final int year;
+  final int month;
+  final String monthName;
+  final int productsUsedCount;
+  final String status;
+
+  const CurrentMonthStats({
+    required this.year,
+    required this.month,
+    required this.monthName,
+    required this.productsUsedCount,
+    required this.status,
+  });
+
+  factory CurrentMonthStats.fromJson(Map<String, dynamic> json) {
+    return CurrentMonthStats(
+      year: (json['year'] as num?)?.toInt() ?? 0,
+      month: (json['month'] as num?)?.toInt() ?? 0,
+      monthName: (json['monthName'] as String?) ?? '',
+      productsUsedCount: (json['productsUsedCount'] as num?)?.toInt() ?? 0,
+      status: (json['status'] as String?) ?? '',
+    );
+  }
+}
+
 class ProductService {
   final AuthService _authService = AuthService();
 
@@ -396,6 +473,62 @@ Future<List<BeautyProduct>> getExpiringSoon({int days = 30}) async {
       return null;
     } catch (e) {
       print('❌ Error eliminando imagen: $e');
+      return null;
+    }
+  }
+
+  Future<YearlyOverviewStats> getYearlyOverview() async {
+    try {
+      final token = await _authService.getToken();
+      if (token == null) return YearlyOverviewStats.empty();
+
+      final response = await http.get(
+        Uri.parse(ApiConfig.getYearlyOverviewUrl()),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final payload = jsonDecode(response.body);
+        if (payload['status'] == true && payload['data'] != null) {
+          return YearlyOverviewStats.fromJson(
+            payload['data'] as Map<String, dynamic>,
+          );
+        }
+      }
+      return YearlyOverviewStats.empty();
+    } catch (e) {
+      print('❌ Error obteniendo yearly overview: $e');
+      return YearlyOverviewStats.empty();
+    }
+  }
+
+  Future<CurrentMonthStats?> getCurrentMonthStats() async {
+    try {
+      final token = await _authService.getToken();
+      if (token == null) return null;
+
+      final response = await http.get(
+        Uri.parse(ApiConfig.getCurrentMonthStatsUrl()),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final payload = jsonDecode(response.body);
+        if (payload['status'] == true && payload['data'] != null) {
+          return CurrentMonthStats.fromJson(
+            payload['data'] as Map<String, dynamic>,
+          );
+        }
+      }
+      return null;
+    } catch (e) {
+      print('❌ Error obteniendo stats del mes actual: $e');
       return null;
     }
   }
