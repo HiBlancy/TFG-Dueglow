@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/main_toolbar.dart';
 import '../constants/app_constants.dart';
+import '../l10n/app_localizations.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -9,9 +10,10 @@ class AboutScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final subtleText = theme.colorScheme.onSurface.withValues(alpha: 0.6);
+    final l10n = AppLocalizations.of(context)!;
 
     return CustomAppBar(
-      title: 'Acerca de',
+      title: l10n.about,
       showDrawer: true,
       showBackButton: true,
       child: Center(
@@ -48,7 +50,7 @@ class AboutScreen extends StatelessWidget {
               
               // Versión
               Text(
-                'Versión 1.0.0',
+                l10n.versionLabel('1.0.0'),
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: subtleText,
                 ),
@@ -57,7 +59,7 @@ class AboutScreen extends StatelessWidget {
               
               // Descripción
               Text(
-                'Aplicación para el cuidado de la piel y \nseguimiento de tus rutinas de belleza.',
+                l10n.aboutDescription,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyLarge?.copyWith(
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.8),

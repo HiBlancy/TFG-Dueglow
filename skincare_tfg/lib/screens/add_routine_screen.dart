@@ -5,6 +5,7 @@ import '../services/routine_service.dart';
 import '../widgets/main_toolbar.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_text_field.dart';
+import '../l10n/app_localizations.dart';
 
 class AddRoutineScreen extends StatefulWidget {
   const AddRoutineScreen({super.key});
@@ -63,8 +64,8 @@ class _AddRoutineScreenState extends State<AddRoutineScreen> {
     if (_selectedDays.isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Selecciona al menos 1 día'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.selectAtLeastOneDay),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
           duration: Duration(seconds: 2),
@@ -87,8 +88,8 @@ class _AddRoutineScreenState extends State<AddRoutineScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✓ Rutina creada correctamente'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.routineCreatedSuccess),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
             duration: Duration(seconds: 2),
@@ -100,7 +101,7 @@ class _AddRoutineScreenState extends State<AddRoutineScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error al crear la rutina: $e'),
+            content: Text(AppLocalizations.of(context)!.routineCreateError),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -118,7 +119,7 @@ class _AddRoutineScreenState extends State<AddRoutineScreen> {
     final cardBg = theme.colorScheme.primaryContainer.withValues(alpha: isDark ? 0.15 : 0.2);
 
     return CustomAppBar(
-      title: 'Nueva Rutina',
+      title: AppLocalizations.of(context)!.newRoutine,
       showDrawer: false,
       showBackButton: true,
       child: SingleChildScrollView(
@@ -133,21 +134,21 @@ class _AddRoutineScreenState extends State<AddRoutineScreen> {
               // Nombre
               CustomTextField(
                 controller: _nameController,
-                label: 'Nombre de la rutina *',
+                label: AppLocalizations.of(context)!.routineNameRequiredLabel,
                 prefixIcon: Icons.auto_awesome_outlined,
-                hint: 'Ej: Rutina de mañana',
-                validator: (v) => v?.trim().isEmpty == true ? 'Obligatorio' : null,
+                hint: AppLocalizations.of(context)!.routineNameHint,
+                validator: (v) => v?.trim().isEmpty == true ? AppLocalizations.of(context)!.requiredField : null,
               ),
               const SizedBox(height: 24),
 
               // Tipo: Mañana / Noche
-              _buildSectionLabel(theme, Icons.schedule_outlined, 'Tipo de rutina'),
+              _buildSectionLabel(theme, Icons.schedule_outlined, AppLocalizations.of(context)!.routineType),
               const SizedBox(height: 10),
               Row(
                 children: [
                   Expanded(
                     child: _buildTypeCard(
-                      label: 'Mañana',
+                      label: AppLocalizations.of(context)!.morning,
                       icon: Icons.wb_sunny_outlined,
                       type: RoutineType.morning,
                       theme: theme,
@@ -157,7 +158,7 @@ class _AddRoutineScreenState extends State<AddRoutineScreen> {
                   const SizedBox(width: 14),
                   Expanded(
                     child: _buildTypeCard(
-                      label: 'Noche',
+                      label: AppLocalizations.of(context)!.night,
                       icon: Icons.nights_stay_outlined,
                       type: RoutineType.night,
                       theme: theme,
@@ -178,7 +179,7 @@ class _AddRoutineScreenState extends State<AddRoutineScreen> {
                           size: 18, color: theme.colorScheme.primary),
                       const SizedBox(width: 8),
                       Text(
-                        'Días de la semana',
+                        AppLocalizations.of(context)!.weekDays,
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
@@ -190,7 +191,7 @@ class _AddRoutineScreenState extends State<AddRoutineScreen> {
                   GestureDetector(
                     onTap: _selectAll,
                     child: Text(
-                      _selectedDays.length == _days.length ? 'Ninguno' : 'Todos',
+                      _selectedDays.length == _days.length ? AppLocalizations.of(context)!.none : AppLocalizations.of(context)!.all,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -276,7 +277,7 @@ class _AddRoutineScreenState extends State<AddRoutineScreen> {
 
               // Botón guardar
               CustomButton(
-                text: 'Crear rutina',
+                text: AppLocalizations.of(context)!.createRoutine,
                 onPressed: _save,
                 isLoading: _isLoading,
                 type: ButtonType.primary,

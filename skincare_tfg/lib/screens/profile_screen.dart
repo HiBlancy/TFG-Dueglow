@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/main_toolbar.dart';
 import '../widgets/custom_button.dart';
+import '../l10n/app_localizations.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -55,13 +56,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final isDark = theme.brightness == Brightness.dark;
     final tabs = _stashData.keys.toList();
 
     return DefaultTabController(
       length: tabs.length,
       child: CustomAppBar(
-        title: 'Mi Tocador',
+        title: l10n.vanity,
         showDrawer: true,
         showBackButton: false,
         child: Column(
@@ -290,7 +292,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           // Título
           Text(
-            'Tus productos de $selectedSub',
+            AppLocalizations.of(context)!.yourProductsOf(selectedSub),
             textAlign: TextAlign.center,
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
@@ -301,8 +303,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           // Descripción
           Text(
-            'Aún no has categorizado ningún producto en esta sección.\n'
-            'Agrega productos desde la búsqueda o tu lista.',
+            AppLocalizations.of(context)!.noCategorizedProductsSection,
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
@@ -315,7 +316,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           SizedBox(
             width: double.infinity,
             child: CustomButton(
-              text: 'Agregar producto',
+              text: AppLocalizations.of(context)!.addProduct,
               onPressed: () {
                 // TODO: Navegar a búsqueda o agregar producto
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -326,7 +327,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            'Funcionalidad en desarrollo',
+                            AppLocalizations.of(context)!.featureInDevelopment,
                             style: TextStyle(color: theme.colorScheme.onPrimary),
                           ),
                         ),

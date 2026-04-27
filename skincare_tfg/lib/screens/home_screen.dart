@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (mounted) {
       setState(() {
-        _userName = name ?? 'Usuario';
+        _userName = name ?? AppLocalizations.of(context)!.defaultUserName;
         _expiringSoonProducts = expiringProducts;
         _isLoading = false;
       });
@@ -103,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 const SizedBox(height: 8),
                                 Text( 
-                                  'Que tu piel nunca deje de brillar',
+                                  l10n.skinGlowTagline,
                                   style: theme.textTheme.displayLarge?.copyWith(
                                     fontWeight: FontWeight.w500,
                                     fontSize: 30,
@@ -144,11 +144,11 @@ class _HomeScreenState extends State<HomeScreen> {
     final name = _userName;
 
     if (hour < 12) {
-      return 'BUENOS DÍAS, $name';
+      return AppLocalizations.of(context)!.morningGreeting(name).toUpperCase();
     } else if (hour < 18) {
-      return 'BUENAS TARDES, $name';
+      return AppLocalizations.of(context)!.afternoonGreeting(name).toUpperCase();
     } else {
-      return 'BUENAS NOCHES, $name';
+      return AppLocalizations.of(context)!.eveningGreeting(name).toUpperCase();
     }
   }
 
@@ -203,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    'Prioriza estos productos antes de que caduquen',
+                    l10n.prioritizeExpiringHint,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: isDark
                           ? theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7)

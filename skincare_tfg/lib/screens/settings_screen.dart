@@ -193,6 +193,19 @@ class _LanguageTile extends StatelessWidget {
             localeProvider.setEnglish();
           },
         ),
+
+        // Ruso
+        ListTile(
+          leading: Icon(Icons.translate, color: theme.colorScheme.primary),
+          title: Text(l10n.russian),
+          subtitle: Text(l10n.english, style: TextStyle(color: subtleText)),
+          trailing: currentLocale == 'ru'
+              ? Icon(Icons.check_circle, color: theme.colorScheme.primary)
+              : null,
+          onTap: () {
+            localeProvider.setRussian();
+          },
+        ),
       ],
     );
   }

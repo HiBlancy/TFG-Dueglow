@@ -3,6 +3,7 @@ import '../services/auth_service.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/bottom_app_bar.dart';
+import '../l10n/app_localizations.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -34,8 +35,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _register() async {
+    final l10n = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate() || !_acceptTerms) {
-      if (!_acceptTerms) _showErrorDialog('Debes aceptar los términos y condiciones');
+      if (!_acceptTerms) _showErrorDialog(l10n.mustAcceptTerms);
       return;
     }
 
@@ -58,9 +60,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
               children: [
                 Icon(Icons.check_circle, color: theme.colorScheme.onPrimary),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    '¡Cuenta creada exitosamente!',
+                    l10n.accountCreatedSuccess,
                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -82,7 +84,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           }
         });
       } else if (mounted) {
-        _showErrorDialog('Error al crear la cuenta. El correo podría estar registrado.');
+        _showErrorDialog(l10n.createAccountErrorMaybeEmail);
       }
     } catch (e) {
       setState(() => _isLoading = false);
@@ -94,6 +96,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   void _showErrorDialog(String message) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     showDialog(
       context: context,
@@ -109,7 +112,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             const SizedBox(width: 12),
             Text(
-              'Error',
+              l10n.errorTitle,
               style: theme.textTheme.titleLarge?.copyWith(
                 color: theme.colorScheme.onSurface,
               ),
@@ -126,7 +129,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Aceptar',
+              l10n.accept,
               style: TextStyle(color: theme.colorScheme.primary),
             ),
           ),
@@ -139,7 +142,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
@@ -207,7 +209,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
       const SizedBox(height: 24),
       Text(
-        'Crear Cuenta',
+        AppLocalizations.of(context)!.createAcount,
         style: theme.textTheme.displayLarge?.copyWith(
           color: theme.colorScheme.primary,
           fontWeight: FontWeight.w400,
@@ -216,7 +218,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       ),
       Text(
-        'Empieza a gestionar tus productos',
+        AppLocalizations.of(context)!.startManagingProducts,
         style: TextStyle(
           fontSize: 16,
           color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
@@ -231,12 +233,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       // Campo de nombre
       CustomTextField(
         controller: _nameController,
-        label: 'Nombre completo',
-        hint: 'Tu nombre',
+        label: AppLocalizations.of(context)!.fullName,
+        hint: AppLocalizations.of(context)!.enterName,
         prefixIcon: Icons.person_outline,
         validator: (value) {
-          if (value?.isEmpty ?? true) return 'Ingrese su nombre';
-          if (value!.length < 3) return 'Mínimo 3 caracteres';
+          if (value?.isEmpty ?? true) return AppLocalizations.of(context)!.enterName;
+          if (value!.length < 3) return AppLocalizations.of(context)!.min3Chars;
           return null;
         },
       ),
@@ -245,14 +247,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
       // Campo de email
       CustomTextField(
         controller: _emailController,
-        label: 'Correo electrónico',
-        hint: 'usuario@ejemplo.com',
+        label: AppLocalizations.of(context)!.email,
+        hint: AppLocalizations.of(context)!.userEmailExample,
         prefixIcon: Icons.email_outlined,
         keyboardType: TextInputType.emailAddress,
         validator: (value) {
-          if (value?.isEmpty ?? true) return 'Ingrese su correo';
+          if (value?.isEmpty ?? true) return AppLocalizations.of(context)!.enterEmailAddress;
           if (!value!.contains('@') || !value.contains('.')) {
-            return 'Correo inválido';
+            return AppLocalizations.of(context)!.invalidAddress;
           }
           return null;
         },
@@ -262,7 +264,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       // Campo de contraseña
       CustomTextField(
         controller: _passwordController,
-        label: 'Contraseña',
+        label: AppLocalizations.of(context)!.password,
         prefixIcon: Icons.lock_outline,
         obscureText: !_isPasswordVisible,
         showVisibilityToggle: true,
@@ -270,8 +272,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
           setState(() => _isPasswordVisible = !_isPasswordVisible);
         },
         validator: (value) {
-          if (value?.isEmpty ?? true) return 'Ingrese su contraseña';
-          if (value!.length < 6) return 'Mínimo 6 caracteres';
+          if (value?.isEmpty ?? true) return AppLocalizations.of(context)!.enterPass;
+          if (value!.length < 6) return AppLocalizations.of(context)!.pass6Char;
           return null;
         },
       ),
@@ -280,7 +282,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       // Campo de confirmar contraseña
       CustomTextField(
         controller: _confirmPasswordController,
-        label: 'Confirmar contraseña',
+        label: AppLocalizations.of(context)!.confirmPassword,
         prefixIcon: Icons.lock_outline,
         obscureText: !_isConfirmVisible,
         showVisibilityToggle: true,
@@ -289,9 +291,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         },
         textInputAction: TextInputAction.done,
         validator: (value) {
-          if (value?.isEmpty ?? true) return 'Confirme su contraseña';
+          if (value?.isEmpty ?? true) return AppLocalizations.of(context)!.confirmYourPassword;
           if (value != _passwordController.text) {
-            return 'Las contraseñas no coinciden';
+            return AppLocalizations.of(context)!.passwordsDontMatch;
           }
           return null;
         },
@@ -338,18 +340,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   text: TextSpan(
                     style: theme.textTheme.bodyMedium?.copyWith(color: textColor),
                     children: [
-                      const TextSpan(text: 'Acepto los '),
+                      TextSpan(text: AppLocalizations.of(context)!.acceptTermsPrefix),
                       TextSpan(
-                        text: 'términos y condiciones',
+                        text: AppLocalizations.of(context)!.termsAndConditions,
                         style: TextStyle(
                           color: linkColor,
                           fontWeight: FontWeight.bold,
                           decoration: TextDecoration.underline,
                         ),
                       ),
-                      const TextSpan(text: ' y la '),
+                      TextSpan(text: AppLocalizations.of(context)!.andThe),
                       TextSpan(
-                        text: 'política de privacidad',
+                        text: AppLocalizations.of(context)!.privacyPolicy,
                         style: TextStyle(
                           color: linkColor,
                           fontWeight: FontWeight.bold,
@@ -369,7 +371,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _buildRegisterButton(ThemeData theme) {
     return context.primaryButton(
-      'CREAR CUENTA',
+      AppLocalizations.of(context)!.createAccountUpper,
       _register,
       isLoading: _isLoading,
       size: ButtonSize.full,
@@ -392,7 +394,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
-                'O continuar con',
+                AppLocalizations.of(context)!.orContinueWith,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
@@ -461,7 +463,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          '¿Ya tienes una cuenta? ',
+          '${AppLocalizations.of(context)!.alreadyHaveAccount} ',
           style: theme.textTheme.bodyLarge?.copyWith(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
           ),
@@ -469,7 +471,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         GestureDetector(
           onTap: () => Navigator.pushReplacementNamed(context, '/'),
           child: Text(
-            'Inicia sesión',
+            AppLocalizations.of(context)!.signIn,
             style: theme.textTheme.bodyLarge?.copyWith(
               color: theme.colorScheme.primary,
               fontWeight: FontWeight.bold,

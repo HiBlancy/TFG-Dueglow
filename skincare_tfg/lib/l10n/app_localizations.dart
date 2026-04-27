@@ -7,6 +7,7 @@ import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_en.dart';
 import 'app_localizations_es.dart';
+import 'app_localizations_ru.dart';
 
 // ignore_for_file: type=lint
 
@@ -96,6 +97,7 @@ abstract class AppLocalizations {
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
     Locale('es'),
+    Locale('ru'),
   ];
 
   /// No description provided for @appName.
@@ -344,6 +346,12 @@ abstract class AppLocalizations {
   /// **'Español'**
   String get spanish;
 
+  /// No description provided for @russian.
+  ///
+  /// In es, this message translates to:
+  /// **'Ruso'**
+  String get russian;
+
   /// No description provided for @versionLabel.
   ///
   /// In es, this message translates to:
@@ -572,6 +580,12 @@ abstract class AppLocalizations {
   /// **'Crear rutina'**
   String get createRoutine;
 
+  /// No description provided for @selectAtLeastOneDay.
+  ///
+  /// In es, this message translates to:
+  /// **'Selecciona al menos 1 día'**
+  String get selectAtLeastOneDay;
+
   /// No description provided for @routineCreatedSuccess.
   ///
   /// In es, this message translates to:
@@ -727,6 +741,768 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Error al añadir producto'**
   String get productAddError;
+
+  /// No description provided for @home.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicio'**
+  String get home;
+
+  /// No description provided for @newTab.
+  ///
+  /// In es, this message translates to:
+  /// **'Nuevo'**
+  String get newTab;
+
+  /// No description provided for @profile.
+  ///
+  /// In es, this message translates to:
+  /// **'Perfil'**
+  String get profile;
+
+  /// No description provided for @aboutDescription.
+  ///
+  /// In es, this message translates to:
+  /// **'Aplicación para el cuidado de la piel y \nseguimiento de tus rutinas de belleza.'**
+  String get aboutDescription;
+
+  /// No description provided for @vanity.
+  ///
+  /// In es, this message translates to:
+  /// **'Mi Tocador'**
+  String get vanity;
+
+  /// No description provided for @yourProductsOf.
+  ///
+  /// In es, this message translates to:
+  /// **'Tus productos de {subcategory}'**
+  String yourProductsOf(String subcategory);
+
+  /// No description provided for @noCategorizedProductsSection.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no has categorizado ningún producto en esta sección.\nAgrega productos desde la búsqueda o tu lista.'**
+  String get noCategorizedProductsSection;
+
+  /// No description provided for @featureInDevelopment.
+  ///
+  /// In es, this message translates to:
+  /// **'Funcionalidad en desarrollo'**
+  String get featureInDevelopment;
+
+  /// No description provided for @defaultUserName.
+  ///
+  /// In es, this message translates to:
+  /// **'Usuario'**
+  String get defaultUserName;
+
+  /// No description provided for @morningGreeting.
+  ///
+  /// In es, this message translates to:
+  /// **'Buenos días, {name}'**
+  String morningGreeting(String name);
+
+  /// No description provided for @afternoonGreeting.
+  ///
+  /// In es, this message translates to:
+  /// **'Buenas tardes, {name}'**
+  String afternoonGreeting(String name);
+
+  /// No description provided for @eveningGreeting.
+  ///
+  /// In es, this message translates to:
+  /// **'Buenas noches, {name}'**
+  String eveningGreeting(String name);
+
+  /// No description provided for @skinGlowTagline.
+  ///
+  /// In es, this message translates to:
+  /// **'Que tu piel nunca deje de brillar'**
+  String get skinGlowTagline;
+
+  /// No description provided for @prioritizeExpiringHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Prioriza estos productos antes de que caduquen'**
+  String get prioritizeExpiringHint;
+
+  /// No description provided for @errorTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Error'**
+  String get errorTitle;
+
+  /// No description provided for @accept.
+  ///
+  /// In es, this message translates to:
+  /// **'Aceptar'**
+  String get accept;
+
+  /// No description provided for @invalidUserOrPassword.
+  ///
+  /// In es, this message translates to:
+  /// **'Usuario o contraseña incorrectos'**
+  String get invalidUserOrPassword;
+
+  /// No description provided for @exitAppTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Salir de la app'**
+  String get exitAppTitle;
+
+  /// No description provided for @exitAppQuestion.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Quieres salir de la aplicación?'**
+  String get exitAppQuestion;
+
+  /// No description provided for @exit.
+  ///
+  /// In es, this message translates to:
+  /// **'Salir'**
+  String get exit;
+
+  /// No description provided for @forgotPassword.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Olvidaste tu contraseña?'**
+  String get forgotPassword;
+
+  /// No description provided for @comingSoon.
+  ///
+  /// In es, this message translates to:
+  /// **'Función próximamente disponible'**
+  String get comingSoon;
+
+  /// No description provided for @loginButtonUpper.
+  ///
+  /// In es, this message translates to:
+  /// **'INICIAR SESIÓN'**
+  String get loginButtonUpper;
+
+  /// No description provided for @dontHaveAccount.
+  ///
+  /// In es, this message translates to:
+  /// **'¿No tienes cuenta?'**
+  String get dontHaveAccount;
+
+  /// No description provided for @createOne.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear una'**
+  String get createOne;
+
+  /// No description provided for @orContinueWith.
+  ///
+  /// In es, this message translates to:
+  /// **'O continuar con'**
+  String get orContinueWith;
+
+  /// No description provided for @fullName.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre completo'**
+  String get fullName;
+
+  /// No description provided for @enterName.
+  ///
+  /// In es, this message translates to:
+  /// **'Ingrese su nombre'**
+  String get enterName;
+
+  /// No description provided for @min3Chars.
+  ///
+  /// In es, this message translates to:
+  /// **'Mínimo 3 caracteres'**
+  String get min3Chars;
+
+  /// No description provided for @confirmPassword.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmar contraseña'**
+  String get confirmPassword;
+
+  /// No description provided for @confirmYourPassword.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirme su contraseña'**
+  String get confirmYourPassword;
+
+  /// No description provided for @passwordsDontMatch.
+  ///
+  /// In es, this message translates to:
+  /// **'Las contraseñas no coinciden'**
+  String get passwordsDontMatch;
+
+  /// No description provided for @mustAcceptTerms.
+  ///
+  /// In es, this message translates to:
+  /// **'Debes aceptar los términos y condiciones'**
+  String get mustAcceptTerms;
+
+  /// No description provided for @accountCreatedSuccess.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Cuenta creada exitosamente!'**
+  String get accountCreatedSuccess;
+
+  /// No description provided for @createAccountErrorMaybeEmail.
+  ///
+  /// In es, this message translates to:
+  /// **'Error al crear la cuenta. El correo podría estar registrado.'**
+  String get createAccountErrorMaybeEmail;
+
+  /// No description provided for @startManagingProducts.
+  ///
+  /// In es, this message translates to:
+  /// **'Empieza a gestionar tus productos'**
+  String get startManagingProducts;
+
+  /// No description provided for @acceptTermsPrefix.
+  ///
+  /// In es, this message translates to:
+  /// **'Acepto los '**
+  String get acceptTermsPrefix;
+
+  /// No description provided for @termsAndConditions.
+  ///
+  /// In es, this message translates to:
+  /// **'términos y condiciones'**
+  String get termsAndConditions;
+
+  /// No description provided for @andThe.
+  ///
+  /// In es, this message translates to:
+  /// **' y la '**
+  String get andThe;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In es, this message translates to:
+  /// **'política de privacidad'**
+  String get privacyPolicy;
+
+  /// No description provided for @createAccountUpper.
+  ///
+  /// In es, this message translates to:
+  /// **'CREAR CUENTA'**
+  String get createAccountUpper;
+
+  /// No description provided for @alreadyHaveAccount.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Ya tienes una cuenta?'**
+  String get alreadyHaveAccount;
+
+  /// No description provided for @signIn.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicia sesión'**
+  String get signIn;
+
+  /// No description provided for @addProductTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir Producto'**
+  String get addProductTitle;
+
+  /// No description provided for @scanAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Escanear'**
+  String get scanAction;
+
+  /// No description provided for @barcodeSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Código de barras'**
+  String get barcodeSubtitle;
+
+  /// No description provided for @searchAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscar'**
+  String get searchAction;
+
+  /// No description provided for @onlineProductSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Producto online'**
+  String get onlineProductSubtitle;
+
+  /// No description provided for @orAddManuallyUpper.
+  ///
+  /// In es, this message translates to:
+  /// **'O AÑADE MANUALMENTE'**
+  String get orAddManuallyUpper;
+
+  /// No description provided for @productNameRequiredLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre del producto *'**
+  String get productNameRequiredLabel;
+
+  /// No description provided for @productNameHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: Crema Hidratante'**
+  String get productNameHint;
+
+  /// No description provided for @brand.
+  ///
+  /// In es, this message translates to:
+  /// **'Marca'**
+  String get brand;
+
+  /// No description provided for @brandHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: Nivea'**
+  String get brandHint;
+
+  /// No description provided for @expiresLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Caduca: {date}'**
+  String expiresLabel(String date);
+
+  /// No description provided for @expirationDate.
+  ///
+  /// In es, this message translates to:
+  /// **'Fecha de caducidad'**
+  String get expirationDate;
+
+  /// No description provided for @saveInMyVanity.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar en mi tocador'**
+  String get saveInMyVanity;
+
+  /// No description provided for @productImage.
+  ///
+  /// In es, this message translates to:
+  /// **'Imagen del producto'**
+  String get productImage;
+
+  /// No description provided for @tapToAddImage.
+  ///
+  /// In es, this message translates to:
+  /// **'Toca para añadir imagen'**
+  String get tapToAddImage;
+
+  /// No description provided for @addProductImageTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir imagen del producto'**
+  String get addProductImageTitle;
+
+  /// No description provided for @takePhoto.
+  ///
+  /// In es, this message translates to:
+  /// **'Tomar foto'**
+  String get takePhoto;
+
+  /// No description provided for @chooseFromGallery.
+  ///
+  /// In es, this message translates to:
+  /// **'Seleccionar de galería'**
+  String get chooseFromGallery;
+
+  /// No description provided for @deleteImage.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar imagen'**
+  String get deleteImage;
+
+  /// No description provided for @imageDeleted.
+  ///
+  /// In es, this message translates to:
+  /// **'Imagen eliminada'**
+  String get imageDeleted;
+
+  /// No description provided for @imageCapturedSuccess.
+  ///
+  /// In es, this message translates to:
+  /// **'Imagen capturada correctamente'**
+  String get imageCapturedSuccess;
+
+  /// No description provided for @imageCaptureError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo capturar la imagen'**
+  String get imageCaptureError;
+
+  /// No description provided for @imageSelectedSuccess.
+  ///
+  /// In es, this message translates to:
+  /// **'Imagen seleccionada correctamente'**
+  String get imageSelectedSuccess;
+
+  /// No description provided for @imageSelectError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo seleccionar la imagen'**
+  String get imageSelectError;
+
+  /// No description provided for @productSavedImageUploadFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'Producto guardado pero la imagen no se pudo subir'**
+  String get productSavedImageUploadFailed;
+
+  /// No description provided for @productAddedSuccess.
+  ///
+  /// In es, this message translates to:
+  /// **'✓ Producto añadido correctamente'**
+  String get productAddedSuccess;
+
+  /// No description provided for @saveProductError.
+  ///
+  /// In es, this message translates to:
+  /// **'Error al guardar el producto'**
+  String get saveProductError;
+
+  /// No description provided for @paoDuration.
+  ///
+  /// In es, this message translates to:
+  /// **'Duración tras abrir (PAO)'**
+  String get paoDuration;
+
+  /// No description provided for @periodAfterOpening.
+  ///
+  /// In es, this message translates to:
+  /// **'Periodo después de la apertura'**
+  String get periodAfterOpening;
+
+  /// No description provided for @findOpenJarIcon.
+  ///
+  /// In es, this message translates to:
+  /// **'Busca el icono del tarro abierto en el envase'**
+  String get findOpenJarIcon;
+
+  /// No description provided for @customPaoHint.
+  ///
+  /// In es, this message translates to:
+  /// **'O escribe uno personalizado (ej: 9M)'**
+  String get customPaoHint;
+
+  /// No description provided for @category.
+  ///
+  /// In es, this message translates to:
+  /// **'Categoría'**
+  String get category;
+
+  /// No description provided for @categoryHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: Facial'**
+  String get categoryHint;
+
+  /// No description provided for @errorPerformingOperation.
+  ///
+  /// In es, this message translates to:
+  /// **'Error al realizar la operación'**
+  String get errorPerformingOperation;
+
+  /// No description provided for @changeToAnotherList.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar a otra lista'**
+  String get changeToAnotherList;
+
+  /// No description provided for @productMovedToList.
+  ///
+  /// In es, this message translates to:
+  /// **'✓ Producto movido a \"{list}\"'**
+  String productMovedToList(String list);
+
+  /// No description provided for @addProductQuestionTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Agregar producto'**
+  String get addProductQuestionTitle;
+
+  /// No description provided for @addProductQuestion.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Quieres agregar \"{name}\" a tu lista de productos?'**
+  String addProductQuestion(String name);
+
+  /// No description provided for @productAddedToList.
+  ///
+  /// In es, this message translates to:
+  /// **'✓ \"{name}\" agregado a tu lista'**
+  String productAddedToList(String name);
+
+  /// No description provided for @productUpdatedSuccess.
+  ///
+  /// In es, this message translates to:
+  /// **'✓ Producto actualizado correctamente'**
+  String get productUpdatedSuccess;
+
+  /// No description provided for @deleteProductTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar producto'**
+  String get deleteProductTitle;
+
+  /// No description provided for @deleteProductQuestion.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Estás seguro de que quieres eliminar \"{name}\" de tu lista?'**
+  String deleteProductQuestion(String name);
+
+  /// No description provided for @productDeletedFromList.
+  ///
+  /// In es, this message translates to:
+  /// **'✓ \"{name}\" eliminado de tu lista'**
+  String productDeletedFromList(String name);
+
+  /// No description provided for @deleteProductError.
+  ///
+  /// In es, this message translates to:
+  /// **'Error al eliminar el producto'**
+  String get deleteProductError;
+
+  /// No description provided for @markAsFinishedTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Marcar como terminado'**
+  String get markAsFinishedTitle;
+
+  /// No description provided for @markAsFinishedQuestion.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Estás seguro de que has terminado \"{name}\"?\n\nEl producto se moverá a la lista de terminados y se registrará en tu historial mensual.'**
+  String markAsFinishedQuestion(String name);
+
+  /// No description provided for @productMarkedFinished.
+  ///
+  /// In es, this message translates to:
+  /// **'✓ \"{name}\" marcado como terminado'**
+  String productMarkedFinished(String name);
+
+  /// No description provided for @openProduct.
+  ///
+  /// In es, this message translates to:
+  /// **'Abrir producto'**
+  String get openProduct;
+
+  /// No description provided for @today.
+  ///
+  /// In es, this message translates to:
+  /// **'Hoy'**
+  String get today;
+
+  /// No description provided for @anotherDate.
+  ///
+  /// In es, this message translates to:
+  /// **'Otra fecha...'**
+  String get anotherDate;
+
+  /// No description provided for @productMarkedOpened.
+  ///
+  /// In es, this message translates to:
+  /// **'✓ Producto marcado como abierto'**
+  String get productMarkedOpened;
+
+  /// No description provided for @productMarkedClosed.
+  ///
+  /// In es, this message translates to:
+  /// **'✓ Producto marcado como cerrado'**
+  String get productMarkedClosed;
+
+  /// No description provided for @expirationCalculated.
+  ///
+  /// In es, this message translates to:
+  /// **'✓ Fecha de caducidad calculada'**
+  String get expirationCalculated;
+
+  /// No description provided for @editProductTooltip.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar producto'**
+  String get editProductTooltip;
+
+  /// No description provided for @deleteProduct.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar producto'**
+  String get deleteProduct;
+
+  /// No description provided for @currentList.
+  ///
+  /// In es, this message translates to:
+  /// **'Lista actual'**
+  String get currentList;
+
+  /// No description provided for @changeListTooltip.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar lista'**
+  String get changeListTooltip;
+
+  /// No description provided for @addedLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Agregado'**
+  String get addedLabel;
+
+  /// No description provided for @expirationLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Caducidad'**
+  String get expirationLabel;
+
+  /// No description provided for @openedOnLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Abierto el'**
+  String get openedOnLabel;
+
+  /// No description provided for @notes.
+  ///
+  /// In es, this message translates to:
+  /// **'Notas'**
+  String get notes;
+
+  /// No description provided for @noExpirationInfoWarningTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin información de caducidad'**
+  String get noExpirationInfoWarningTitle;
+
+  /// No description provided for @noExpirationInfoWarningBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Edita el producto para añadir su duración después de abierto (ej: \"6M\") o una fecha de caducidad.'**
+  String get noExpirationInfoWarningBody;
+
+  /// No description provided for @addToMyProducts.
+  ///
+  /// In es, this message translates to:
+  /// **'Agregar a mis productos'**
+  String get addToMyProducts;
+
+  /// No description provided for @closeProduct.
+  ///
+  /// In es, this message translates to:
+  /// **'Cerrar producto'**
+  String get closeProduct;
+
+  /// No description provided for @calculateExpiration.
+  ///
+  /// In es, this message translates to:
+  /// **'Calcular caducidad'**
+  String get calculateExpiration;
+
+  /// No description provided for @finishedProduct.
+  ///
+  /// In es, this message translates to:
+  /// **'Producto acabado'**
+  String get finishedProduct;
+
+  /// No description provided for @editProduct.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar producto'**
+  String get editProduct;
+
+  /// No description provided for @list.
+  ///
+  /// In es, this message translates to:
+  /// **'Lista'**
+  String get list;
+
+  /// No description provided for @rating.
+  ///
+  /// In es, this message translates to:
+  /// **'Calificación'**
+  String get rating;
+
+  /// No description provided for @deleteAll.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar todas'**
+  String get deleteAll;
+
+  /// No description provided for @newCategory.
+  ///
+  /// In es, this message translates to:
+  /// **'Nueva categoría'**
+  String get newCategory;
+
+  /// No description provided for @uploadingImage.
+  ///
+  /// In es, this message translates to:
+  /// **'Subiendo imagen...'**
+  String get uploadingImage;
+
+  /// No description provided for @changeProductImageTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar imagen del producto'**
+  String get changeProductImageTitle;
+
+  /// No description provided for @imageDeletedSuccess.
+  ///
+  /// In es, this message translates to:
+  /// **'Imagen eliminada correctamente'**
+  String get imageDeletedSuccess;
+
+  /// No description provided for @deleteImageError.
+  ///
+  /// In es, this message translates to:
+  /// **'Error al eliminar la imagen'**
+  String get deleteImageError;
+
+  /// No description provided for @nameRequiredError.
+  ///
+  /// In es, this message translates to:
+  /// **'El nombre es obligatorio'**
+  String get nameRequiredError;
+
+  /// No description provided for @imageUploadError.
+  ///
+  /// In es, this message translates to:
+  /// **'Error al subir la imagen'**
+  String get imageUploadError;
+
+  /// No description provided for @saveChangesError.
+  ///
+  /// In es, this message translates to:
+  /// **'Error al guardar los cambios'**
+  String get saveChangesError;
+
+  /// No description provided for @expirationWithDate.
+  ///
+  /// In es, this message translates to:
+  /// **'Caducidad: {date}'**
+  String expirationWithDate(String date);
+
+  /// No description provided for @addExpirationDate.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir fecha de caducidad'**
+  String get addExpirationDate;
+
+  /// No description provided for @additionalNotes.
+  ///
+  /// In es, this message translates to:
+  /// **'Notas adicionales'**
+  String get additionalNotes;
+
+  /// No description provided for @deleteDateTooltip.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar fecha'**
+  String get deleteDateTooltip;
+
+  /// No description provided for @save.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar'**
+  String get save;
 }
 
 class _AppLocalizationsDelegate
@@ -740,7 +1516,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['en', 'es'].contains(locale.languageCode);
+      <String>['en', 'es', 'ru'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -753,6 +1529,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsEn();
     case 'es':
       return AppLocalizationsEs();
+    case 'ru':
+      return AppLocalizationsRu();
   }
 
   throw FlutterError(

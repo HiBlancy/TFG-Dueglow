@@ -134,6 +134,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get spanish => 'Spanish';
 
   @override
+  String get russian => 'Russian';
+
+  @override
   String versionLabel(String version) {
     return 'Version $version';
   }
@@ -263,6 +266,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createRoutine => 'Create routine';
 
   @override
+  String get selectAtLeastOneDay => 'Select at least 1 day';
+
+  @override
   String get routineCreatedSuccess => '✓ Routine created successfully';
 
   @override
@@ -340,4 +346,417 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get productAddError => 'Failed to add product';
+
+  @override
+  String get home => 'Home';
+
+  @override
+  String get newTab => 'New';
+
+  @override
+  String get profile => 'Profile';
+
+  @override
+  String get aboutDescription =>
+      'App for skincare care and \ntracking your beauty routines.';
+
+  @override
+  String get vanity => 'My Vanity';
+
+  @override
+  String yourProductsOf(String subcategory) {
+    return 'Your $subcategory products';
+  }
+
+  @override
+  String get noCategorizedProductsSection =>
+      'You have not categorized any products in this section yet.\nAdd products from search or your list.';
+
+  @override
+  String get featureInDevelopment => 'Feature in development';
+
+  @override
+  String get defaultUserName => 'User';
+
+  @override
+  String morningGreeting(String name) {
+    return 'Good morning, $name';
+  }
+
+  @override
+  String afternoonGreeting(String name) {
+    return 'Good afternoon, $name';
+  }
+
+  @override
+  String eveningGreeting(String name) {
+    return 'Good evening, $name';
+  }
+
+  @override
+  String get skinGlowTagline => 'Let your skin always shine';
+
+  @override
+  String get prioritizeExpiringHint =>
+      'Prioritize these products before they expire';
+
+  @override
+  String get errorTitle => 'Error';
+
+  @override
+  String get accept => 'Accept';
+
+  @override
+  String get invalidUserOrPassword => 'Incorrect username or password';
+
+  @override
+  String get exitAppTitle => 'Exit app';
+
+  @override
+  String get exitAppQuestion => 'Do you want to exit the app?';
+
+  @override
+  String get exit => 'Exit';
+
+  @override
+  String get forgotPassword => 'Forgot your password?';
+
+  @override
+  String get comingSoon => 'Feature coming soon';
+
+  @override
+  String get loginButtonUpper => 'SIGN IN';
+
+  @override
+  String get dontHaveAccount => 'Don\'t have an account?';
+
+  @override
+  String get createOne => 'Create one';
+
+  @override
+  String get orContinueWith => 'Or continue with';
+
+  @override
+  String get fullName => 'Full name';
+
+  @override
+  String get enterName => 'Enter your name';
+
+  @override
+  String get min3Chars => 'Minimum 3 characters';
+
+  @override
+  String get confirmPassword => 'Confirm password';
+
+  @override
+  String get confirmYourPassword => 'Confirm your password';
+
+  @override
+  String get passwordsDontMatch => 'Passwords do not match';
+
+  @override
+  String get mustAcceptTerms => 'You must accept the terms and conditions';
+
+  @override
+  String get accountCreatedSuccess => 'Account created successfully!';
+
+  @override
+  String get createAccountErrorMaybeEmail =>
+      'Failed to create account. The email might already be registered.';
+
+  @override
+  String get startManagingProducts => 'Start managing your products';
+
+  @override
+  String get acceptTermsPrefix => 'I accept the ';
+
+  @override
+  String get termsAndConditions => 'terms and conditions';
+
+  @override
+  String get andThe => ' and the ';
+
+  @override
+  String get privacyPolicy => 'privacy policy';
+
+  @override
+  String get createAccountUpper => 'CREATE ACCOUNT';
+
+  @override
+  String get alreadyHaveAccount => 'Already have an account?';
+
+  @override
+  String get signIn => 'Sign in';
+
+  @override
+  String get addProductTitle => 'Add Product';
+
+  @override
+  String get scanAction => 'Scan';
+
+  @override
+  String get barcodeSubtitle => 'Barcode';
+
+  @override
+  String get searchAction => 'Search';
+
+  @override
+  String get onlineProductSubtitle => 'Online product';
+
+  @override
+  String get orAddManuallyUpper => 'OR ADD MANUALLY';
+
+  @override
+  String get productNameRequiredLabel => 'Product name *';
+
+  @override
+  String get productNameHint => 'Ex: Moisturizing cream';
+
+  @override
+  String get brand => 'Brand';
+
+  @override
+  String get brandHint => 'Ex: Nivea';
+
+  @override
+  String expiresLabel(String date) {
+    return 'Expires: $date';
+  }
+
+  @override
+  String get expirationDate => 'Expiration date';
+
+  @override
+  String get saveInMyVanity => 'Save in my vanity';
+
+  @override
+  String get productImage => 'Product image';
+
+  @override
+  String get tapToAddImage => 'Tap to add image';
+
+  @override
+  String get addProductImageTitle => 'Add product image';
+
+  @override
+  String get takePhoto => 'Take photo';
+
+  @override
+  String get chooseFromGallery => 'Choose from gallery';
+
+  @override
+  String get deleteImage => 'Delete image';
+
+  @override
+  String get imageDeleted => 'Image deleted';
+
+  @override
+  String get imageCapturedSuccess => 'Image captured successfully';
+
+  @override
+  String get imageCaptureError => 'Could not capture image';
+
+  @override
+  String get imageSelectedSuccess => 'Image selected successfully';
+
+  @override
+  String get imageSelectError => 'Could not select image';
+
+  @override
+  String get productSavedImageUploadFailed =>
+      'Product saved but image upload failed';
+
+  @override
+  String get productAddedSuccess => '✓ Product added successfully';
+
+  @override
+  String get saveProductError => 'Failed to save product';
+
+  @override
+  String get paoDuration => 'Duration after opening (PAO)';
+
+  @override
+  String get periodAfterOpening => 'Period after opening';
+
+  @override
+  String get findOpenJarIcon => 'Look for the open-jar icon on the package';
+
+  @override
+  String get customPaoHint => 'Or type a custom one (e.g. 9M)';
+
+  @override
+  String get category => 'Category';
+
+  @override
+  String get categoryHint => 'Ex: Face';
+
+  @override
+  String get errorPerformingOperation => 'Error performing operation';
+
+  @override
+  String get changeToAnotherList => 'Move to another list';
+
+  @override
+  String productMovedToList(String list) {
+    return '✓ Product moved to \"$list\"';
+  }
+
+  @override
+  String get addProductQuestionTitle => 'Add product';
+
+  @override
+  String addProductQuestion(String name) {
+    return 'Do you want to add \"$name\" to your products list?';
+  }
+
+  @override
+  String productAddedToList(String name) {
+    return '✓ \"$name\" added to your list';
+  }
+
+  @override
+  String get productUpdatedSuccess => '✓ Product updated successfully';
+
+  @override
+  String get deleteProductTitle => 'Delete product';
+
+  @override
+  String deleteProductQuestion(String name) {
+    return 'Are you sure you want to delete \"$name\" from your list?';
+  }
+
+  @override
+  String productDeletedFromList(String name) {
+    return '✓ \"$name\" removed from your list';
+  }
+
+  @override
+  String get deleteProductError => 'Error deleting product';
+
+  @override
+  String get markAsFinishedTitle => 'Mark as finished';
+
+  @override
+  String markAsFinishedQuestion(String name) {
+    return 'Are you sure you have finished \"$name\"?\n\nThe product will be moved to the finished list and recorded in your monthly history.';
+  }
+
+  @override
+  String productMarkedFinished(String name) {
+    return '✓ \"$name\" marked as finished';
+  }
+
+  @override
+  String get openProduct => 'Open product';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get anotherDate => 'Another date...';
+
+  @override
+  String get productMarkedOpened => '✓ Product marked as opened';
+
+  @override
+  String get productMarkedClosed => '✓ Product marked as closed';
+
+  @override
+  String get expirationCalculated => '✓ Expiration date calculated';
+
+  @override
+  String get editProductTooltip => 'Edit product';
+
+  @override
+  String get deleteProduct => 'Delete product';
+
+  @override
+  String get currentList => 'Current list';
+
+  @override
+  String get changeListTooltip => 'Change list';
+
+  @override
+  String get addedLabel => 'Added';
+
+  @override
+  String get expirationLabel => 'Expiration';
+
+  @override
+  String get openedOnLabel => 'Opened on';
+
+  @override
+  String get notes => 'Notes';
+
+  @override
+  String get noExpirationInfoWarningTitle => 'No expiration information';
+
+  @override
+  String get noExpirationInfoWarningBody =>
+      'Edit the product to add its period after opening (e.g. \"6M\") or an expiration date.';
+
+  @override
+  String get addToMyProducts => 'Add to my products';
+
+  @override
+  String get closeProduct => 'Close product';
+
+  @override
+  String get calculateExpiration => 'Calculate expiration';
+
+  @override
+  String get finishedProduct => 'Finished product';
+
+  @override
+  String get editProduct => 'Edit product';
+
+  @override
+  String get list => 'List';
+
+  @override
+  String get rating => 'Rating';
+
+  @override
+  String get deleteAll => 'Delete all';
+
+  @override
+  String get newCategory => 'New category';
+
+  @override
+  String get uploadingImage => 'Uploading image...';
+
+  @override
+  String get changeProductImageTitle => 'Change product image';
+
+  @override
+  String get imageDeletedSuccess => 'Image deleted successfully';
+
+  @override
+  String get deleteImageError => 'Error deleting image';
+
+  @override
+  String get nameRequiredError => 'Name is required';
+
+  @override
+  String get imageUploadError => 'Error uploading image';
+
+  @override
+  String get saveChangesError => 'Error saving changes';
+
+  @override
+  String expirationWithDate(String date) {
+    return 'Expiration: $date';
+  }
+
+  @override
+  String get addExpirationDate => 'Add expiration date';
+
+  @override
+  String get additionalNotes => 'Additional notes';
+
+  @override
+  String get deleteDateTooltip => 'Delete date';
+
+  @override
+  String get save => 'Save';
 }

@@ -7,6 +7,7 @@ import '../models/product_list_type.dart';
 import '../services/product_service.dart';
 import '../services/image_service.dart';
 import 'custom_text_field.dart';
+import '../l10n/app_localizations.dart';
 
 class EditProductDialog extends StatefulWidget {
   final BeautyProduct product;
@@ -91,13 +92,13 @@ class _EditProductDialogState extends State<EditProductDialog> {
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Text(
-                    'Cambiar imagen del producto',
+                    AppLocalizations.of(context)!.changeProductImageTitle,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ),
                 ListTile(
                   leading: const Icon(Icons.photo_camera),
-                  title: const Text('Tomar foto'),
+                  title: Text(AppLocalizations.of(context)!.takePhoto),
                   onTap: () {
                     Navigator.pop(context);
                     _pickImageFromCamera();
@@ -105,7 +106,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
                 ),
                 ListTile(
                   leading: const Icon(Icons.photo_library),
-                  title: const Text('Seleccionar de galería'),
+                  title: Text(AppLocalizations.of(context)!.chooseFromGallery),
                   onTap: () {
                     Navigator.pop(context);
                     _pickImageFromGallery();
@@ -114,7 +115,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
                 if (_currentImageUrl != null || _selectedImageFile != null)
                   ListTile(
                     leading: const Icon(Icons.delete_outline, color: Colors.red),
-                    title: const Text('Eliminar imagen', style: TextStyle(color: Colors.red)),
+                    title: Text(AppLocalizations.of(context)!.deleteImage, style: const TextStyle(color: Colors.red)),
                     onTap: () {
                       Navigator.pop(context);
                       _deleteImage();
@@ -139,9 +140,9 @@ class _EditProductDialogState extends State<EditProductDialog> {
       setState(() {
         _selectedImageFile = imageFile;
       });
-      _showSnackBar('Imagen capturada correctamente');
+      _showSnackBar(AppLocalizations.of(context)!.imageCapturedSuccess);
     } else if (mounted) {
-      _showSnackBar('No se pudo capturar la imagen', isError: true);
+      _showSnackBar(AppLocalizations.of(context)!.imageCaptureError, isError: true);
     }
     
     setState(() => _isUploadingImage = false);
@@ -157,9 +158,9 @@ class _EditProductDialogState extends State<EditProductDialog> {
       setState(() {
         _selectedImageFile = imageFile;
       });
-      _showSnackBar('Imagen seleccionada correctamente');
+      _showSnackBar(AppLocalizations.of(context)!.imageSelectedSuccess);
     } else if (mounted) {
-      _showSnackBar('No se pudo seleccionar la imagen', isError: true);
+      _showSnackBar(AppLocalizations.of(context)!.imageSelectError, isError: true);
     }
     
     setState(() => _isUploadingImage = false);
@@ -179,16 +180,16 @@ class _EditProductDialogState extends State<EditProductDialog> {
           _currentImageUrl = null;
           _selectedImageFile = null;
         });
-        _showSnackBar('Imagen eliminada correctamente');
+        _showSnackBar(AppLocalizations.of(context)!.imageDeletedSuccess);
         
         // Notificar al padre que el producto cambió
         widget.onProductUpdated(updatedProduct);
       } else {
-        _showSnackBar('Error al eliminar la imagen', isError: true);
+        _showSnackBar(AppLocalizations.of(context)!.deleteImageError, isError: true);
       }
     } catch (e) {
       print('❌ Error eliminando imagen: $e');
-      _showSnackBar('Error al eliminar la imagen', isError: true);
+      _showSnackBar(AppLocalizations.of(context)!.deleteImageError, isError: true);
     } finally {
       if (mounted) setState(() => _isUploadingImage = false);
     }
@@ -234,7 +235,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
 
   Future<void> _saveProduct() async {
   if (_nameController.text.trim().isEmpty) {
-    _showSnackBar('El nombre es obligatorio', isError: true);
+    _showSnackBar(AppLocalizations.of(context)!.nameRequiredError, isError: true);
     return;
   }
 
@@ -255,7 +256,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
         _currentImageUrl = uploadedProduct.imageUrl;
 
       } else {
-        _showSnackBar('Error al subir la imagen', isError: true);
+        _showSnackBar(AppLocalizations.of(context)!.imageUploadError, isError: true);
         return;
       }
     }
@@ -294,13 +295,13 @@ class _EditProductDialogState extends State<EditProductDialog> {
           : result;
       widget.onProductUpdated(finalProduct);
       Navigator.pop(context, finalProduct);
-      _showSnackBar('Producto actualizado correctamente');
+      _showSnackBar(AppLocalizations.of(context)!.productUpdatedSuccess);
     } else {
-      _showSnackBar('Error al guardar los cambios', isError: true);
+      _showSnackBar(AppLocalizations.of(context)!.saveChangesError, isError: true);
     }
   } catch (e) {
     print('❌ Error guardando producto: $e');
-    _showSnackBar('Error al guardar los cambios', isError: true);
+    _showSnackBar(AppLocalizations.of(context)!.saveChangesError, isError: true);
   } finally {
     if (mounted) setState(() => _isUploadingImage = false);
   }
@@ -339,18 +340,18 @@ class _EditProductDialogState extends State<EditProductDialog> {
                     // Nombre
                     CustomTextField(
                       controller: _nameController,
-                      label: 'Nombre del producto *',
+                      label: AppLocalizations.of(context)!.productNameRequiredLabel,
                       prefixIcon: Icons.spa,
-                      hint: 'Ej: Crema hidratante facial',
+                      hint: AppLocalizations.of(context)!.productNameHint,
                     ),
                     const SizedBox(height: 16),
                     
                     // Marca
                     CustomTextField(
                       controller: _brandController,
-                      label: 'Marca',
+                      label: AppLocalizations.of(context)!.brand,
                       prefixIcon: Icons.branding_watermark,
-                      hint: 'Ej: L\'Oréal, Nivea, Garnier',
+                      hint: AppLocalizations.of(context)!.brandHint,
                     ),
                     const SizedBox(height: 16),
                     
@@ -363,8 +364,8 @@ class _EditProductDialogState extends State<EditProductDialog> {
                       icon: Icons.warning_amber,
                       iconColor: Colors.orange,
                       text: _expirationDate != null
-                          ? 'Caducidad: ${_formatDate(_expirationDate!)}'
-                          : 'Añadir fecha de caducidad',
+                          ? AppLocalizations.of(context)!.expirationWithDate(_formatDate(_expirationDate!))
+                          : AppLocalizations.of(context)!.addExpirationDate,
                       isActive: _expirationDate != null,
                       borderColor: subtleBorder,
                       onTap: () => _selectDate(
@@ -380,9 +381,9 @@ class _EditProductDialogState extends State<EditProductDialog> {
                     // Duración después de abrir
                     CustomTextField(
                       controller: _periodAfterOpeningController,
-                      label: 'Duración después de abrir',
+                      label: AppLocalizations.of(context)!.periodAfterOpening,
                       prefixIcon: Icons.timer,
-                      hint: 'Ej: 6 meses, 12M',
+                      hint: AppLocalizations.of(context)!.customPaoHint,
                     ),
                     const SizedBox(height: 16),
                     
@@ -393,9 +394,9 @@ class _EditProductDialogState extends State<EditProductDialog> {
                     // Notas
                     CustomTextField(
                       controller: _notesController,
-                      label: 'Notas adicionales',
+                      label: AppLocalizations.of(context)!.additionalNotes,
                       prefixIcon: Icons.note,
-                      hint: 'Añade información adicional',
+                      hint: AppLocalizations.of(context)!.notes,
                       keyboardType: TextInputType.multiline,
                     ),
                   ],
@@ -421,7 +422,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Imagen del producto',
+            AppLocalizations.of(context)!.productImage,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -447,7 +448,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
                           const CircularProgressIndicator(),
                           const SizedBox(height: 8),
                           Text(
-                            'Subiendo imagen...',
+                            AppLocalizations.of(context)!.uploadingImage,
                             style: TextStyle(
                               fontSize: 12,
                               color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
@@ -499,7 +500,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Toca para añadir imagen',
+            AppLocalizations.of(context)!.tapToAddImage,
             style: TextStyle(
               fontSize: 12,
               color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
@@ -534,7 +535,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
           Icon(Icons.edit, color: fgColor, size: 24),
           const SizedBox(width: 12),
           Text(
-            'Editar producto',
+            AppLocalizations.of(context)!.editProduct,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -564,7 +565,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Lista',
+            AppLocalizations.of(context)!.list,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -654,7 +655,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Calificación',
+                AppLocalizations.of(context)!.rating,
                 style: TextStyle(fontSize: 12, color: subtleText),
               ),
               if (_rating != null)
@@ -666,7 +667,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   child: Text(
-                    'Limpiar',
+                    AppLocalizations.of(context)!.clear,
                     style: TextStyle(fontSize: 11, color: theme.colorScheme.error),
                   ),
                 ),
@@ -739,7 +740,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
                 onPressed: onClear,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
-                tooltip: 'Eliminar fecha',
+                tooltip: AppLocalizations.of(context)!.deleteDateTooltip,
               ),
             Icon(Icons.calendar_today, color: subtleText),
           ],
@@ -766,7 +767,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Categorías',
+                AppLocalizations.of(context)!.categories,
                 style: TextStyle(fontSize: 12, color: subtleText),
               ),
               if (_categories.isNotEmpty)
@@ -778,7 +779,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   child: Text(
-                    'Eliminar todas',
+                    AppLocalizations.of(context)!.deleteAll,
                     style:
                         TextStyle(fontSize: 11, color: theme.colorScheme.error),
                   ),
@@ -810,7 +811,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
                   controller: _newCategoryController,
                   label: '',
                   prefixIcon: Icons.category,
-                  hint: 'Nueva categoría',
+                  hint: AppLocalizations.of(context)!.newCategory,
                 ),
               ),
               const SizedBox(width: 8),
@@ -849,7 +850,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
                 side: BorderSide(color: borderColor),
               ),
             ),
-            child: const Text('Cancelar'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
         ),
         const SizedBox(width: 16),
@@ -878,7 +879,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
                       color: Colors.white,
                     ),
                   )
-                : const Text('Guardar'),
+                : Text(AppLocalizations.of(context)!.save),
           ),
         ),
       ],

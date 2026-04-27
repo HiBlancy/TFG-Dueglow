@@ -6,6 +6,7 @@ import '../services/product_service.dart';
 import '../widgets/edit_product_dialog.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/warning_dialog.dart';
+import '../l10n/app_localizations.dart';
 
 class ProductScreen extends StatefulWidget {
   final BeautyProduct product;
@@ -58,7 +59,7 @@ class _ProductScreenState extends State<ProductScreen> {
     if (isError) {
       await WarningDialog.showInfo(
         context: context,
-        title: 'Error',
+        title: AppLocalizations.of(context)!.errorTitle,
         content: message,
       );
     } else {
@@ -100,7 +101,9 @@ class _ProductScreenState extends State<ProductScreen> {
       context: context,
       title: title,
       content: content,
-      confirmText: isDanger ? 'Eliminar' : 'Aceptar',
+      confirmText: isDanger
+          ? AppLocalizations.of(context)!.delete
+          : AppLocalizations.of(context)!.accept,
       isDanger: isDanger,
     );
   }
@@ -120,7 +123,7 @@ class _ProductScreenState extends State<ProductScreen> {
       await _showMessage(successMessage);
       onSuccess?.call();
     } else {
-      await _showMessage('Error al realizar la operación', isError: true);
+      await _showMessage(AppLocalizations.of(context)!.errorPerformingOperation, isError: true);
     }
   }
 
@@ -149,7 +152,7 @@ class _ProductScreenState extends State<ProductScreen> {
             Icon(Icons.swap_horiz, color: theme.colorScheme.primary),
             const SizedBox(width: 12),
             Text(
-              'Cambiar a otra lista',
+              AppLocalizations.of(context)!.changeToAnotherList,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -206,7 +209,7 @@ class _ProductScreenState extends State<ProductScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Cancelar',
+              AppLocalizations.of(context)!.cancel,
               style: TextStyle(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
               ),
@@ -221,7 +224,7 @@ class _ProductScreenState extends State<ProductScreen> {
         action: () => _productService.updateProduct(_currentProduct.id!, {
           'listType': newListType.value,
         }),
-        successMessage: '✓ Producto movido a "${newListType.label}"',
+        successMessage: AppLocalizations.of(context)!.productMovedToList(newListType.label),
         loadingKey: 'changingList',
       );
     }
@@ -231,15 +234,15 @@ class _ProductScreenState extends State<ProductScreen> {
 
   Future<void> _addToMyProducts() async {
     if (!await _confirmAction(
-      'Agregar producto',
-      '¿Quieres agregar "${_currentProduct.name}" a tu lista de productos?',
+      AppLocalizations.of(context)!.addProductQuestionTitle,
+      AppLocalizations.of(context)!.addProductQuestion(_currentProduct.name),
     )) {
       return;
     }
 
     await _executeAction(
       action: () => _productService.addProductToHave(_currentProduct),
-      successMessage: '✓ "${_currentProduct.name}" agregado a tu lista',
+      successMessage: AppLocalizations.of(context)!.productAddedToList(_currentProduct.name),
       loadingKey: 'adding',
       onSuccess: () {
         if (widget.isFromSearch && mounted) Navigator.pop(context);
@@ -277,7 +280,7 @@ class _ProductScreenState extends State<ProductScreen> {
       await _executeAction(
         action: () =>
             _productService.updateProduct(_currentProduct.id!, updatedData),
-        successMessage: '✓ Producto actualizado correctamente',
+        successMessage: AppLocalizations.of(context)!.productUpdatedSuccess,
         loadingKey: 'editing',
       );
     }
@@ -285,8 +288,8 @@ class _ProductScreenState extends State<ProductScreen> {
 
   Future<void> _deleteProduct() async {
     if (!await _confirmAction(
-      'Eliminar producto',
-      '¿Estás seguro de que quieres eliminar "${_currentProduct.name}" de tu lista?',
+      AppLocalizations.of(context)!.deleteProductTitle,
+      AppLocalizations.of(context)!.deleteProductQuestion(_currentProduct.name),
       isDanger: true,
     )) {
       return;
@@ -297,18 +300,17 @@ class _ProductScreenState extends State<ProductScreen> {
     _setLoading('deleting', false);
 
     if (deleted) {
-      await _showMessage('✓ "${_currentProduct.name}" eliminado de tu lista');
+      await _showMessage(AppLocalizations.of(context)!.productDeletedFromList(_currentProduct.name));
       if (mounted) Navigator.pop(context, true);
     } else {
-      await _showMessage('Error al eliminar el producto', isError: true);
+      await _showMessage(AppLocalizations.of(context)!.deleteProductError, isError: true);
     }
   }
 
   Future<void> _markAsFinished() async {
   if (!await _confirmAction(
-    'Marcar como terminado',
-    '¿Estás seguro de que has terminado "${_currentProduct.name}"?\n\n'
-    'El producto se moverá a la lista de terminados y se registrará en tu historial mensual.',
+    AppLocalizations.of(context)!.markAsFinishedTitle,
+    AppLocalizations.of(context)!.markAsFinishedQuestion(_currentProduct.name),
   )) {
     return;
   }
@@ -318,7 +320,7 @@ class _ProductScreenState extends State<ProductScreen> {
       'listType': 'used',
       'finishedDate': DateTime.now().toIso8601String(), // Guardar fecha
     }),
-    successMessage: '✓ "${_currentProduct.name}" marcado como terminado',
+    successMessage: AppLocalizations.of(context)!.productMarkedFinished(_currentProduct.name),
     loadingKey: 'finishing',
   );
 }
@@ -343,7 +345,7 @@ class _ProductScreenState extends State<ProductScreen> {
           children: [
             Icon(Icons.open_in_new, color: theme.colorScheme.primary),
             const SizedBox(width: 12),
-            Text('Abrir producto', style: theme.textTheme.titleLarge),
+            Text(AppLocalizations.of(context)!.openProduct, style: theme.textTheme.titleLarge),
           ],
         ),
         contentPadding: const EdgeInsets.only(top: 16, bottom: 8),
@@ -352,12 +354,12 @@ class _ProductScreenState extends State<ProductScreen> {
           children: [
             _DialogListTile(
               icon: Icons.today,
-              title: 'Hoy',
+              title: AppLocalizations.of(context)!.today,
               onTap: () => Navigator.pop(context, 'hoy'),
             ),
             _DialogListTile(
               icon: Icons.calendar_month,
-              title: 'Otra fecha...',
+              title: AppLocalizations.of(context)!.anotherDate,
               onTap: () => Navigator.pop(context, 'otra'),
             ),
           ],
@@ -366,7 +368,7 @@ class _ProductScreenState extends State<ProductScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Cancelar',
+              AppLocalizations.of(context)!.cancel,
               style: TextStyle(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
               ),
@@ -412,7 +414,7 @@ class _ProductScreenState extends State<ProductScreen> {
         _currentProduct.id!,
         openedDate: finalDate,
       ),
-      successMessage: '✓ Producto marcado como abierto',
+      successMessage: AppLocalizations.of(context)!.productMarkedOpened,
       loadingKey: 'opening',
     );
   }
@@ -420,7 +422,7 @@ class _ProductScreenState extends State<ProductScreen> {
   Future<void> _markAsClosed() async {
     await _executeAction(
       action: () => _productService.markAsClosed(_currentProduct.id!),
-      successMessage: '✓ Producto marcado como cerrado',
+      successMessage: AppLocalizations.of(context)!.productMarkedClosed,
       loadingKey: 'closing',
     );
   }
@@ -428,7 +430,7 @@ class _ProductScreenState extends State<ProductScreen> {
   Future<void> _calculateExpiration() async {
     await _executeAction(
       action: () => _productService.calculateExpiration(_currentProduct.id!),
-      successMessage: '✓ Fecha de caducidad calculada',
+      successMessage: AppLocalizations.of(context)!.expirationCalculated,
       loadingKey: 'calculating',
     );
   }
@@ -469,7 +471,7 @@ class _ProductScreenState extends State<ProductScreen> {
             IconButton(
               icon: const Icon(Icons.edit),
               onPressed: _isLoading('editing') ? null : _editProduct,
-              tooltip: 'Editar producto',
+              tooltip: AppLocalizations.of(context)!.editProductTooltip,
               color: isDark
                   ? const Color(0xfff4add8)
                   : theme.colorScheme.primary,
@@ -498,7 +500,7 @@ class _ProductScreenState extends State<ProductScreen> {
               SizedBox(
                 width: double.infinity,
                 child: CustomButton(
-                  text: 'Eliminar producto',
+                  text: AppLocalizations.of(context)!.deleteProduct,
                   onPressed: _isLoading('deleting') ? () {} : _deleteProduct,
                   type: ButtonType.danger,
                   size: ButtonSize.full,
@@ -616,7 +618,7 @@ class _ProductScreenState extends State<ProductScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Lista actual',
+                  AppLocalizations.of(context)!.currentList,
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
@@ -635,7 +637,7 @@ class _ProductScreenState extends State<ProductScreen> {
           IconButton(
             icon: Icon(Icons.edit, color: currentListType.color),
             onPressed: _isLoading('changingList') ? null : _changeProductList,
-            tooltip: 'Cambiar lista',
+            tooltip: AppLocalizations.of(context)!.changeListTooltip,
           ),
         ],
       ),
@@ -664,7 +666,7 @@ class _ProductScreenState extends State<ProductScreen> {
           if (_currentProduct.addedAt != null) ...[
             _InfoRow(
               icon: Icons.calendar_today,
-              label: 'Agregado',
+              label: AppLocalizations.of(context)!.addedLabel,
               value: _formatDate(_currentProduct.addedAt!),
             ),
             const SizedBox(height: 12),
@@ -672,7 +674,7 @@ class _ProductScreenState extends State<ProductScreen> {
           if (_currentProduct.expirationDate != null) ...[
             _InfoRow(
               icon: Icons.warning_amber,
-              label: 'Caducidad',
+              label: AppLocalizations.of(context)!.expirationLabel,
               value: _formatDate(_currentProduct.expirationDate!),
             ),
             const SizedBox(height: 12),
@@ -680,7 +682,7 @@ class _ProductScreenState extends State<ProductScreen> {
           if (isReallyOpened && _currentProduct.openedDate != null) ...[
             _InfoRow(
               icon: Icons.open_in_new,
-              label: 'Abierto el',
+              label: AppLocalizations.of(context)!.openedOnLabel,
               value: _formatDate(_currentProduct.openedDate!),
             ),
             const SizedBox(height: 12),
@@ -689,7 +691,7 @@ class _ProductScreenState extends State<ProductScreen> {
               _currentProduct.periodAfterOpening?.isNotEmpty == true) ...[
             _InfoRow(
               icon: Icons.timer,
-              label: 'Duración después de abrir',
+              label: AppLocalizations.of(context)!.periodAfterOpening,
               value: _currentProduct.periodAfterOpening!,
             ),
             const SizedBox(height: 12),
@@ -699,7 +701,7 @@ class _ProductScreenState extends State<ProductScreen> {
           if (_currentProduct.notes?.isNotEmpty == true) ...[
             const Divider(height: 24),
             Text(
-              'Notas',
+              AppLocalizations.of(context)!.notes,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -737,7 +739,7 @@ class _ProductScreenState extends State<ProductScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '⚠️ Sin información de caducidad',
+                  AppLocalizations.of(context)!.noExpirationInfoWarningTitle,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
@@ -746,7 +748,7 @@ class _ProductScreenState extends State<ProductScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Edita el producto para añadir su duración después de abierto (ej: "6M") o una fecha de caducidad.',
+                  AppLocalizations.of(context)!.noExpirationInfoWarningBody,
                   style: TextStyle(
                     fontSize: 12,
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
@@ -768,7 +770,7 @@ class _ProductScreenState extends State<ProductScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Categorías',
+          AppLocalizations.of(context)!.categories,
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -808,7 +810,7 @@ class _ProductScreenState extends State<ProductScreen> {
       children: [
         if (showAddButton) ...[
           CustomButton(
-            text: 'Agregar a mis productos',
+            text: AppLocalizations.of(context)!.addToMyProducts,
             onPressed: _isLoading('adding') ? () {} : _addToMyProducts,
             type: ButtonType.primary,
             size: ButtonSize.full,
@@ -820,7 +822,7 @@ class _ProductScreenState extends State<ProductScreen> {
         ],
         if (isProductSaved && !isReallyOpened) ...[
           CustomButton(
-            text: 'Abrir producto',
+            text: AppLocalizations.of(context)!.openProduct,
             onPressed: _isLoading('opening') ? () {} : _markAsOpened,
             type: ButtonType.primary,
             size: ButtonSize.full,
@@ -832,7 +834,7 @@ class _ProductScreenState extends State<ProductScreen> {
         ],
         if (isProductSaved && isReallyOpened) ...[
           CustomButton(
-            text: 'Cerrar producto',
+            text: AppLocalizations.of(context)!.closeProduct,
             onPressed: _isLoading('closing') ? () {} : _markAsClosed,
             type: ButtonType.secondary,
             size: ButtonSize.full,
@@ -844,7 +846,7 @@ class _ProductScreenState extends State<ProductScreen> {
         ],
         if (canCalculateExpiration) ...[
           CustomButton(
-            text: 'Calcular caducidad',
+            text: AppLocalizations.of(context)!.calculateExpiration,
             onPressed: _isLoading('calculating') ? () {} : _calculateExpiration,
             type: ButtonType.secondary,
             size: ButtonSize.full,
@@ -856,7 +858,7 @@ class _ProductScreenState extends State<ProductScreen> {
         ],
         if (isProductSaved) ...[
           CustomButton(
-            text: 'Producto acabado',
+            text: AppLocalizations.of(context)!.finishedProduct,
             onPressed: _isLoading('finishing') ? () {} : _markAsFinished,
             type: ButtonType.secondary,
             size: ButtonSize.full,

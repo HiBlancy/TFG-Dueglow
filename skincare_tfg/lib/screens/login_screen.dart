@@ -4,6 +4,7 @@ import '../services/auth_service.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/bottom_app_bar.dart';
+import '../l10n/app_localizations.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -67,6 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _showErrorDialog([String? customMessage]) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     showDialog(
       context: context,
@@ -78,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Icon(Icons.error_outline, color: theme.colorScheme.error, size: 28),
             const SizedBox(width: 12),
             Text(
-              'Error',
+              l10n.errorTitle,
               style: theme.textTheme.titleLarge?.copyWith(
                 color: theme.colorScheme.onSurface,
               ),
@@ -86,7 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ],
         ),
         content: Text(
-          customMessage ?? 'Usuario o contraseña incorrectos',
+          customMessage ?? l10n.invalidUserOrPassword,
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
           ),
@@ -95,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Aceptar',
+              l10n.accept,
               style: TextStyle(color: theme.colorScheme.primary),
             ),
           ),
@@ -107,6 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final isDark = theme.brightness == Brightness.dark;
 
     return PopScope(
@@ -122,13 +125,13 @@ class _LoginScreenState extends State<LoginScreen> {
               borderRadius: BorderRadius.circular(20),
             ),
             title: Text(
-              'Salir de la app',
+              l10n.exitAppTitle,
               style: theme.textTheme.titleLarge?.copyWith(
                 color: theme.colorScheme.onSurface,
               ),
             ),
             content: Text(
-              '¿Quieres salir de la aplicación?',
+              l10n.exitAppQuestion,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               ),
@@ -137,7 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
                 child: Text(
-                  'Cancelar',
+                  l10n.cancel,
                   style: TextStyle(
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
@@ -146,7 +149,7 @@ class _LoginScreenState extends State<LoginScreen> {
               TextButton(
                 onPressed: () => SystemNavigator.pop(),
                 child: Text(
-                  'Salir',
+                  l10n.exit,
                   style: TextStyle(color: theme.colorScheme.error),
                 ),
               ),
@@ -243,14 +246,14 @@ class _LoginScreenState extends State<LoginScreen> {
       // Campo de email
       CustomTextField(
         controller: _emailController,
-        label: 'Correo electrónico',
-        hint: 'usuario@ejemplo.com',
+        label: AppLocalizations.of(context)!.email,
+        hint: AppLocalizations.of(context)!.userEmailExample,
         prefixIcon: Icons.email_outlined,
         keyboardType: TextInputType.emailAddress,
         validator: (value) {
-          if (value?.isEmpty ?? true) return 'Ingrese su correo';
+          if (value?.isEmpty ?? true) return AppLocalizations.of(context)!.enterEmailAddress;
           if (!value!.contains('@') || !value.contains('.')) {
-            return 'Correo inválido';
+            return AppLocalizations.of(context)!.invalidAddress;
           }
           return null;
         },
@@ -260,7 +263,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // Campo de contraseña
       CustomTextField(
         controller: _passwordController,
-        label: 'Contraseña',
+        label: AppLocalizations.of(context)!.password,
         prefixIcon: Icons.lock_outline,
         obscureText: !_isPasswordVisible,
         showVisibilityToggle: true,
@@ -269,8 +272,8 @@ class _LoginScreenState extends State<LoginScreen> {
         },
         textInputAction: TextInputAction.done,
         validator: (value) {
-          if (value?.isEmpty ?? true) return 'Ingrese su contraseña';
-          if (value!.length < 6) return 'Mínimo 6 caracteres';
+          if (value?.isEmpty ?? true) return AppLocalizations.of(context)!.enterPass;
+          if (value!.length < 6) return AppLocalizations.of(context)!.pass6Char;
           return null;
         },
       ),
@@ -284,7 +287,7 @@ class _LoginScreenState extends State<LoginScreen> {
             // TODO: Implementar recuperación de contraseña
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: const Text('Función próximamente disponible'),
+                content: Text(AppLocalizations.of(context)!.comingSoon),
                 backgroundColor: theme.colorScheme.primary.withValues(
                   alpha: 0.8,
                 ),
@@ -293,7 +296,7 @@ class _LoginScreenState extends State<LoginScreen> {
             );
           },
           child: Text(
-            '¿Olvidaste tu contraseña?',
+            AppLocalizations.of(context)!.forgotPassword,
             style: theme.textTheme.labelLarge?.copyWith(
               color: theme.colorScheme.primary,
               decoration: TextDecoration.underline,
@@ -306,7 +309,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildLoginButton(ThemeData theme) {
     return context.primaryButton(
-      'INICIAR SESIÓN',
+      AppLocalizations.of(context)!.loginButtonUpper,
       _login,
       isLoading: _isLoading,
       size: ButtonSize.full,
@@ -320,7 +323,7 @@ class _LoginScreenState extends State<LoginScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          '¿No tienes cuenta? ',
+          '${AppLocalizations.of(context)!.dontHaveAccount} ',
           style: theme.textTheme.bodyLarge?.copyWith(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
           ),
@@ -328,7 +331,7 @@ class _LoginScreenState extends State<LoginScreen> {
         GestureDetector(
           onTap: () => Navigator.pushNamed(context, '/register'),
           child: Text(
-            'Crear una',
+            AppLocalizations.of(context)!.createOne,
             style: theme.textTheme.bodyLarge?.copyWith(
               color: theme.colorScheme.primary,
               fontWeight: FontWeight.bold,
@@ -354,7 +357,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
-                'O continuar con',
+                AppLocalizations.of(context)!.orContinueWith,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                 ),

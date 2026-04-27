@@ -38,6 +38,12 @@ class LocaleProvider extends ChangeNotifier {
     await _saveLocale(_locale);
     notifyListeners();
   }
+
+  void setRussian() async {
+    _locale = const Locale('ru');
+    await _saveLocale(_locale);
+    notifyListeners();
+  }
   
   void setLocale(String languageCode) async {
     _locale = Locale(languageCode);

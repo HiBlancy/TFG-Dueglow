@@ -8,6 +8,7 @@ import '../services/image_service.dart';
 import '../widgets/main_toolbar.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_text_field.dart';
+import '../l10n/app_localizations.dart';
 
 class AddProductScreen extends StatefulWidget {
   const AddProductScreen({super.key});
@@ -71,13 +72,13 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Text(
-                    'Añadir imagen del producto',
+                    AppLocalizations.of(context)!.addProductImageTitle,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ),
                 ListTile(
                   leading: const Icon(Icons.photo_camera),
-                  title: const Text('Tomar foto'),
+                  title: Text(AppLocalizations.of(context)!.takePhoto),
                   onTap: () {
                     Navigator.pop(context);
                     _pickImageFromCamera();
@@ -85,7 +86,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 ),
                 ListTile(
                   leading: const Icon(Icons.photo_library),
-                  title: const Text('Seleccionar de galería'),
+                  title: Text(AppLocalizations.of(context)!.chooseFromGallery),
                   onTap: () {
                     Navigator.pop(context);
                     _pickImageFromGallery();
@@ -94,11 +95,11 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 if (_selectedImageFile != null)
                   ListTile(
                     leading: const Icon(Icons.delete_outline, color: Colors.red),
-                    title: const Text('Eliminar imagen', style: TextStyle(color: Colors.red)),
+                    title: Text(AppLocalizations.of(context)!.deleteImage, style: const TextStyle(color: Colors.red)),
                     onTap: () {
                       Navigator.pop(context);
                       setState(() => _selectedImageFile = null);
-                      _showSnackBar('Imagen eliminada');
+                      _showSnackBar(AppLocalizations.of(context)!.imageDeleted);
                     },
                   ),
                 const SizedBox(height: 8),
@@ -118,9 +119,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
       setState(() {
         _selectedImageFile = imageFile;
       });
-      _showSnackBar('Imagen capturada correctamente');
+      _showSnackBar(AppLocalizations.of(context)!.imageCapturedSuccess);
     } else if (mounted) {
-      _showSnackBar('No se pudo capturar la imagen', isError: true);
+      _showSnackBar(AppLocalizations.of(context)!.imageCaptureError, isError: true);
     }
   }
 
@@ -132,9 +133,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
       setState(() {
         _selectedImageFile = imageFile;
       });
-      _showSnackBar('Imagen seleccionada correctamente');
+      _showSnackBar(AppLocalizations.of(context)!.imageSelectedSuccess);
     } else if (mounted) {
-      _showSnackBar('No se pudo seleccionar la imagen', isError: true);
+      _showSnackBar(AppLocalizations.of(context)!.imageSelectError, isError: true);
     }
   }
 
@@ -207,25 +208,25 @@ class _AddProductScreenState extends State<AddProductScreen> {
           if (updatedProduct != null) {
             addedProduct = updatedProduct;
           } else {
-            _showSnackBar('Producto guardado pero la imagen no se pudo subir', isError: true);
+            _showSnackBar(AppLocalizations.of(context)!.productSavedImageUploadFailed, isError: true);
           }
         }
 
         if (mounted) {
           setState(() => _isLoading = false);
-          _showSnackBar('✓ Producto añadido correctamente');
+          _showSnackBar(AppLocalizations.of(context)!.productAddedSuccess);
           _clearForm();
         }
       } else {
         if (mounted) {
           setState(() => _isLoading = false);
-          _showSnackBar('Error al guardar el producto', isError: true);
+          _showSnackBar(AppLocalizations.of(context)!.saveProductError, isError: true);
         }
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        _showSnackBar('Error al guardar el producto', isError: true);
+        _showSnackBar(AppLocalizations.of(context)!.saveProductError, isError: true);
       }
     }
   }
@@ -264,7 +265,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     final cardBackgroundColor = theme.colorScheme.primaryContainer.withValues(alpha: 0.15);
 
     return CustomAppBar(
-      title: 'Añadir Producto',
+      title: AppLocalizations.of(context)!.addProductTitle,
       showDrawer: true,
       showBackButton: false,
       child: SingleChildScrollView(
@@ -277,8 +278,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 Expanded(
                   child: _buildQuickActionCard(
                     icon: Icons.qr_code_scanner,
-                    title: 'Escanear',
-                    subtitle: 'Código de barras',
+                    title: AppLocalizations.of(context)!.scanAction,
+                    subtitle: AppLocalizations.of(context)!.barcodeSubtitle,
                     color: cardBackgroundColor,
                     onTap: () => Navigator.pushNamed(context, AppConstants.routeScan),
                   ),
@@ -287,8 +288,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 Expanded(
                   child: _buildQuickActionCard(
                     icon: Icons.search,
-                    title: 'Buscar',
-                    subtitle: 'Producto online',
+                    title: AppLocalizations.of(context)!.searchAction,
+                    subtitle: AppLocalizations.of(context)!.onlineProductSubtitle,
                     color: cardBackgroundColor,
                     onTap: () => Navigator.pushNamed(context, '/search'),
                   ),
@@ -304,7 +305,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
-                    'O AÑADE MANUALMENTE',
+                    AppLocalizations.of(context)!.orAddManuallyUpper,
                     style: TextStyle(
                       fontSize: 10,
                       letterSpacing: 1.2,
@@ -329,18 +330,18 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   
                   CustomTextField(
                     controller: _nameController,
-                    label: 'Nombre del producto *',
+                    label: AppLocalizations.of(context)!.productNameRequiredLabel,
                     prefixIcon: Icons.spa_outlined,
-                    hint: 'Ej: Crema Hidratante',
-                    validator: (v) => v?.trim().isEmpty == true ? 'Obligatorio' : null,
+                    hint: AppLocalizations.of(context)!.productNameHint,
+                    validator: (v) => v?.trim().isEmpty == true ? AppLocalizations.of(context)!.requiredField : null,
                   ),
                   const SizedBox(height: 20),
                   
                   CustomTextField(
                     controller: _brandController,
-                    label: 'Marca',
+                    label: AppLocalizations.of(context)!.brand,
                     prefixIcon: Icons.branding_watermark_outlined,
-                    hint: 'Ej: Nivea',
+                    hint: AppLocalizations.of(context)!.brandHint,
                   ),
                   const SizedBox(height: 20),
                   
@@ -348,8 +349,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   _buildDateSelector(
                     icon: Icons.calendar_today_outlined,
                     text: _expirationDate != null
-                        ? 'Caduca: ${_formatDate(_expirationDate!)}'
-                        : 'Fecha de caducidad',
+                        ? AppLocalizations.of(context)!.expiresLabel(_formatDate(_expirationDate!))
+                        : AppLocalizations.of(context)!.expirationDate,
                     isActive: _expirationDate != null,
                     onTap: () => _selectDate(
                       initialDate: _expirationDate,
@@ -371,7 +372,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   
                   // Botón guardar
                   CustomButton(
-                    text: 'Guardar en mi tocador',
+                    text: AppLocalizations.of(context)!.saveInMyVanity,
                     onPressed: _saveProductManually,
                     isLoading: _isLoading || _isUploadingImage,
                     type: ButtonType.primary,
@@ -457,7 +458,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
               Icon(Icons.image_outlined, size: 18, color: theme.colorScheme.primary),
               const SizedBox(width: 8),
               Text(
-                'Imagen del producto',
+                AppLocalizations.of(context)!.productImage,
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -500,7 +501,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Toca para añadir imagen',
+                            AppLocalizations.of(context)!.tapToAddImage,
                             style: TextStyle(
                               fontSize: 12,
                               color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
@@ -527,7 +528,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
             Icon(Icons.timer_outlined, size: 18, color: theme.colorScheme.primary),
             const SizedBox(width: 8),
             Text(
-              'Duración tras abrir (PAO)',
+              AppLocalizations.of(context)!.paoDuration,
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -583,7 +584,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Periodo después de la apertura',
+                          AppLocalizations.of(context)!.periodAfterOpening,
                           style: TextStyle(
                             fontSize: 11,
                             color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
@@ -591,7 +592,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Busca el icono del tarro abierto en el envase',
+                          AppLocalizations.of(context)!.findOpenJarIcon,
                           style: TextStyle(
                             fontSize: 10,
                             color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
@@ -655,7 +656,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
               TextField(
                 controller: _paoController,
                 decoration: InputDecoration(
-                  hintText: 'O escribe uno personalizado (ej: 9M)',
+                  hintText: AppLocalizations.of(context)!.customPaoHint,
                   hintStyle: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
                   isDense: true,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -727,9 +728,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
             Expanded(
               child: CustomTextField(
                 controller: _newCategoryController,
-                label: 'Categoría',
+                label: AppLocalizations.of(context)!.category,
                 prefixIcon: Icons.category_outlined,
-                hint: 'Ej: Facial',
+                hint: AppLocalizations.of(context)!.categoryHint,
               ),
             ),
             const SizedBox(width: 8),

@@ -50,6 +50,7 @@ class MyApp extends StatelessWidget {
           supportedLocales: const [
             Locale('es', ''), // Español
             Locale('en', ''), // Inglés
+            Locale('ru', ''), // Ruso
           ],
           localizationsDelegates: const [
             // Aquí irán tus delegates de traducción

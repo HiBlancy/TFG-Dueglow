@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../screens/home_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/routines_screen.dart';
+import '../l10n/app_localizations.dart';
 
 class BottomNavBar extends StatefulWidget {
   final int initialIndex;
@@ -49,36 +50,37 @@ class _BottomNavBarState extends State<BottomNavBar> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     
     // Generamos los colores dinámicos basados en la opacidad del texto principal
     final unselectedColor = theme.colorScheme.onSurface.withValues(alpha: 0.5);
     final borderColor = theme.colorScheme.onSurface.withValues(alpha: 0.1);
 
-    final defaultItems = const [
+    final defaultItems = [
       BottomNavigationBarItem(
         icon: Icon(Icons.home_outlined),
         activeIcon: Icon(Icons.home),
-        label: 'Inicio',
+        label: l10n.home,
       ),
       BottomNavigationBarItem(
         icon: Icon(Icons.shopping_bag_outlined),
         activeIcon: Icon(Icons.shopping_bag),
-        label: 'Productos',
+        label: l10n.products,
       ),
       BottomNavigationBarItem(
         icon: Icon(Icons.add),
         activeIcon: Icon(Icons.add),
-        label: 'Nuevo',
+        label: l10n.newTab,
       ),
       BottomNavigationBarItem(
         icon: Icon(Icons.camera_alt_outlined),
         activeIcon: Icon(Icons.camera_alt),
-        label: 'Rutinas',
+        label: l10n.routines,
       ),
       BottomNavigationBarItem(
         icon: Icon(Icons.person_outline),
         activeIcon: Icon(Icons.person),
-        label: 'Perfil',
+        label: l10n.profile,
       ),
     ];
 
