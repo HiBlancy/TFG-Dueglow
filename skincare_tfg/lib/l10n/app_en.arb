@@ -1,39 +1,153 @@
 {
-    "@@locale": "en",
-    "appName": "DueGlow",
-    "helloUser": "Hello {name}!",
-    
-
-    "myProducts": "My products",
-        "seeAll": "VIEW ALL",
-
-    "routines": "Routines",
-
-    "categories": "Categories",
-
-    "expiringSoon": "Expiring Soon",
-        "days": "days",
-        "allFine": "All is fine!",
-        "noProdExpiring": "No products are about to expire",
-
-    "searchProducts": "Browse products",
-        "searchNameBrand": "Search by name or brand...",
-        "exmapleSearch": "Ex: \"Yves Rocher\", \"moisturising\"",
-
-    "camera": "Camera",
-        "aimBarcode": "Aim at the barcode",
-
-    "settings": "Settings",
-        "general": "General",
-            "notifications": "Notifications",
-            "notifText": "Receive alerts and updates",
-        "appearance": "Appearance",
-            "lightMode": "Light Mode",
-            "darkMode": "Dark Mode",
-        "language": "Language",
-        "information": "Information",
-
-    "about": "About",
-
-    "logout": "Log out"
+  "@@locale": "en",
+  "appName": "DueGlow",
+  "helloUser": "Hello {name}!",
+  "@helloUser": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "login": "Login",
+  "createAcount": "Create account",
+  "email": "Email",
+  "userEmailExample": "user@example.com",
+  "enterEmailAddress": "Enter your email",
+  "invalidAddress": "Invalid email",
+  "password": "Password",
+  "enterPass": "Enter your password",
+  "pass6Char": "At least 6 characters",
+  "myProducts": "My products",
+  "seeAll": "VIEW ALL",
+  "routines": "Routines",
+  "categories": "Categories",
+  "expiringSoon": "Expiring Soon",
+  "days": "days",
+  "allFine": "All is fine!",
+  "noProdExpiring": "No products are about to expire",
+  "searchProducts": "Search products",
+  "searchNameBrand": "Search by name or brand...",
+  "exmapleSearch": "Ex: \"Yves Rocher\", \"moisturising\"",
+  "camera": "Camera",
+  "aimBarcode": "Aim at the barcode",
+  "settings": "Settings",
+  "general": "General",
+  "notifications": "Notifications",
+  "notifText": "Receive alerts and updates",
+  "appearance": "Appearance",
+  "lightMode": "Light Mode",
+  "darkMode": "Dark Mode",
+  "language": "Language",
+  "information": "Information",
+  "about": "About",
+  "logout": "Log out",
+  "retry": "Retry",
+  "clear": "Clear",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "english": "English",
+  "spanish": "Spanish",
+  "versionLabel": "Version {version}",
+  "@versionLabel": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsEnabled": "Notifications enabled",
+  "notificationsDisabled": "Notifications disabled",
+  "allProducts": "All products",
+  "noProductsRegistered": "You have no saved products",
+  "noProductsInHave": "You have no products in \"Have\"",
+  "noProductsInWishlist": "You have no products in \"Wishlist\"",
+  "noFinishedProducts": "You have no finished products",
+  "addFirstProductsHint": "Add your first products by scanning barcodes or searching in the database",
+  "haveProductsHint": "Products marked as \"Have\" will appear here",
+  "wishlistProductsHint": "Add products to your wishlist from the detail screen",
+  "usedProductsHint": "Products you finished this month appear in this list",
+  "usedProductsInfo": "These are the products you finished this month. When the month ends, these products will be automatically removed and the data will be stored for the PAN project.",
+  "productsCount": "{count} product{pluralSuffix}",
+  "@productsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "pluralSuffix": {
+        "type": "String"
+      }
+    }
+  },
+  "searchLoading": "Searching...",
+  "searchErrorTitle": "Search error",
+  "searchConnectionError": "Search failed. Check your connection.",
+  "searchNoResults": "No products found",
+  "searchTryAnotherTerm": "Try another search term",
+  "searchBeautyProducts": "Search beauty products",
+  "searchExamplesExtended": "Ex: \"L'Oréal\", \"moisturizer\", \"shampoo\"",
+  "noBrand": "No brand",
+  "scanProductNotFound": "Product not found",
+  "scanNoBarcodeInfo": "No information was found for barcode:\n{barcode}\n\nDo you want to create a new product manually?",
+  "@scanNoBarcodeInfo": {
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      }
+    }
+  },
+  "createProduct": "Create product",
+  "newProductDefaultName": "New product",
+  "deleteRoutineTitle": "Delete routine",
+  "deleteRoutineQuestion": "Delete \"{name}\"?",
+  "@deleteRoutineQuestion": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "routineDeleted": "Routine deleted",
+  "routinesLoadError": "Failed to load routines",
+  "routineDeleteError": "Failed to delete routine",
+  "morning": "Morning",
+  "night": "Night",
+  "newRoutine": "New routine",
+  "noMorningRoutines": "No morning routines",
+  "noNightRoutines": "No night routines",
+  "createFirstRoutineHint": "Create your first {period} routine\nand organize your skincare products",
+  "@createFirstRoutineHint": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "createRoutine": "Create routine",
+  "routineCreatedSuccess": "✓ Routine created successfully",
+  "routineCreateError": "Failed to create routine",
+  "routineNameRequiredLabel": "Routine name *",
+  "routineNameHint": "Ex: Morning routine",
+  "requiredField": "Required",
+  "routineType": "Routine type",
+  "weekDays": "Week days",
+  "none": "None",
+  "all": "All",
+  "addProduct": "Add product",
+  "noMoreProductsToAdd": "No more products\nto add",
+  "routineNameLabel": "Name",
+  "morningRoutineLabel": "Morning routine",
+  "nightRoutineLabel": "Night routine",
+  "products": "Products",
+  "noProductAdded": "No product added",
+  "longPressReorder": "Long press to reorder",
+  "noProductsYet": "No products yet",
+  "addProductsToBuildRoutine": "Add products from your stash\nto build your routine",
+  "routineUpdated": "Routine updated",
+  "updateError": "Update failed",
+  "productRemovedFromRoutine": "Product removed from routine",
+  "productRemoveError": "Failed to remove product",
+  "reorderProductsError": "Failed to reorder products",
+  "productAddedToRoutine": "Product added to routine",
+  "productAddError": "Failed to add product"
 }

@@ -307,6 +307,426 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Cerrar Sesión'**
   String get logout;
+
+  /// No description provided for @retry.
+  ///
+  /// In es, this message translates to:
+  /// **'Reintentar'**
+  String get retry;
+
+  /// No description provided for @clear.
+  ///
+  /// In es, this message translates to:
+  /// **'Limpiar'**
+  String get clear;
+
+  /// No description provided for @cancel.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar'**
+  String get cancel;
+
+  /// No description provided for @delete.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar'**
+  String get delete;
+
+  /// No description provided for @english.
+  ///
+  /// In es, this message translates to:
+  /// **'Inglés'**
+  String get english;
+
+  /// No description provided for @spanish.
+  ///
+  /// In es, this message translates to:
+  /// **'Español'**
+  String get spanish;
+
+  /// No description provided for @versionLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Versión {version}'**
+  String versionLabel(String version);
+
+  /// No description provided for @notificationsEnabled.
+  ///
+  /// In es, this message translates to:
+  /// **'Notificaciones activadas'**
+  String get notificationsEnabled;
+
+  /// No description provided for @notificationsDisabled.
+  ///
+  /// In es, this message translates to:
+  /// **'Notificaciones desactivadas'**
+  String get notificationsDisabled;
+
+  /// No description provided for @allProducts.
+  ///
+  /// In es, this message translates to:
+  /// **'Todos los productos'**
+  String get allProducts;
+
+  /// No description provided for @noProductsRegistered.
+  ///
+  /// In es, this message translates to:
+  /// **'No tienes productos registrados'**
+  String get noProductsRegistered;
+
+  /// No description provided for @noProductsInHave.
+  ///
+  /// In es, this message translates to:
+  /// **'No tienes productos en \"Tengo\"'**
+  String get noProductsInHave;
+
+  /// No description provided for @noProductsInWishlist.
+  ///
+  /// In es, this message translates to:
+  /// **'No tienes productos en \"Deseados\"'**
+  String get noProductsInWishlist;
+
+  /// No description provided for @noFinishedProducts.
+  ///
+  /// In es, this message translates to:
+  /// **'No has registrado productos terminados'**
+  String get noFinishedProducts;
+
+  /// No description provided for @addFirstProductsHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Agrega tus primeros productos escaneando códigos de barras o buscando en la base de datos'**
+  String get addFirstProductsHint;
+
+  /// No description provided for @haveProductsHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Los productos que marques como \"Tengo\" aparecerán aquí'**
+  String get haveProductsHint;
+
+  /// No description provided for @wishlistProductsHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Agrega productos a tu wishlist desde la pantalla de detalles'**
+  String get wishlistProductsHint;
+
+  /// No description provided for @usedProductsHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Los productos que has acabado este mes aparecen en esta lista'**
+  String get usedProductsHint;
+
+  /// No description provided for @usedProductsInfo.
+  ///
+  /// In es, this message translates to:
+  /// **'Estos son los productos que has terminado este mes. Cuando termine el mes, estos productos se eliminarán automáticamente y se almacenarán los datos para el proyecto PAN.'**
+  String get usedProductsInfo;
+
+  /// No description provided for @productsCount.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} producto{pluralSuffix}'**
+  String productsCount(int count, String pluralSuffix);
+
+  /// No description provided for @searchLoading.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscando...'**
+  String get searchLoading;
+
+  /// No description provided for @searchErrorTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Error al buscar'**
+  String get searchErrorTitle;
+
+  /// No description provided for @searchConnectionError.
+  ///
+  /// In es, this message translates to:
+  /// **'Error al buscar. Revisa tu conexión.'**
+  String get searchConnectionError;
+
+  /// No description provided for @searchNoResults.
+  ///
+  /// In es, this message translates to:
+  /// **'No se encontraron productos'**
+  String get searchNoResults;
+
+  /// No description provided for @searchTryAnotherTerm.
+  ///
+  /// In es, this message translates to:
+  /// **'Prueba con otro término de búsqueda'**
+  String get searchTryAnotherTerm;
+
+  /// No description provided for @searchBeautyProducts.
+  ///
+  /// In es, this message translates to:
+  /// **'Busca productos de belleza'**
+  String get searchBeautyProducts;
+
+  /// No description provided for @searchExamplesExtended.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: \"L\'Oréal\", \"hidratante\", \"champú\"'**
+  String get searchExamplesExtended;
+
+  /// No description provided for @noBrand.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin marca'**
+  String get noBrand;
+
+  /// No description provided for @scanProductNotFound.
+  ///
+  /// In es, this message translates to:
+  /// **'Producto no encontrado'**
+  String get scanProductNotFound;
+
+  /// No description provided for @scanNoBarcodeInfo.
+  ///
+  /// In es, this message translates to:
+  /// **'No se encontró información para el código de barras:\n{barcode}\n\n¿Quieres crear un nuevo producto manualmente?'**
+  String scanNoBarcodeInfo(String barcode);
+
+  /// No description provided for @createProduct.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear producto'**
+  String get createProduct;
+
+  /// No description provided for @newProductDefaultName.
+  ///
+  /// In es, this message translates to:
+  /// **'Nuevo producto'**
+  String get newProductDefaultName;
+
+  /// No description provided for @deleteRoutineTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar rutina'**
+  String get deleteRoutineTitle;
+
+  /// No description provided for @deleteRoutineQuestion.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Eliminar \"{name}\"?'**
+  String deleteRoutineQuestion(String name);
+
+  /// No description provided for @routineDeleted.
+  ///
+  /// In es, this message translates to:
+  /// **'Rutina eliminada'**
+  String get routineDeleted;
+
+  /// No description provided for @routinesLoadError.
+  ///
+  /// In es, this message translates to:
+  /// **'Error al cargar rutinas'**
+  String get routinesLoadError;
+
+  /// No description provided for @routineDeleteError.
+  ///
+  /// In es, this message translates to:
+  /// **'Error al eliminar rutina'**
+  String get routineDeleteError;
+
+  /// No description provided for @morning.
+  ///
+  /// In es, this message translates to:
+  /// **'Mañana'**
+  String get morning;
+
+  /// No description provided for @night.
+  ///
+  /// In es, this message translates to:
+  /// **'Noche'**
+  String get night;
+
+  /// No description provided for @newRoutine.
+  ///
+  /// In es, this message translates to:
+  /// **'Nueva rutina'**
+  String get newRoutine;
+
+  /// No description provided for @noMorningRoutines.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin rutinas de mañana'**
+  String get noMorningRoutines;
+
+  /// No description provided for @noNightRoutines.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin rutinas de noche'**
+  String get noNightRoutines;
+
+  /// No description provided for @createFirstRoutineHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Crea tu primera rutina de {period}\ny organiza tus productos de skincare'**
+  String createFirstRoutineHint(String period);
+
+  /// No description provided for @createRoutine.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear rutina'**
+  String get createRoutine;
+
+  /// No description provided for @routineCreatedSuccess.
+  ///
+  /// In es, this message translates to:
+  /// **'✓ Rutina creada correctamente'**
+  String get routineCreatedSuccess;
+
+  /// No description provided for @routineCreateError.
+  ///
+  /// In es, this message translates to:
+  /// **'Error al crear la rutina'**
+  String get routineCreateError;
+
+  /// No description provided for @routineNameRequiredLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre de la rutina *'**
+  String get routineNameRequiredLabel;
+
+  /// No description provided for @routineNameHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: Rutina de mañana'**
+  String get routineNameHint;
+
+  /// No description provided for @requiredField.
+  ///
+  /// In es, this message translates to:
+  /// **'Obligatorio'**
+  String get requiredField;
+
+  /// No description provided for @routineType.
+  ///
+  /// In es, this message translates to:
+  /// **'Tipo de rutina'**
+  String get routineType;
+
+  /// No description provided for @weekDays.
+  ///
+  /// In es, this message translates to:
+  /// **'Días de la semana'**
+  String get weekDays;
+
+  /// No description provided for @none.
+  ///
+  /// In es, this message translates to:
+  /// **'Ninguno'**
+  String get none;
+
+  /// No description provided for @all.
+  ///
+  /// In es, this message translates to:
+  /// **'Todos'**
+  String get all;
+
+  /// No description provided for @addProduct.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir producto'**
+  String get addProduct;
+
+  /// No description provided for @noMoreProductsToAdd.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay más productos\npara añadir'**
+  String get noMoreProductsToAdd;
+
+  /// No description provided for @routineNameLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre'**
+  String get routineNameLabel;
+
+  /// No description provided for @morningRoutineLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Rutina de mañana'**
+  String get morningRoutineLabel;
+
+  /// No description provided for @nightRoutineLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Rutina de noche'**
+  String get nightRoutineLabel;
+
+  /// No description provided for @products.
+  ///
+  /// In es, this message translates to:
+  /// **'Productos'**
+  String get products;
+
+  /// No description provided for @noProductAdded.
+  ///
+  /// In es, this message translates to:
+  /// **'Ningún producto añadido'**
+  String get noProductAdded;
+
+  /// No description provided for @longPressReorder.
+  ///
+  /// In es, this message translates to:
+  /// **'Mantén pulsado para reordenar'**
+  String get longPressReorder;
+
+  /// No description provided for @noProductsYet.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin productos aún'**
+  String get noProductsYet;
+
+  /// No description provided for @addProductsToBuildRoutine.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade productos de tu armario\npara construir tu rutina'**
+  String get addProductsToBuildRoutine;
+
+  /// No description provided for @routineUpdated.
+  ///
+  /// In es, this message translates to:
+  /// **'Rutina actualizada'**
+  String get routineUpdated;
+
+  /// No description provided for @updateError.
+  ///
+  /// In es, this message translates to:
+  /// **'Error al actualizar'**
+  String get updateError;
+
+  /// No description provided for @productRemovedFromRoutine.
+  ///
+  /// In es, this message translates to:
+  /// **'Producto eliminado de la rutina'**
+  String get productRemovedFromRoutine;
+
+  /// No description provided for @productRemoveError.
+  ///
+  /// In es, this message translates to:
+  /// **'Error al eliminar producto'**
+  String get productRemoveError;
+
+  /// No description provided for @reorderProductsError.
+  ///
+  /// In es, this message translates to:
+  /// **'Error al reordenar productos'**
+  String get reorderProductsError;
+
+  /// No description provided for @productAddedToRoutine.
+  ///
+  /// In es, this message translates to:
+  /// **'Producto añadido a la rutina'**
+  String get productAddedToRoutine;
+
+  /// No description provided for @productAddError.
+  ///
+  /// In es, this message translates to:
+  /// **'Error al añadir producto'**
+  String get productAddError;
 }
 
 class _AppLocalizationsDelegate

@@ -6,6 +6,7 @@ import '../widgets/main_toolbar.dart';
 import '../widgets/custom_button.dart';
 import 'add_routine_screen.dart';
 import 'routine_detail.screen.dart';
+import '../l10n/app_localizations.dart';
 
 class RoutinesScreen extends StatefulWidget {
   const RoutinesScreen({super.key});
@@ -41,7 +42,7 @@ class _RoutinesScreenState extends State<RoutinesScreen>
       final routines = await _routineService.getRoutines();
       if (mounted) setState(() => _routines = routines);
     } catch (e) {
-      if (mounted) _showSnackBar('Error al cargar rutinas', isError: true);
+      if (mounted) _showSnackBar(AppLocalizations.of(context)!.routinesLoadError, isError: true);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -51,19 +52,19 @@ class _RoutinesScreenState extends State<RoutinesScreen>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Eliminar rutina'),
-        content: Text('¿Eliminar "${routine.name}"?'),
+        title: Text(AppLocalizations.of(context)!.deleteRoutineTitle),
+        content: Text(AppLocalizations.of(context)!.deleteRoutineQuestion(routine.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.error,
             ),
-            child: const Text('Eliminar'),
+            child: Text(AppLocalizations.of(context)!.delete),
           ),
         ],
       ),
@@ -73,10 +74,10 @@ class _RoutinesScreenState extends State<RoutinesScreen>
 
     try {
       await _routineService.deleteRoutine(routine.id!);
-      _showSnackBar('Rutina eliminada');
+      _showSnackBar(AppLocalizations.of(context)!.routineDeleted);
       await _loadRoutines();
     } catch (e) {
-      _showSnackBar('Error al eliminar rutina', isError: true);
+      _showSnackBar(AppLocalizations.of(context)!.routineDeleteError, isError: true);
     }
   }
 
@@ -115,10 +116,11 @@ class _RoutinesScreenState extends State<RoutinesScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final isDark = theme.brightness == Brightness.dark;
 
     return CustomAppBar(
-      title: 'Rutinas',
+      title: l10n.routines,
       showDrawer: true,
       showBackButton: false,
       child: Stack(
@@ -150,20 +152,20 @@ class _RoutinesScreenState extends State<RoutinesScreen>
                     Tab(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
+                        children: [
                           Icon(Icons.wb_sunny_outlined, size: 18),
                           SizedBox(width: 6),
-                          Text('Mañana'),
+                          Text(l10n.morning),
                         ],
                       ),
                     ),
                     Tab(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
+                        children: [
                           Icon(Icons.nights_stay_outlined, size: 18),
                           SizedBox(width: 6),
-                          Text('Noche'),
+                          Text(l10n.night),
                         ],
                       ),
                     ),
@@ -194,7 +196,7 @@ class _RoutinesScreenState extends State<RoutinesScreen>
             child: FloatingActionButton.extended(
               onPressed: _navigateToAdd,
               icon: const Icon(Icons.add),
-              label: const Text('Nueva rutina'),
+              label: Text(l10n.newRoutine),
               backgroundColor: theme.colorScheme.primary,
               foregroundColor: theme.colorScheme.onPrimary,
             ),
@@ -221,6 +223,7 @@ class _RoutinesScreenState extends State<RoutinesScreen>
 
   Widget _buildEmptyState(RoutineType type, bool isDark) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final isMorning = type == RoutineType.morning;
 
     return Center(
@@ -246,14 +249,14 @@ class _RoutinesScreenState extends State<RoutinesScreen>
             ),
             const SizedBox(height: 20),
             Text(
-              isMorning ? 'Sin rutinas de mañana' : 'Sin rutinas de noche',
+              isMorning ? l10n.noMorningRoutines : l10n.noNightRoutines,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Crea tu primera rutina de ${isMorning ? 'mañana' : 'noche'}\ny organiza tus productos de skincare',
+              l10n.createFirstRoutineHint(isMorning ? l10n.morning.toLowerCase() : l10n.night.toLowerCase()),
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
@@ -261,7 +264,7 @@ class _RoutinesScreenState extends State<RoutinesScreen>
             ),
             const SizedBox(height: 28),
             CustomButton(
-              text: 'Crear rutina',
+              text: l10n.createRoutine,
               onPressed: _navigateToAdd,
               type: ButtonType.primary,
               size: ButtonSize.medium,

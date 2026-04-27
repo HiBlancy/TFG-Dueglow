@@ -6,6 +6,7 @@ import '../services/product_service.dart';
 import '../widgets/main_toolbar.dart';
 import '../widgets/product_card.dart';
 import 'product_screen.dart';
+import '../l10n/app_localizations.dart';
 
 class MyProductsScreen extends StatefulWidget {
   final ProductListType? initialListType;
@@ -122,9 +123,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Estos son los productos que has terminado este mes. '
-              'Cuando termine el mes, estos productos se eliminarán automáticamente '
-              'y se almacenarán los datos para el proyecto PAN.',
+              AppLocalizations.of(context)!.usedProductsInfo,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurface,
                 height: 1.4,
@@ -159,37 +158,47 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
   }
 
   String _getTitle() {
+    final l10n = AppLocalizations.of(context)!;
     if (_selectedListType == null) {
-      return 'Todos los productos';
-    }
-    return _selectedListType!.label;
-  }
-
-  String _getEmptyMessage() {
-    if (_selectedListType == null) {
-      return 'No tienes productos registrados';
+      return l10n.allProducts;
     }
     switch (_selectedListType!) {
       case ProductListType.have:
-        return 'No tienes productos en "Tengo"';
+        return 'Tengo';
       case ProductListType.wishlist:
-        return 'No tienes productos en "Deseados"';
+        return 'Deseados';
       case ProductListType.used:
-        return 'No has registrado productos terminados';
+        return 'Terminados';
+    }
+  }
+
+  String _getEmptyMessage() {
+    final l10n = AppLocalizations.of(context)!;
+    if (_selectedListType == null) {
+      return l10n.noProductsRegistered;
+    }
+    switch (_selectedListType!) {
+      case ProductListType.have:
+        return l10n.noProductsInHave;
+      case ProductListType.wishlist:
+        return l10n.noProductsInWishlist;
+      case ProductListType.used:
+        return l10n.noFinishedProducts;
     }
   }
 
   String _getEmptySubMessage() {
+    final l10n = AppLocalizations.of(context)!;
     if (_selectedListType == null) {
-      return 'Agrega tus primeros productos escaneando códigos de barras o buscando en la base de datos';
+      return l10n.addFirstProductsHint;
     }
     switch (_selectedListType!) {
       case ProductListType.have:
-        return 'Los productos que marques como "Tengo" aparecerán aquí';
+        return l10n.haveProductsHint;
       case ProductListType.wishlist:
-        return 'Agrega productos a tu wishlist desde la pantalla de detalles';
+        return l10n.wishlistProductsHint;
       case ProductListType.used:
-        return 'Los productos que has acabado este mes aparecen en esta lista';
+        return l10n.usedProductsHint;
     }
   }
 
@@ -198,7 +207,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
     final theme = Theme.of(context);
 
     return CustomAppBar(
-      title: 'Mis Productos',
+      title: AppLocalizations.of(context)!.myProducts,
       showDrawer: true,
       child: Column(
         children: [
@@ -224,7 +233,10 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${_filteredProducts.length} producto${_filteredProducts.length != 1 ? 's' : ''}',
+                      AppLocalizations.of(context)!.productsCount(
+                        _filteredProducts.length,
+                        _filteredProducts.length == 1 ? '' : 's',
+                      ),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurface.withValues(
                           alpha: 0.6,
@@ -237,7 +249,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
                   TextButton.icon(
                     onPressed: () => _changeListType(_selectedListType),
                     icon: const Icon(Icons.close, size: 18),
-                    label: const Text('Limpiar'),
+                    label: Text(AppLocalizations.of(context)!.clear),
                     style: TextButton.styleFrom(
                       foregroundColor: theme.colorScheme.primary,
                     ),
@@ -373,7 +385,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
             ElevatedButton.icon(
               onPressed: _loadProducts,
               icon: const Icon(Icons.refresh),
-              label: const Text('Reintentar'),
+              label: Text(AppLocalizations.of(context)!.retry),
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.colorScheme.primary,
                 foregroundColor: theme.colorScheme.onPrimary,

@@ -1,58 +1,154 @@
 {
-    "@@locale": "es",
-    "appName": "DueGlow",
-    "helloUser": "¡Hola {name}!",
-    "@helloUser": {
-        "description": "Saludo en la pantalla de inicio",
-        "placeholders": {
-            "name": {
-                "type": "String"
-            }
-        }
-    },
-
-    "login": "Iniciar Sesión",
-    "createAcount": "Crear Cuenta",
-        "email": "Correo electrónico",
-        "userEmailExample": "usuario@ejemplo.com",
-        "enterEmailAddress": "Ingrese su correo",
-        "invalidAddress": "Correo inválido",
-        "password": "Contraseña",
-        "enterPass": "Ingrese su contraseña",
-        "pass6Char": "Mínimo 6 caracteres",
-
-
-    "myProducts": "Mis productos",
-        "seeAll": "VER TODOS",
-
-    "routines": "Rutinas",
-
-    "categories": "Categorías",
-
-    "expiringSoon": "Próximos a caducar",
-        "days": "días",
-        "allFine": "¡Todo en orden!",
-        "noProdExpiring": "No hay productos próximos a caducar",
-
-    "searchProducts": "Buscar productos",
-        "searchNameBrand": "Buscar por nombre o marca...",
-        "exmapleSearch": "Ej: \"Yves Rocher\", \"hidratante\"",
-
-    "camera": "Cámara",
-        "aimBarcode": "Apunta al código de barras",
-    
-    "settings": "Configuración",
-        "general": "General",
-            "notifications": "Notificaciones",
-            "notifText": "Recibir alertas y actualizaciones",
-        "appearance": "Apariencia",
-            "lightMode": "Modo Claro",
-            "darkMode": "Modo Oscuro",
-        "language": "Idioma",
-        "information": "Información",
-
-
-    "about": "Acerca de",
-
-    "logout": "Cerrar Sesión"
+  "@@locale": "es",
+  "appName": "DueGlow",
+  "helloUser": "¡Hola {name}!",
+  "@helloUser": {
+    "description": "Saludo en la pantalla de inicio",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "login": "Iniciar Sesión",
+  "createAcount": "Crear Cuenta",
+  "email": "Correo electrónico",
+  "userEmailExample": "usuario@ejemplo.com",
+  "enterEmailAddress": "Ingrese su correo",
+  "invalidAddress": "Correo inválido",
+  "password": "Contraseña",
+  "enterPass": "Ingrese su contraseña",
+  "pass6Char": "Mínimo 6 caracteres",
+  "myProducts": "Mis productos",
+  "seeAll": "VER TODOS",
+  "routines": "Rutinas",
+  "categories": "Categorías",
+  "expiringSoon": "Próximos a caducar",
+  "days": "días",
+  "allFine": "¡Todo en orden!",
+  "noProdExpiring": "No hay productos próximos a caducar",
+  "searchProducts": "Buscar productos",
+  "searchNameBrand": "Buscar por nombre o marca...",
+  "exmapleSearch": "Ej: \"Yves Rocher\", \"hidratante\"",
+  "camera": "Cámara",
+  "aimBarcode": "Apunta al código de barras",
+  "settings": "Configuración",
+  "general": "General",
+  "notifications": "Notificaciones",
+  "notifText": "Recibir alertas y actualizaciones",
+  "appearance": "Apariencia",
+  "lightMode": "Modo Claro",
+  "darkMode": "Modo Oscuro",
+  "language": "Idioma",
+  "information": "Información",
+  "about": "Acerca de",
+  "logout": "Cerrar Sesión",
+  "retry": "Reintentar",
+  "clear": "Limpiar",
+  "cancel": "Cancelar",
+  "delete": "Eliminar",
+  "english": "Inglés",
+  "spanish": "Español",
+  "versionLabel": "Versión {version}",
+  "@versionLabel": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsEnabled": "Notificaciones activadas",
+  "notificationsDisabled": "Notificaciones desactivadas",
+  "allProducts": "Todos los productos",
+  "noProductsRegistered": "No tienes productos registrados",
+  "noProductsInHave": "No tienes productos en \"Tengo\"",
+  "noProductsInWishlist": "No tienes productos en \"Deseados\"",
+  "noFinishedProducts": "No has registrado productos terminados",
+  "addFirstProductsHint": "Agrega tus primeros productos escaneando códigos de barras o buscando en la base de datos",
+  "haveProductsHint": "Los productos que marques como \"Tengo\" aparecerán aquí",
+  "wishlistProductsHint": "Agrega productos a tu wishlist desde la pantalla de detalles",
+  "usedProductsHint": "Los productos que has acabado este mes aparecen en esta lista",
+  "usedProductsInfo": "Estos son los productos que has terminado este mes. Cuando termine el mes, estos productos se eliminarán automáticamente y se almacenarán los datos para el proyecto PAN.",
+  "productsCount": "{count} producto{pluralSuffix}",
+  "@productsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "pluralSuffix": {
+        "type": "String"
+      }
+    }
+  },
+  "searchLoading": "Buscando...",
+  "searchErrorTitle": "Error al buscar",
+  "searchConnectionError": "Error al buscar. Revisa tu conexión.",
+  "searchNoResults": "No se encontraron productos",
+  "searchTryAnotherTerm": "Prueba con otro término de búsqueda",
+  "searchBeautyProducts": "Busca productos de belleza",
+  "searchExamplesExtended": "Ej: \"L'Oréal\", \"hidratante\", \"champú\"",
+  "noBrand": "Sin marca",
+  "scanProductNotFound": "Producto no encontrado",
+  "scanNoBarcodeInfo": "No se encontró información para el código de barras:\n{barcode}\n\n¿Quieres crear un nuevo producto manualmente?",
+  "@scanNoBarcodeInfo": {
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      }
+    }
+  },
+  "createProduct": "Crear producto",
+  "newProductDefaultName": "Nuevo producto",
+  "deleteRoutineTitle": "Eliminar rutina",
+  "deleteRoutineQuestion": "¿Eliminar \"{name}\"?",
+  "@deleteRoutineQuestion": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "routineDeleted": "Rutina eliminada",
+  "routinesLoadError": "Error al cargar rutinas",
+  "routineDeleteError": "Error al eliminar rutina",
+  "morning": "Mañana",
+  "night": "Noche",
+  "newRoutine": "Nueva rutina",
+  "noMorningRoutines": "Sin rutinas de mañana",
+  "noNightRoutines": "Sin rutinas de noche",
+  "createFirstRoutineHint": "Crea tu primera rutina de {period}\ny organiza tus productos de skincare",
+  "@createFirstRoutineHint": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "createRoutine": "Crear rutina",
+  "routineCreatedSuccess": "✓ Rutina creada correctamente",
+  "routineCreateError": "Error al crear la rutina",
+  "routineNameRequiredLabel": "Nombre de la rutina *",
+  "routineNameHint": "Ej: Rutina de mañana",
+  "requiredField": "Obligatorio",
+  "routineType": "Tipo de rutina",
+  "weekDays": "Días de la semana",
+  "none": "Ninguno",
+  "all": "Todos",
+  "addProduct": "Añadir producto",
+  "noMoreProductsToAdd": "No hay más productos\npara añadir",
+  "routineNameLabel": "Nombre",
+  "morningRoutineLabel": "Rutina de mañana",
+  "nightRoutineLabel": "Rutina de noche",
+  "products": "Productos",
+  "noProductAdded": "Ningún producto añadido",
+  "longPressReorder": "Mantén pulsado para reordenar",
+  "noProductsYet": "Sin productos aún",
+  "addProductsToBuildRoutine": "Añade productos de tu armario\npara construir tu rutina",
+  "routineUpdated": "Rutina actualizada",
+  "updateError": "Error al actualizar",
+  "productRemovedFromRoutine": "Producto eliminado de la rutina",
+  "productRemoveError": "Error al eliminar producto",
+  "reorderProductsError": "Error al reordenar productos",
+  "productAddedToRoutine": "Producto añadido a la rutina",
+  "productAddError": "Error al añadir producto"
 }

@@ -4,6 +4,7 @@ import '../models/beauty_product.dart';
 import '../services/beauty_api_service.dart';
 import '../widgets/main_toolbar.dart';
 import 'product_screen.dart';
+import '../l10n/app_localizations.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -64,10 +65,9 @@ class _ScanScreenState extends State<ScanScreen> {
                   ? BorderSide(color: theme.colorScheme.onSurface.withValues(alpha: 0.1))
                   : BorderSide.none,
             ),
-            title: Text('Producto no encontrado', style: theme.textTheme.titleLarge),
+            title: Text(AppLocalizations.of(context)!.scanProductNotFound, style: theme.textTheme.titleLarge),
             content: Text(
-              'No se encontró información para el código de barras:\n${barcode.rawValue}\n\n'
-              '¿Quieres crear un nuevo producto manualmente?',
+              AppLocalizations.of(context)!.scanNoBarcodeInfo(barcode.rawValue!),
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.7)
               ),
@@ -76,7 +76,7 @@ class _ScanScreenState extends State<ScanScreen> {
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext, false),
                 child: Text(
-                  'Cancelar', 
+                  AppLocalizations.of(context)!.cancel, 
                   style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6))
                 ),
               ),
@@ -90,7 +90,7 @@ class _ScanScreenState extends State<ScanScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text('Crear producto'),
+                child: Text(AppLocalizations.of(context)!.createProduct),
               ),
             ],
           );
@@ -102,7 +102,7 @@ class _ScanScreenState extends State<ScanScreen> {
       if (shouldCreate == true) {
         final newProduct = BeautyProduct(
           barcode: barcode.rawValue!,
-          name: 'Nuevo producto',
+          name: AppLocalizations.of(context)!.newProductDefaultName,
           brand: '',
           addedAt: DateTime.now(),
         );
@@ -129,7 +129,7 @@ class _ScanScreenState extends State<ScanScreen> {
   @override
   Widget build(BuildContext context) {
     return CustomAppBar(
-      title: 'Cámara',
+      title: AppLocalizations.of(context)!.camera,
       showDrawer: true,
       showBackButton: false,
       child: Stack(
@@ -158,12 +158,12 @@ class _ScanScreenState extends State<ScanScreen> {
             ),
           ),
 
-          const Positioned(
+          Positioned(
             bottom: 48,
             left: 0,
             right: 0,
             child: Text(
-              'Apunta al código de barras',
+              AppLocalizations.of(context)!.aimBarcode,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white,

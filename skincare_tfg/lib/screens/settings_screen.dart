@@ -102,7 +102,7 @@ class _NotificationTileState extends State<_NotificationTile> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                value ? 'Notificaciones activadas' : 'Notificaciones desactivadas',
+                value ? l10n.notificationsEnabled : l10n.notificationsDisabled,
                 style: const TextStyle(color: Colors.white),
               ),
               backgroundColor: theme.colorScheme.primary,
@@ -164,14 +164,15 @@ class _LanguageTile extends StatelessWidget {
     final currentLocale = localeProvider.locale.languageCode;
     final theme = Theme.of(context);
     final subtleText = theme.colorScheme.onSurface.withValues(alpha: 0.6);
+    final l10n = AppLocalizations.of(context)!;
     
     return Column(
       children: [
         // Español
         ListTile(
           leading: Icon(Icons.translate, color: theme.colorScheme.primary),
-          title: const Text('Español'),
-          subtitle: Text('Spanish', style: TextStyle(color: subtleText)),
+          title: Text(l10n.spanish),
+          subtitle: Text(l10n.english, style: TextStyle(color: subtleText)),
           trailing: currentLocale == 'es'
               ? Icon(Icons.check_circle, color: theme.colorScheme.primary) // Adiós Colors.green
               : null,
@@ -183,8 +184,8 @@ class _LanguageTile extends StatelessWidget {
         // Inglés
         ListTile(
           leading: Icon(Icons.translate, color: theme.colorScheme.primary),
-          title: const Text('English'),
-          subtitle: Text('Inglés', style: TextStyle(color: subtleText)),
+          title: Text(l10n.english),
+          subtitle: Text(l10n.spanish, style: TextStyle(color: subtleText)),
           trailing: currentLocale == 'en'
               ? Icon(Icons.check_circle, color: theme.colorScheme.primary) // Adiós Colors.green
               : null,
@@ -211,7 +212,7 @@ class _AboutTile extends StatelessWidget {
     return ListTile(
       leading: Icon(Icons.info, color: theme.colorScheme.primary),
       title: Text(l10n.about),
-      subtitle: Text('Versión 1.0.0', style: TextStyle(color: subtleText)),
+      subtitle: Text(l10n.versionLabel('1.0.0'), style: TextStyle(color: subtleText)),
       trailing: Icon(Icons.chevron_right, color: subtleText),
       onTap: () {
         // Navegar a la pantalla de About

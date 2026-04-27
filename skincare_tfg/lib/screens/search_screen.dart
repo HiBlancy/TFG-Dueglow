@@ -4,6 +4,7 @@ import '../widgets/main_toolbar.dart';
 import '../services/beauty_api_service.dart';
 import '../models/beauty_product.dart';
 import 'product_screen.dart';
+import '../l10n/app_localizations.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -68,7 +69,7 @@ class _SearchScreenState extends State<SearchScreen> {
       });
     } catch (e) {
       setState(() {
-        _errorMessage = 'Error al buscar. Revisa tu conexión.';
+        _errorMessage = AppLocalizations.of(context)!.searchConnectionError;
       });
     } finally {
       setState(() => _isLoading = false);
@@ -110,7 +111,7 @@ class _SearchScreenState extends State<SearchScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return CustomAppBar(
-      title: 'Buscar productos',
+      title: AppLocalizations.of(context)!.searchProducts,
       showDrawer: true,
       showBackButton: false,
       child: Column(
@@ -142,7 +143,7 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
         cursorColor: theme.colorScheme.primary,
         decoration: InputDecoration(
-          hintText: 'Buscar por nombre o marca...',
+          hintText: AppLocalizations.of(context)!.searchNameBrand,
           hintStyle: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
           ),
@@ -239,7 +240,7 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Buscando...',
+              AppLocalizations.of(context)!.searchLoading,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: subtleText,
               ),
@@ -268,7 +269,7 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Error al buscar',
+              AppLocalizations.of(context)!.searchErrorTitle,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -286,7 +287,7 @@ class _SearchScreenState extends State<SearchScreen> {
             ElevatedButton.icon(
               onPressed: () => _performSearch(_searchController.text),
               icon: const Icon(Icons.refresh),
-              label: const Text('Reintentar'),
+              label: Text(AppLocalizations.of(context)!.retry),
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.colorScheme.primary,
                 foregroundColor: theme.colorScheme.onPrimary,
@@ -316,7 +317,7 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'No se encontraron productos',
+              AppLocalizations.of(context)!.searchNoResults,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -326,7 +327,7 @@ class _SearchScreenState extends State<SearchScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Text(
-                'Prueba con otro término de búsqueda',
+                AppLocalizations.of(context)!.searchTryAnotherTerm,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: subtleText),
               ),
@@ -355,7 +356,7 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
             const SizedBox(height: 20),
             Text(
-              'Busca productos de belleza',
+              AppLocalizations.of(context)!.searchBeautyProducts,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: theme.colorScheme.onSurface,
@@ -366,7 +367,7 @@ class _SearchScreenState extends State<SearchScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Text(
-                'Ej: "L\'Oréal", "hidratante", "champú"',
+                AppLocalizations.of(context)!.searchExamplesExtended,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: subtleText),
               ),
@@ -584,7 +585,7 @@ class _ProductTileState extends State<_ProductTile>
           )
         else
           Text(
-            'Sin marca',
+            AppLocalizations.of(context)!.noBrand,
             style: theme.textTheme.bodySmall?.copyWith(
               color: subtitleColor.withValues(alpha: 0.6),
               fontStyle: FontStyle.italic,
