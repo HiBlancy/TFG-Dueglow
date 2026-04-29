@@ -1,140 +1,105 @@
-# DueGlow - Aplicación Flutter
+# ✦ DueGlow Frontend (Flutter)
 
-Aplicación móvil para la gestión de productos de belleza, escaneo de códigos de barras, rutinas y resúmenes anuales (Project Pan).
+Aplicación móvil de DueGlow para gestionar productos de belleza, rutinas y resúmenes de uso (Project Pan), conectada al backend en NestJS.
 
-## Versiones usadas
+> README del monorepo: [ver documentación general](../README.md)  
+> Backend API: [ver README del backend](../backend/README.md)
+
+## 📋 Tabla de contenidos
+
+- [Tecnologías y versiones](#-tecnologías-y-versiones)
+- [Requisitos previos](#-requisitos-previos)
+- [Instalación y ejecución](#-instalación-y-ejecución)
+- [Configuración de API](#-configuración-de-api)
+- [Build de producción](#-build-de-producción)
+- [Estructura del proyecto](#-estructura-del-proyecto)
+
+## 🛠 Tecnologías y versiones
 
 | Dependencia | Versión |
-|-------------|---------|
+|---|---|
 | Flutter SDK | `3.27.4` (estable) |
 | Dart SDK | `^3.11.3` |
-| provider (estado) | `^6.1.1` |
-| http (cliente API) | `^1.2.0` |
-| mobile_scanner | `^5.0.0` |
-| flutter_secure_storage | `^10.0.0` |
-| image_picker | `^1.0.4` |
-| image (procesamiento) | `^4.5.4` |
-| shared_preferences | `^2.5.5` |
-| logger | `^2.0.2+1` |
-| google_fonts | `^6.2.1` |
-| intl (internacionalización) | `^0.20.2` |
+| `provider` (estado) | `^6.1.1` |
+| `http` (cliente API) | `^1.2.0` |
+| `mobile_scanner` | `^5.0.0` |
+| `flutter_secure_storage` | `^10.0.0` |
+| `image_picker` | `^1.0.4` |
+| `image` + `mime` | `^4.5.4` + `^1.0.4` |
+| `shared_preferences` | `^2.5.5` |
+| `logger` | `^2.0.2+1` |
+| `google_fonts` | `^6.2.1` |
+| `intl` + `flutter_localizations` | `^0.20.2` |
 
-## Requisitos previos
+## ✅ Requisitos previos
 
-- Flutter instalado (`flutter doctor` sin errores)
-- Emulador Android/iOS o dispositivo físico con depuración USB
-- **Backend** funcionando (local o en Render) – ver [README general](../README.md)
+- Flutter instalado y operativo (`flutter doctor` sin errores críticos).
+- Emulador Android/iOS o dispositivo físico con depuración activada.
+- Backend disponible (local o desplegado) para autenticación y datos.
 
-## Configuración
+## 🚀 Instalación y ejecución
 
-### 1. Clonar el repositorio (si no está clonado desde la raíz)
-
-```bash
-git clone https://github.com/tu-usuario/dueglow.git
-cd dueglow
-```
-
-### 2. Ir a la carpeta de la app
+Si estás en la raíz del repo:
 
 ```bash
-cd app
+cd dueglow_app
 ```
 
-### 3. Obtener dependencias
+Instala dependencias y ejecuta:
 
 ```bash
 flutter pub get
-```
-
-### 4. Configurar la URL del backend
-La app necesita saber a qué backend conectarse. Elige una opción:
-
-Opción A: Backend local (desarrollo)
-Crea un archivo .env en la raíz de app/ con:
-
-```bash
-API_URL=http://localhost:3000
-```
-
->⚠️ Asegúrate de que el backend NestJS esté corriendo en http://localhost:3000.
-
-Opción B: Backend desplegado en Render
-
-```bash
-API_URL=https://dueglow-api.onrender.com   # cambia por tu URL real
-```
-
-### 5. Ejecutar la app
-Con dispositivo conectado o emulador encendido:
-
-```bash
 flutter run
 ```
 
-### Generar APK (Android)
+Comandos útiles:
+
+```bash
+flutter devices
+flutter analyze
+```
+
+## 🔌 Configuración de API
+
+Actualmente la URL base se define en `lib/services/api_config.dart`:
+
+- `_baseUrlWeb` para Flutter Web (por defecto `http://localhost:3000`)
+- `_baseUrlMobile` para Android/iOS (por defecto IP local)
+
+Para conectar con otro entorno (por ejemplo Render), cambia esos valores en `ApiConfig`.
+
+> Nota: este frontend no está usando `.env` para `API_URL` en su estado actual; la configuración activa está hardcodeada en `api_config.dart`.
+
+## 📦 Build de producción
+
+APK Android:
 
 ```bash
 flutter build apk --release
 ```
 
-El APK se generará en:
-build/app/outputs/flutter-apk/app-release.apk
+Salida:
 
-Para generar un AAB (Google Play):
+`build/app/outputs/flutter-apk/app-release.apk`
+
+Android App Bundle (Google Play):
 
 ```bash
 flutter build appbundle
 ```
 
-### 🧩 Estructura del proyecto (carpeta lib/)
+## 🧩 Estructura del proyecto
 
-```
+```text
 lib/
-├── constants/                       #
-│   └── app_constants/               #
-├── l10n/                            #
-│   ├── models/                      
-│   └── repositories/
-├── models/   
-│   ├── beauty_product.dart
-│   ├── product_list_type.dart    
-│   ├── routine_model.dart
-│   └── user.dart               
-├── provides/                        # Proveedores
-│   ├── locale_provider.dart
-│   └── theme_provider.dart
-├── screens/                         # Pantallas
-│   ├── about_Screen.dart
-│   ├── add_product_screen.dart
-│   ├── add_routine_screen.dart
-│   ├── edit_screen.dart
-│   ├── home_screen.dart
-│   ├── login_screen.dart
-│   ├── my_products_screen.dart
-│   ├── product_screen.dart
-│   ├── profile_screen.dart
-│   ├── register_screen.dart
-│   ├── routine_screen.dart
-│   ├── scan_screen.dart
-│   ├── search_screen.dart
-│   └── settings_screen.dart
-├── services/                        # Servicios
-│   ├── api_config.dart              # Configuracion general de la Api      
-│   ├── auth_services.dart           # Servicio de autentificacion 
-│   ├── beauty_api_service.dart      #
-│   ├── cleanup_service.dart
-│   ├── image_service.dart
-│   ├── product_service.dart
-│   └── routine_Service.dart
-├── widgets/                         # Widgets
-│   ├── bottom_app_bar.dart
-│   ├── custom_button.dart
-│   ├── custom_text_field.dart
-│   ├── edit_product_dialog.dart
-│   ├── main_toolbar.dart
-│   ├── product_card.dart
-│   └── warning_dialog.dart
-├── themes.dart                      # Colores y tipografias de la app
-└── main.dart                        # Punto de entrada
+├── constants/          # Constantes de la aplicación
+├── l10n/               # Internacionalización
+├── models/             # Modelos de dominio
+├── providers/          # Gestión de estado (Provider)
+├── screens/            # Pantallas de la app
+├── services/           # API, auth, productos, rutinas, imágenes
+├── widgets/            # Componentes reutilizables
+├── themes.dart         # Tema, colores y tipografía
+└── main.dart           # Punto de entrada
 ```
 

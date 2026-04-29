@@ -1,98 +1,160 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# DueGlow - Backend (NestJS)
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend REST API de DueGlow para autenticación, gestión de usuarios, productos cosméticos, rutinas y estadísticas mensuales/anuales.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+![NestJS](https://img.shields.io/badge/NestJS-11.x-E0234E?logo=nestjs)
+![Node](https://img.shields.io/badge/Node.js-20%2B-339933?logo=node.js)
+![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-47A248?logo=mongodb)
+![Estado](https://img.shields.io/badge/Estado-En%20desarrollo-yellow)
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Tabla de contenidos
 
-## Project setup
+- [Descripción](#descripción)
+- [Stack técnico](#stack-técnico)
+- [Estructura del backend](#estructura-del-backend)
+- [Requisitos](#requisitos)
+- [Configuración local](#configuración-local)
+- [Variables de entorno](#variables-de-entorno)
+- [Scripts útiles](#scripts-útiles)
+- [Endpoints principales](#endpoints-principales)
 
-```bash
-$ npm install
+---
+
+## Descripción
+
+Este servicio expone una API REST construida con NestJS y MongoDB para dar soporte a la app Flutter de DueGlow.
+
+Responsabilidades principales:
+
+- Registro, login y perfil de usuario (incluyendo imagen de perfil).
+- CRUD de productos con estados/listas y cálculo de caducidad.
+- CRUD de rutinas y asociación de productos a cada rutina.
+- Estadísticas de uso y procesos de limpieza para históricos mensuales.
+- Subida y eliminación de imágenes en Cloudinary.
+
+---
+
+## Stack técnico
+
+- `NestJS 11`
+- `Node.js` (recomendado `20+`)
+- `MongoDB + Mongoose`
+- `JWT` para autenticación
+- `Cloudinary` para almacenamiento de imágenes
+- `@nestjs/schedule` para tareas programadas
+
+---
+
+## Estructura del backend
+
+```text
+src/
+├── app.module.ts
+├── users/         # autenticación, perfil y gestión de usuarios
+├── product/       # productos, listas y estadísticas
+├── routines/      # rutinas y productos de rutina
+├── cloudinary/    # integración de almacenamiento de imágenes
+├── monthly-stats/ # limpieza y gestión de históricos
+└── services/      # servicios compartidos (ej. compresión de imagen)
 ```
 
-## Compile and run the project
+---
+
+## Requisitos
+
+- Node.js `20` o superior
+- npm
+- Instancia MongoDB (local o Atlas)
+- Cuenta Cloudinary (si se usan imagenes)
+
+---
+
+## Configuración local
+
+1) Instalar dependencias
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
 ```
 
-## Run tests
+2) Crear archivo `.env` en esta carpeta (`backend/`)
+
+```env
+URL=mongodb://localhost:27017/dueglow
+PORT=3000
+JWT_SECRET=tu_secreto_jwt
+CLOUDINARY_CLOUD_NAME=tu_cloud_name
+CLOUDINARY_API_KEY=tu_api_key
+CLOUDINARY_API_SECRET=tu_api_secret
+```
+
+3) Levantar el servidor en desarrollo
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run start:dev
 ```
 
-## Deployment
+API disponible en `http://localhost:3000`.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+---
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Variables de entorno
+
+| Variable | Obligatoria | Descripción |
+|---|---|---|
+| `URL` | Si | Conexión de MongoDB usada por Mongoose |
+| `PORT` | No | Puerto HTTP de la API (por defecto `3000`) |
+| `JWT_SECRET` | Si | Secreto para firma/validación de tokens |
+| `CLOUDINARY_CLOUD_NAME` | Si (imágenes) | Cloud name de Cloudinary |
+| `CLOUDINARY_API_KEY` | Si (imágenes) | API key de Cloudinary |
+| `CLOUDINARY_API_SECRET` | Si (imágenes) | API secret de Cloudinary |
+
+---
+
+## Scripts útiles
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Desarrollo (watch)
+npm run start:dev
+
+# Build de producción
+npm run build
+
+# Ejecutar en produccion (requiere dist generado)
+npm run start:prod
+
+# Lint (autofix)
+npm run lint
+
+# Tests
+npm run test
+npm run test:e2e
+npm run test:cov
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+---
 
-## Resources
+## Endpoints principales
 
-Check out a few resources that may come in handy when working with NestJS:
+Prefijos por modulo:
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+- `/users` -> registro, login, perfil y gestión de cuenta
+- `/products` -> CRUD de productos, movimientos de lista, imágenes y stats
+- `/routines` -> CRUD de rutinas y gestion de productos asociados
 
-## Support
+Algunos ejemplos:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+- `POST /users/register`
+- `POST /users/login`
+- `GET /users/me`
+- `GET /products`
+- `GET /products/stats/summary`
+- `GET /products/stats/monthly-history`
+- `POST /routines`
+- `PATCH /routines/:id/reorder`
 
-## Stay in touch
+---
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Para contexto global del proyecto, revisa el README de la raiz: [`../README.md`](../README.md).
