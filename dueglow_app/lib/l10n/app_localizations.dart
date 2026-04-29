@@ -340,6 +340,24 @@ abstract class AppLocalizations {
   /// **'Limpiar'**
   String get clear;
 
+  /// No description provided for @filterAll.
+  ///
+  /// In es, this message translates to:
+  /// **'Todos'**
+  String get filterAll;
+
+  /// No description provided for @filterOpened.
+  ///
+  /// In es, this message translates to:
+  /// **'Abiertos'**
+  String get filterOpened;
+
+  /// No description provided for @filterExpired.
+  ///
+  /// In es, this message translates to:
+  /// **'Caducados'**
+  String get filterExpired;
+
   /// No description provided for @cancel.
   ///
   /// In es, this message translates to:

@@ -132,6 +132,15 @@ class AppLocalizationsRu extends AppLocalizations {
   String get clear => 'Очистить';
 
   @override
+  String get filterAll => 'Все';
+
+  @override
+  String get filterOpened => 'Открытые';
+
+  @override
+  String get filterExpired => 'Просроченные';
+
+  @override
   String get cancel => 'Отмена';
 
   @override

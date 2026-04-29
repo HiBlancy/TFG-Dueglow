@@ -132,6 +132,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get clear => 'Limpiar';
 
   @override
+  String get filterAll => 'Todos';
+
+  @override
+  String get filterOpened => 'Abiertos';
+
+  @override
+  String get filterExpired => 'Caducados';
+
+  @override
   String get cancel => 'Cancelar';
 
   @override

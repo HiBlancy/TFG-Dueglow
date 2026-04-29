@@ -132,6 +132,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clear => 'Clear';
 
   @override
+  String get filterAll => 'All';
+
+  @override
+  String get filterOpened => 'Opened';
+
+  @override
+  String get filterExpired => 'Expired';
+
+  @override
   String get cancel => 'Cancel';
 
   @override

@@ -382,19 +382,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-                TextButton(
-                  onPressed: () => Navigator.pushNamed(
-                    context,
-                    AppConstants.routeMyProducts,
-                  ),
-                  child: Text(
-                    l10n.seeAll,
-                    style: TextStyle(
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
               ],
             ),
           ],
@@ -718,7 +705,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    '$days ${l10n.days}',
+                    days == 0 ? l10n.today : '$days ${l10n.days}',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 11,

@@ -8,6 +8,8 @@ import '../widgets/product_card.dart';
 import 'product_screen.dart';
 import '../l10n/app_localizations.dart';
 
+enum HaveProductsFilter { all, opened, expired }
+
 class MyProductsScreen extends StatefulWidget {
   final ProductListType? initialListType;
 
@@ -21,6 +23,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
   final ProductService _productService = ProductService();
 
   ProductListType? _selectedListType;
+  HaveProductsFilter _haveProductsFilter = HaveProductsFilter.all;
   List<BeautyProduct> _allProducts = [];
   List<BeautyProduct> _filteredProducts = [];
   Set<String> _expiredProductIds = {};
@@ -88,7 +91,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
           _allProducts.addAll(
             response.products,
           );
-          _filteredProducts = _allProducts;
+          _applyCurrentFilters();
           _currentPage++;
 
 
@@ -126,6 +129,29 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
       expirationDate.day,
     );
     return productDate.isBefore(today);
+  }
+
+  bool _isOpenedProduct(BeautyProduct product) {
+    return product.isOpened == true && product.openedDate != null;
+  }
+
+  void _applyCurrentFilters() {
+    var result = List<BeautyProduct>.from(_allProducts);
+
+    if (_selectedListType == ProductListType.have) {
+      switch (_haveProductsFilter) {
+        case HaveProductsFilter.all:
+          break;
+        case HaveProductsFilter.opened:
+          result = result.where(_isOpenedProduct).toList();
+          break;
+        case HaveProductsFilter.expired:
+          result = result.where(_isProductExpired).toList();
+          break;
+      }
+    }
+
+    _filteredProducts = result;
   }
 
   Widget _buildInfoMessage(ThemeData theme) {
@@ -169,8 +195,73 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
   void _changeListType(ProductListType? newType) {
     setState(() {
       _selectedListType = (_selectedListType == newType) ? null : newType;
+      _haveProductsFilter = HaveProductsFilter.all;
     });
     _loadProducts(reset: true);
+  }
+
+  void _changeHaveProductsFilter(HaveProductsFilter filter) {
+    if (_selectedListType != ProductListType.have) return;
+
+    setState(() => _haveProductsFilter = filter);
+
+    if (filter == HaveProductsFilter.all) {
+      _loadProducts(reset: true);
+      return;
+    }
+
+    _loadAllHaveProductsForAdvancedFilter();
+  }
+
+  Future<void> _loadAllHaveProductsForAdvancedFilter() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final expiredProducts = await _productService.getExpiredProducts();
+      _expiredProductIds = expiredProducts
+          .map((p) => p.id)
+          .whereType<String>()
+          .toSet();
+
+      final allHaveProducts = <BeautyProduct>[];
+      var page = 1;
+      const limit = 100;
+      var totalPages = 1;
+
+      do {
+        final response = await _productService.getProducts(
+          page: page,
+          limit: limit,
+          listType: ProductListType.have.value,
+        );
+
+        if (response == null) break;
+
+        allHaveProducts.addAll(response.products);
+        totalPages = response.totalPages;
+        page++;
+      } while (page <= totalPages);
+
+      if (!mounted) return;
+      setState(() {
+        _allProducts = allHaveProducts;
+        _hasMore = false;
+        _isMoreLoading = false;
+        _isLoading = false;
+        _currentPage = page;
+        _applyCurrentFilters();
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = 'Error: $e';
+        _isLoading = false;
+        _isMoreLoading = false;
+      });
+    }
   }
 
   Future<void> _navigateToProduct(BeautyProduct product) async {
@@ -285,6 +376,9 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
             ),
           ),
 
+          if (_selectedListType == ProductListType.have)
+            _buildHaveFilters(theme),
+
 
           Expanded(
             child: RefreshIndicator(
@@ -373,6 +467,77 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                 fontSize: 13,
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHaveFilters(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
+    final isDark = theme.brightness == Brightness.dark;
+
+    Widget chip({
+      required String label,
+      required IconData icon,
+      required bool selected,
+      required VoidCallback onTap,
+    }) {
+      return Padding(
+        padding: const EdgeInsets.only(right: 8),
+        child: FilterChip(
+          selected: selected,
+          onSelected: (_) => onTap(),
+          label: Text(label),
+          avatar: Icon(
+            icon,
+            size: 16,
+            color: selected ? theme.colorScheme.onPrimary : theme.colorScheme.primary,
+          ),
+          backgroundColor: isDark
+              ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35)
+              : theme.colorScheme.primaryContainer.withValues(alpha: 0.2),
+          selectedColor: theme.colorScheme.primary,
+          labelStyle: TextStyle(
+            color: selected ? theme.colorScheme.onPrimary : theme.colorScheme.primary,
+            fontWeight: FontWeight.w600,
+          ),
+          side: BorderSide(
+            color: selected
+                ? theme.colorScheme.primary
+                : theme.colorScheme.primary.withValues(alpha: 0.3),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            chip(
+              label: l10n.filterAll,
+              icon: Icons.list_alt,
+              selected: _haveProductsFilter == HaveProductsFilter.all,
+              onTap: () => _changeHaveProductsFilter(HaveProductsFilter.all),
+            ),
+            chip(
+              label: l10n.filterOpened,
+              icon: Icons.lock_open,
+              selected: _haveProductsFilter == HaveProductsFilter.opened,
+              onTap: () => _changeHaveProductsFilter(HaveProductsFilter.opened),
+            ),
+            chip(
+              label: l10n.filterExpired,
+              icon: Icons.warning_amber_rounded,
+              selected: _haveProductsFilter == HaveProductsFilter.expired,
+              onTap: () => _changeHaveProductsFilter(HaveProductsFilter.expired),
             ),
           ],
         ),
