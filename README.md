@@ -3,7 +3,7 @@
 > Aplicación móvil para el seguimiento de productos de belleza y autocuidado: gestión de caducidades, listas personalizadas, rutinas y resumen anual al estilo Spotify Wrapped.
 
 - [Backend (NestJS)](./api-skincare/README.md)
-- [Frontend (Flutter)](./skincare_tfg/README.md)
+- [Frontend (Flutter)](./dueglow_app/README.md)
 
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter)
 ![NestJS](https://img.shields.io/badge/NestJS-10.x-E0234E?logo=nestjs)
