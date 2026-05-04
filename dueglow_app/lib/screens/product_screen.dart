@@ -220,10 +220,15 @@ class _ProductScreenState extends State<ProductScreen> {
     );
 
     if (newListType != null && newListType != currentListType) {
+      final updateData = <String, dynamic>{
+        'listType': newListType.value,
+      };
+      if (newListType == ProductListType.used) {
+        updateData['finishedDate'] = DateTime.now().toIso8601String();
+      }
+
       await _executeAction(
-        action: () => _productService.updateProduct(_currentProduct.id!, {
-          'listType': newListType.value,
-        }),
+        action: () => _productService.updateProduct(_currentProduct.id!, updateData),
         successMessage: AppLocalizations.of(context)!.productMovedToList(newListType.label),
         loadingKey: 'changingList',
       );
@@ -880,6 +885,9 @@ class _ProductScreenState extends State<ProductScreen> {
   Widget _buildScrollableButtons(bool isProductSaved, bool showAddButton) {
     final isReallyOpened =
         _currentProduct.isOpened == true && _currentProduct.openedDate != null;
+    final isInFinishedList =
+        ProductListType.fromNullable(_currentProduct.listType) ==
+        ProductListType.used;
     final canCalculateExpiration =
         isReallyOpened &&
         _currentProduct.periodAfterOpening?.isNotEmpty == true &&
@@ -935,7 +943,7 @@ class _ProductScreenState extends State<ProductScreen> {
           ),
           const SizedBox(height: 12),
         ],
-        if (isProductSaved) ...[
+        if (isProductSaved && !isInFinishedList) ...[
           CustomButton(
             text: AppLocalizations.of(context)!.finishedProduct,
             onPressed: _isLoading('finishing') ? () {} : _markAsFinished,

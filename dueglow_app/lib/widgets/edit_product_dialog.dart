@@ -282,6 +282,9 @@ class _EditProductDialogState extends State<EditProductDialog> {
       'periodAfterOpening': _periodAfterOpeningController.text.trim().isEmpty ? null : _periodAfterOpeningController.text.trim(),
       'openedDate': _openedDate?.toIso8601String(),
     };
+    if (_selectedListType == ProductListType.used) {
+      updatedProductData['finishedDate'] = DateTime.now().toIso8601String();
+    }
 
 
 
