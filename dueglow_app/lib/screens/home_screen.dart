@@ -254,7 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '${nextRoutine.slotLabel} • ${AppLocalizations.of(context)!.routineProductsCount(routine.products.length)}',
+                              '${nextRoutine.slotLabel} • ${AppLocalizations.of(context)!.productsCount(routine.products.length, routine.products.length == 1 ? '' : 's')}',
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: theme.colorScheme.onSurfaceVariant,
                               ),

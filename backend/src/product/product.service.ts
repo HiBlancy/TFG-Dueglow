@@ -524,8 +524,6 @@ export class ProductService {
 
     // 5. Actualizar producto
     const updatedProduct = await this.update(productId, userId, { imageUrl });
-
-    console.log(`✅ Imagen actualizada para producto: ${product.name}`);
     return updatedProduct;
   }
 

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import '../models/beauty_product.dart';
 import '../services/beauty_api_service.dart';
 import '../widgets/main_toolbar.dart';
 import 'product_screen.dart';
@@ -50,8 +49,7 @@ class _ScanScreenState extends State<ScanScreen> {
         _cameraController.start();
       });
     } else {
-
-      final shouldCreate = await showDialog<bool>(
+      await showDialog<void>(
         context: context,
         builder: (dialogContext) {
           final theme = Theme.of(dialogContext);
@@ -73,15 +71,8 @@ class _ScanScreenState extends State<ScanScreen> {
               ),
             ),
             actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext, false),
-                child: Text(
-                  AppLocalizations.of(context)!.cancel,
-                  style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6))
-                ),
-              ),
               ElevatedButton(
-                onPressed: () => Navigator.pop(dialogContext, true),
+                onPressed: () => Navigator.pop(dialogContext),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: theme.colorScheme.primary,
                   foregroundColor: theme.colorScheme.onPrimary,
@@ -90,7 +81,7 @@ class _ScanScreenState extends State<ScanScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text(AppLocalizations.of(context)!.createProduct),
+                child: Text(AppLocalizations.of(context)!.accept),
               ),
             ],
           );
@@ -98,31 +89,8 @@ class _ScanScreenState extends State<ScanScreen> {
       );
 
       if (!mounted) return;
-
-      if (shouldCreate == true) {
-        final newProduct = BeautyProduct(
-          barcode: barcode.rawValue!,
-          name: AppLocalizations.of(context)!.newProductDefaultName,
-          brand: '',
-          addedAt: DateTime.now(),
-        );
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ProductScreen(
-              product: newProduct,
-              isFromSearch: true,
-            ),
-          ),
-        ).then((_) {
-          setState(() => _isNavigating = false);
-          _cameraController.start();
-        });
-      } else {
-        setState(() => _isNavigating = false);
-        _cameraController.start();
-      }
+      setState(() => _isNavigating = false);
+      Navigator.pop(context);
     }
   }
 

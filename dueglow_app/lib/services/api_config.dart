@@ -4,7 +4,7 @@ class ApiConfig {
 
 
   static const String _baseUrlWeb = 'http://localhost:3000';
-  static const String _baseUrlMobile = 'http://192.168.1.18:3000';
+  static const String _baseUrlMobile = 'http://192.168.1.21:3000';
 
   static String get baseUrl {
 

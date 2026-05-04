@@ -280,34 +280,6 @@ Future<List<BeautyProduct>> getExpiredProducts() async {
   }
 }
 
-  Future<BeautyProduct?> moveProduct(String id, String targetList) async {
-    try {
-      final token = await _authService.getToken();
-      if (token == null) return null;
-
-      // API call
-      final response = await http.patch(
-        Uri.parse('${ApiConfig.getProductsUrl()}/$id/move'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({'targetList': targetList}),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data['status'] == true && data['data'] != null) {
-          return BeautyProduct.fromBackend(data['data']);
-        }
-      }
-      return null;
-    } catch (e) {
-      print('❌ Error moviendo producto: $e');
-      return null;
-    }
-  }
-
   Future<BeautyProduct?> addProductToHave(BeautyProduct product) async {
     try {
       final token = await _authService.getToken();
@@ -320,8 +292,8 @@ Future<List<BeautyProduct>> getExpiredProducts() async {
         'listType': 'have',
       };
 
-      if (product.barcode?.trim().isNotEmpty == true) {
-        productData['barcode'] = product.barcode!.trim();
+      if (product.barcode.trim().isNotEmpty) {
+        productData['barcode'] = product.barcode.trim();
       }
       if (product.imageUrl?.trim().isNotEmpty == true) {
         productData['imageUrl'] = product.imageUrl!.trim();

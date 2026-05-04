@@ -51,6 +51,15 @@ class _ProductScreenState extends State<ProductScreen> {
 
   bool _isLoading(String key) => _loadingStates[key] == true;
 
+  List<String> get _validCategories {
+    final categories = _currentProduct.categories;
+    if (categories == null) return const [];
+    return categories
+        .map((category) => category.trim())
+        .where((category) => category.isNotEmpty)
+        .toList();
+  }
+
   Future<void> _showMessage(String message, {bool isError = false}) async {
     if (!mounted) return;
 
@@ -523,7 +532,7 @@ class _ProductScreenState extends State<ProductScreen> {
               ],
               _buildProductInfo(theme),
               const SizedBox(height: 24),
-              if (_currentProduct.categories?.isNotEmpty == true)
+              if (_validCategories.isNotEmpty)
                 _buildCategories(theme),
               const SizedBox(height: 24),
               _buildScrollableButtons(isProductSaved, showAddButton),
@@ -880,6 +889,9 @@ class _ProductScreenState extends State<ProductScreen> {
   }
 
   Widget _buildCategories(ThemeData theme) {
+    final categories = _validCategories;
+    if (categories.isEmpty) return const SizedBox.shrink();
+
     final subtleText = theme.colorScheme.onSurface.withValues(alpha: 0.6);
     final chipBg = theme.colorScheme.onSurface.withValues(alpha: 0.08);
 
@@ -898,7 +910,7 @@ class _ProductScreenState extends State<ProductScreen> {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: _currentProduct.categories!
+          children: categories
               .take(6)
               .map(
                 (cat) => Chip(

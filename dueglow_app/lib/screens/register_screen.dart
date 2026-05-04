@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../services/auth_service.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_button.dart';
@@ -207,12 +208,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     children: [
       Text(
         'DueGlow',
-        style: theme.textTheme.displayLarge?.copyWith(
-          color: theme.colorScheme.primary,
-          fontWeight: FontWeight.w400,
-          letterSpacing: 1.2,
+        style: GoogleFonts.crimsonText(
+          fontSize: 46,
+          fontWeight: FontWeight.w600,
           fontStyle: FontStyle.italic,
-          fontSize: 40
+          color: theme.colorScheme.primary,
         ),
       ),
       const SizedBox(height: 24),

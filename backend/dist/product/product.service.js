@@ -391,7 +391,6 @@ let ProductService = class ProductService {
         const imageUrl = await this.cloudinaryService.uploadImage(compressedBuffer, `product_${productId}_${Date.now()}`, 'products');
         await this.deleteCloudinaryImageByUrl(product.imageUrl, '🗑️ Imagen anterior del producto eliminada');
         const updatedProduct = await this.update(productId, userId, { imageUrl });
-        console.log(`✅ Imagen actualizada para producto: ${product.name}`);
         return updatedProduct;
     }
     async deleteProductImage(productId, userId) {

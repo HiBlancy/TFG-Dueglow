@@ -362,46 +362,52 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
 
   String _getTitle() {
     final l10n = AppLocalizations.of(context)!;
-    if (_selectedListType == null) {
-      return l10n.allProducts;
-    }
-    switch (_selectedListType!) {
-      case ProductListType.have:
-        return 'Tengo';
-      case ProductListType.wishlist:
-        return 'Deseados';
-      case ProductListType.used:
-        return 'Terminados';
-    }
+    return _byListType<String>(
+      allValue: l10n.allProducts,
+      haveValue: 'Tengo',
+      wishlistValue: 'Deseados',
+      usedValue: 'Terminados',
+    );
   }
 
   String _getEmptyMessage() {
     final l10n = AppLocalizations.of(context)!;
-    if (_selectedListType == null) {
-      return l10n.noProductsRegistered;
-    }
-    switch (_selectedListType!) {
-      case ProductListType.have:
-        return l10n.noProductsInHave;
-      case ProductListType.wishlist:
-        return l10n.noProductsInWishlist;
-      case ProductListType.used:
-        return l10n.noFinishedProducts;
-    }
+    return _byListType<String>(
+      allValue: l10n.noProductsRegistered,
+      haveValue: l10n.noProductsInHave,
+      wishlistValue: l10n.noProductsInWishlist,
+      usedValue: l10n.noFinishedProducts,
+    );
   }
 
   String _getEmptySubMessage() {
     final l10n = AppLocalizations.of(context)!;
-    if (_selectedListType == null) {
-      return l10n.addFirstProductsHint;
+    return _byListType<String>(
+      allValue: l10n.addFirstProductsHint,
+      haveValue: l10n.haveProductsHint,
+      wishlistValue: l10n.wishlistProductsHint,
+      usedValue: l10n.usedProductsHint,
+    );
+  }
+
+  T _byListType<T>({
+    required T allValue,
+    required T haveValue,
+    required T wishlistValue,
+    required T usedValue,
+  }) {
+    final selected = _selectedListType;
+    if (selected == null) {
+      return allValue;
     }
-    switch (_selectedListType!) {
+
+    switch (selected) {
       case ProductListType.have:
-        return l10n.haveProductsHint;
+        return haveValue;
       case ProductListType.wishlist:
-        return l10n.wishlistProductsHint;
+        return wishlistValue;
       case ProductListType.used:
-        return l10n.usedProductsHint;
+        return usedValue;
     }
   }
 

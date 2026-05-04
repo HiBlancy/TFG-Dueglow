@@ -162,6 +162,7 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
 
     List<BeautyProduct> userProducts = [];
     bool loadingProducts = true;
+    String searchQuery = '';
 
     await showModalBottomSheet(
       context: context,
@@ -195,6 +196,13 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
             final available = userProducts
                 .where((p) => !addedIds.contains(p.id))
                 .toList();
+            final filteredAvailable = available.where((p) {
+              if (searchQuery.trim().isEmpty) return true;
+              final query = searchQuery.toLowerCase();
+              final name = p.name.toLowerCase();
+              final brand = (p.brand ?? '').toLowerCase();
+              return name.contains(query) || brand.contains(query);
+            }).toList();
 
             return Container(
               height: MediaQuery.of(ctx).size.height * 0.7,
@@ -229,6 +237,20 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
                       ],
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+                    child: TextField(
+                      onChanged: (value) => setModalState(() => searchQuery = value),
+                      decoration: InputDecoration(
+                        hintText: AppLocalizations.of(context)!.searchNameBrand,
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        isDense: true,
+                      ),
+                    ),
+                  ),
                   const Divider(height: 1),
                   Expanded(
                     child: loadingProducts
@@ -260,13 +282,40 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
                               ),
                             ),
                           )
+                        : filteredAvailable.isEmpty
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(32),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.search_off_outlined,
+                                    size: 48,
+                                    color: theme.colorScheme.primary.withValues(
+                                      alpha: 0.4,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    AppLocalizations.of(context)!.searchNoResults,
+                                    textAlign: TextAlign.center,
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: theme.colorScheme.onSurface
+                                          .withValues(alpha: 0.5),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
                         : ListView.separated(
                             padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-                            itemCount: available.length,
+                            itemCount: filteredAvailable.length,
                             separatorBuilder: (_, __) =>
                                 const SizedBox(height: 8),
                             itemBuilder: (_, i) {
-                              final product = available[i];
+                              final product = filteredAvailable[i];
                               return ListTile(
                                 contentPadding: const EdgeInsets.symmetric(
                                   horizontal: 12,

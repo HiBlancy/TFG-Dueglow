@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../services/auth_service.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_button.dart';
@@ -220,11 +221,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
       Text(
         'DueGlow',
-        style: theme.textTheme.displayLarge?.copyWith(
+        style: GoogleFonts.crimsonText(
+          fontSize: 46,
+          fontWeight: FontWeight.w600,
+          fontStyle: FontStyle.italic,
           color: theme.colorScheme.primary,
-          fontWeight: FontWeight.w900,
-          letterSpacing: 1.2,
-          fontStyle: FontStyle.italic
         ),
       ),
       const SizedBox(height: 8),
