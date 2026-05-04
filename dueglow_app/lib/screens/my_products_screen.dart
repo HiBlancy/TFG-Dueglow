@@ -9,6 +9,12 @@ import 'product_screen.dart';
 import '../l10n/app_localizations.dart';
 
 enum HaveProductsFilter { all, opened, expired }
+enum ProductSortOption {
+  addedNewest,
+  alphabetical,
+  openedDateNewest,
+  expirationSoonest,
+}
 
 class MyProductsScreen extends StatefulWidget {
   final ProductListType? initialListType;
@@ -21,14 +27,17 @@ class MyProductsScreen extends StatefulWidget {
 
 class _MyProductsScreenState extends State<MyProductsScreen> {
   final ProductService _productService = ProductService();
+  final TextEditingController _searchController = TextEditingController();
 
   ProductListType? _selectedListType;
   HaveProductsFilter _haveProductsFilter = HaveProductsFilter.all;
+  ProductSortOption _sortOption = ProductSortOption.addedNewest;
   List<BeautyProduct> _allProducts = [];
   List<BeautyProduct> _filteredProducts = [];
   Set<String> _expiredProductIds = {};
   bool _isLoading = true;
   String? _error;
+  String _searchQuery = '';
 
   final ScrollController _scrollController = ScrollController();
   int _currentPage = 1;
@@ -38,6 +47,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -151,6 +161,36 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
       }
     }
 
+    final normalizedQuery = _searchQuery.trim().toLowerCase();
+    if (normalizedQuery.isNotEmpty) {
+      result = result.where((product) {
+        final name = product.name.toLowerCase();
+        final brand = (product.brand ?? '').toLowerCase();
+        return name.contains(normalizedQuery) || brand.contains(normalizedQuery);
+      }).toList();
+    }
+
+    result.sort((a, b) {
+      switch (_sortOption) {
+        case ProductSortOption.addedNewest:
+          final dateA = a.addedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final dateB = b.addedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          return dateB.compareTo(dateA);
+        case ProductSortOption.alphabetical:
+          return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+        case ProductSortOption.openedDateNewest:
+          final dateA = a.openedDate ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final dateB = b.openedDate ?? DateTime.fromMillisecondsSinceEpoch(0);
+          return dateB.compareTo(dateA);
+        case ProductSortOption.expirationSoonest:
+          final dateA =
+              a.expirationDate ?? DateTime.fromMillisecondsSinceEpoch(253402300799000);
+          final dateB =
+              b.expirationDate ?? DateTime.fromMillisecondsSinceEpoch(253402300799000);
+          return dateA.compareTo(dateB);
+      }
+    });
+
     _filteredProducts = result;
   }
 
@@ -189,6 +229,15 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
   }
 
   Future<void> _refreshProducts() async {
+    final isAdvancedHaveFilter =
+        _selectedListType == ProductListType.have &&
+        _haveProductsFilter != HaveProductsFilter.all;
+
+    if (isAdvancedHaveFilter) {
+      await _loadAllHaveProductsForAdvancedFilter();
+      return;
+    }
+
     await _loadProducts(reset: true);
   }
 
@@ -196,6 +245,9 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
     setState(() {
       _selectedListType = (_selectedListType == newType) ? null : newType;
       _haveProductsFilter = HaveProductsFilter.all;
+      _searchQuery = '';
+      _searchController.clear();
+      _sortOption = ProductSortOption.addedNewest;
     });
     _loadProducts(reset: true);
   }
@@ -211,6 +263,39 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
     }
 
     _loadAllHaveProductsForAdvancedFilter();
+  }
+
+  void _onSearchChanged(String value) {
+    setState(() {
+      _searchQuery = value;
+      _applyCurrentFilters();
+    });
+  }
+
+  String _sortOptionLabel(ProductSortOption option) {
+    switch (option) {
+      case ProductSortOption.addedNewest:
+        return 'Recientes';
+      case ProductSortOption.alphabetical:
+        return 'A-Z';
+      case ProductSortOption.openedDateNewest:
+        return 'Apertura';
+      case ProductSortOption.expirationSoonest:
+        return 'Caducidad';
+    }
+  }
+
+  IconData _sortOptionIcon(ProductSortOption option) {
+    switch (option) {
+      case ProductSortOption.addedNewest:
+        return Icons.schedule;
+      case ProductSortOption.alphabetical:
+        return Icons.sort_by_alpha;
+      case ProductSortOption.openedDateNewest:
+        return Icons.lock_open;
+      case ProductSortOption.expirationSoonest:
+        return Icons.event_busy;
+    }
   }
 
   Future<void> _loadAllHaveProductsForAdvancedFilter() async {
@@ -378,6 +463,8 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
 
           if (_selectedListType == ProductListType.have)
             _buildHaveFilters(theme),
+
+          _buildSearchAndSortControls(theme),
 
 
           Expanded(
@@ -661,6 +748,120 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildSearchAndSortControls(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _searchController,
+              onChanged: _onSearchChanged,
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                hintText: l10n.searchNameBrand,
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchQuery.isEmpty
+                    ? null
+                    : IconButton(
+                        onPressed: () {
+                          _searchController.clear();
+                          _onSearchChanged('');
+                        },
+                        icon: const Icon(Icons.close),
+                      ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                filled: true,
+                fillColor: isDark
+                    ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35)
+                    : theme.colorScheme.surface,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: theme.colorScheme.outline.withValues(alpha: 0.25),
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: theme.colorScheme.outline.withValues(alpha: 0.25),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: theme.colorScheme.primary,
+                    width: 1.5,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          PopupMenuButton<ProductSortOption>(
+            tooltip: 'Ordenar',
+            onSelected: (option) {
+              setState(() {
+                _sortOption = option;
+                _applyCurrentFilters();
+              });
+            },
+            itemBuilder: (context) => ProductSortOption.values
+                .map(
+                  (option) => PopupMenuItem<ProductSortOption>(
+                    value: option,
+                    child: Row(
+                      children: [
+                        Icon(
+                          _sortOptionIcon(option),
+                          size: 18,
+                          color: option == _sortOption
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(_sortOptionLabel(option)),
+                      ],
+                    ),
+                  ),
+                )
+                .toList(),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35)
+                    : theme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: theme.colorScheme.outline.withValues(alpha: 0.25),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(_sortOptionIcon(_sortOption), size: 18),
+                  const SizedBox(width: 6),
+                  Text(
+                    _sortOptionLabel(_sortOption),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
