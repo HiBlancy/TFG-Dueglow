@@ -1,0 +1,32 @@
+# --- General ---
+.DS_Store
+.env
+*.log
+
+# --- NestJS (Backend) ---
+backend/node_modules/
+backend/dist/
+backend/npm-debug.log
+backend/.env
+backend/.env.production
+# .env.template NO se ignora para que sirva de guía
+
+# --- Flutter (Front - dueglow_app) ---
+dueglow_app/.dart_tool/
+dueglow_app/.flutter-plugins
+dueglow_app/.flutter-plugins-dependencies
+dueglow_app/.pub-cache
+dueglow_app/.packages
+dueglow_app/build/
+# Configuraciones locales y llaves
+dueglow_app/android/local.properties
+dueglow_app/android/key.properties
+dueglow_app/android/app/*.keystore
+dueglow_app/android/app/*.jks
+dueglow_app/ios/Flutter/Generated.xcconfig
+dueglow_app/ios/Flutter/flutter_export_environment.sh
+
+# --- Archivos de configuración de IDEs ---
+.vscode/
+.idea/
+*.iml
