@@ -43,6 +43,8 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
   int _currentPage = 1;
   bool _isMoreLoading = false;
   bool _hasMore = true;
+  bool _hasLoadedCompleteDataset = false;
+  bool _isHydratingSearchDataset = false;
 
   @override
   void dispose() {
@@ -76,6 +78,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
         _currentPage = 1;
         _allProducts = [];
         _hasMore = true;
+        _hasLoadedCompleteDataset = false;
       });
     } else {
       setState(() => _isMoreLoading = true);
@@ -107,6 +110,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
 
           if (response.currentPage >= response.totalPages) {
             _hasMore = false;
+            _hasLoadedCompleteDataset = true;
           }
 
           _isLoading = false;
@@ -248,6 +252,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
       _searchQuery = '';
       _searchController.clear();
       _sortOption = ProductSortOption.addedNewest;
+      _hasLoadedCompleteDataset = false;
     });
     _loadProducts(reset: true);
   }
@@ -270,6 +275,13 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
       _searchQuery = value;
       _applyCurrentFilters();
     });
+
+    final normalizedQuery = value.trim().toLowerCase();
+    if (normalizedQuery.isNotEmpty &&
+        !_hasLoadedCompleteDataset &&
+        !_isHydratingSearchDataset) {
+      _hydrateAllProductsForSearch();
+    }
   }
 
   String _sortOptionLabel(ProductSortOption option) {
@@ -334,6 +346,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
       setState(() {
         _allProducts = allHaveProducts;
         _hasMore = false;
+        _hasLoadedCompleteDataset = true;
         _isMoreLoading = false;
         _isLoading = false;
         _currentPage = page;
@@ -346,6 +359,49 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
         _isLoading = false;
         _isMoreLoading = false;
       });
+    }
+  }
+
+  Future<void> _hydrateAllProductsForSearch() async {
+    _isHydratingSearchDataset = true;
+    if (mounted) {
+      setState(() => _isMoreLoading = true);
+    }
+
+    try {
+      final allProducts = <BeautyProduct>[];
+      var page = 1;
+      var totalPages = 1;
+
+      do {
+        final response = await _productService.getProducts(
+          page: page,
+          limit: 100,
+          listType: _selectedListType?.value,
+        );
+
+        if (response == null) break;
+
+        allProducts.addAll(response.products);
+        totalPages = response.totalPages;
+        page++;
+      } while (page <= totalPages);
+
+      if (!mounted) return;
+
+      setState(() {
+        _allProducts = allProducts;
+        _currentPage = page;
+        _hasMore = false;
+        _hasLoadedCompleteDataset = true;
+        _isMoreLoading = false;
+        _applyCurrentFilters();
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isMoreLoading = false);
+    } finally {
+      _isHydratingSearchDataset = false;
     }
   }
 
