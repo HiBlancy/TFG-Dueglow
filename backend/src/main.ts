@@ -2,9 +2,22 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { json, urlencoded } from 'express'; 
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // --- CONFIGURACIÓN DE SWAGGER ---
+  const config = new DocumentBuilder()
+    .setTitle('API de Cosmética y Rutinas')
+    .setDescription('Documentación de la API para gestión de productos y rutinas')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
+  // --------------------------------
 
   // limite img y archivos grandes
   app.use(json({ limit: '50mb' }));
@@ -14,9 +27,7 @@ async function bootstrap() {
 
   app.enableCors({
     origin: true,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
   });
 
   await app.listen(process.env.PORT ?? 3000);

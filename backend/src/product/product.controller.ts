@@ -22,7 +22,9 @@ import { PaginationDto } from '../pagination/pagination.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CleanupService } from '../monthly-stats/services/cleanup.service';
 import { multerImageFilter } from '../common/multer.utils';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Productos')
 @Controller('products')
 @UseGuards(AuthGuard)
 export class ProductController {
@@ -47,6 +49,8 @@ export class ProductController {
   }
 
   // obtener todos los productos paginados
+  @ApiOperation({ summary: 'Obtener todos los productos del usuario' })
+  @ApiOkResponse({ description: 'Lista de productos devuelta correctamente.' })
   @Get()
   async findAll(
     @Req() req,

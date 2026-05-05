@@ -12,12 +12,15 @@ import {
   Matches,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateProductDto {
+  @ApiProperty({ example: 'Crema Hidratante', description: 'Nombre del producto' })
   @IsString()
   @IsNotEmpty()
   name: string;
 
+  @ApiProperty({ example: 'Nivea', description: 'Marca del cosmético' })
   @IsString()
   @IsNotEmpty()
   brand: string;
