@@ -927,6 +927,20 @@ class _ProductScreenState extends State<ProductScreen> {
     final hasExpirationInfo =
         _currentProduct.expirationDate != null ||
         (_currentProduct.periodAfterOpening?.isNotEmpty == true);
+    final shouldShowExpirationWarning = isReallyOpened && !hasExpirationInfo;
+    final hasNotes = _currentProduct.notes?.isNotEmpty == true;
+    final hasVisibleInfo =
+        isExpired ||
+        _currentProduct.addedAt != null ||
+        _currentProduct.expirationDate != null ||
+        (isReallyOpened && _currentProduct.openedDate != null) ||
+        (isReallyOpened && _currentProduct.periodAfterOpening?.isNotEmpty == true) ||
+        shouldShowExpirationWarning ||
+        hasNotes;
+
+    if (!hasVisibleInfo) {
+      return const SizedBox.shrink();
+    }
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -977,9 +991,9 @@ class _ProductScreenState extends State<ProductScreen> {
             ),
             const SizedBox(height: 12),
           ],
-          if (isReallyOpened && !hasExpirationInfo)
+          if (shouldShowExpirationWarning)
             _buildExpirationWarning(theme),
-          if (_currentProduct.notes?.isNotEmpty == true) ...[
+          if (hasNotes) ...[
             const Divider(height: 24),
             Text(
               AppLocalizations.of(context)!.notes,

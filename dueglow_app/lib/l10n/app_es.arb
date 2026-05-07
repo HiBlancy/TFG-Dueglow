@@ -41,7 +41,7 @@
   "phoneHint": "+34 123 456 789",
   "birthDate": "Fecha de nacimiento",
   "birthDateHint": "DD/MM/AAAA",
-  "changePasswordOptional": "Cambiar contraseña (opcional)",
+  "changePasswordOptional": "Cambiar contraseña",
   "newPassword": "Nueva contraseña",
   "saveChanges": "Guardar cambios",
   "selectBirthDate": "Selecciona tu fecha de nacimiento",

@@ -301,7 +301,7 @@ abstract class AppLocalizations {
   /// No description provided for @changePasswordOptional.
   ///
   /// In es, this message translates to:
-  /// **'Cambiar contraseña (opcional)'**
+  /// **'Cambiar contraseña'**
   String get changePasswordOptional;
 
   /// No description provided for @newPassword.

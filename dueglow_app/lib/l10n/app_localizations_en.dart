@@ -111,7 +111,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get birthDateHint => 'DD/MM/YYYY';
 
   @override
-  String get changePasswordOptional => 'Change password (optional)';
+  String get changePasswordOptional => 'Change password';
 
   @override
   String get newPassword => 'New password';

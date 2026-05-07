@@ -40,7 +40,7 @@
   "phoneHint": "+34 123 456 789",
   "birthDate": "Birth date",
   "birthDateHint": "DD/MM/YYYY",
-  "changePasswordOptional": "Change password (optional)",
+  "changePasswordOptional": "Change password",
   "newPassword": "New password",
   "saveChanges": "Save changes",
   "selectBirthDate": "Select your birth date",

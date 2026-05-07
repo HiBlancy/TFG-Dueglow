@@ -111,7 +111,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get birthDateHint => 'ДД/ММ/ГГГГ';
 
   @override
-  String get changePasswordOptional => 'Изменить пароль (необязательно)';
+  String get changePasswordOptional => 'Изменить пароль';
 
   @override
   String get newPassword => 'Новый пароль';
