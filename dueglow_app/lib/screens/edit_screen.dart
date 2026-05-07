@@ -382,7 +382,7 @@ class _EditScreenState extends State<EditScreen> {
                   const SizedBox(height: 32),
                   CustomTextField(
                     controller: _nameController,
-                    label: l10n.fullName,
+                    label: l10n.userNameLabel,
                     prefixIcon: Icons.person,
                     hint: l10n.enterName,
                     validator: (value) {

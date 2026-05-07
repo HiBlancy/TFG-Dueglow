@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'dart:io';
+import '../constants/product_category_catalog.dart';
 import '../models/beauty_product.dart';
 import '../models/product_list_type.dart';
 import '../services/product_service.dart';
@@ -31,7 +32,6 @@ class _EditProductDialogState extends State<EditProductDialog> {
   late final TextEditingController _brandController;
   late final TextEditingController _notesController;
   late final TextEditingController _periodAfterOpeningController;
-  final TextEditingController _newCategoryController = TextEditingController();
 
   int? _rating;
   DateTime? _expirationDate;
@@ -68,7 +68,6 @@ class _EditProductDialogState extends State<EditProductDialog> {
     _brandController.dispose();
     _notesController.dispose();
     _periodAfterOpeningController.dispose();
-    _newCategoryController.dispose();
     super.dispose();
   }
 
@@ -231,13 +230,93 @@ class _EditProductDialogState extends State<EditProductDialog> {
     }
   }
 
-  void _addCategory() {
-    if (_newCategoryController.text.trim().isNotEmpty) {
-      setState(() {
-        _categories.add(_newCategoryController.text.trim());
-        _newCategoryController.clear();
-      });
-    }
+  Future<void> _openCategorySelector() async {
+    final l10n = AppLocalizations.of(context)!;
+    final temporarySelection = List<String>.from(_categories);
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.category_outlined),
+                        const SizedBox(width: 8),
+                        Text(
+                          l10n.selectCategoriesTitle,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Flexible(
+                      child: ListView(
+                        shrinkWrap: true,
+                        children: ProductCategoryCatalog.sections.map((section) {
+                              return ExpansionTile(
+                                title: Text(section.localizedName(l10n)),
+                                children: section.options.map((option) {
+                                  final scopedLabel =
+                                      ProductCategoryCatalog.scopedLabel(
+                                        section.id,
+                                        option.id,
+                                      );
+                                  final isSelected =
+                                      temporarySelection.contains(scopedLabel);
+                                  return CheckboxListTile(
+                                    value: isSelected,
+                                    secondary: Icon(option.icon),
+                                    title: Text(option.localizedName(l10n)),
+                                    controlAffinity:
+                                        ListTileControlAffinity.leading,
+                                    onChanged: (selected) {
+                                      setModalState(() {
+                                        if (selected == true) {
+                                          temporarySelection.add(scopedLabel);
+                                        } else {
+                                          temporarySelection.remove(scopedLabel);
+                                        }
+                                      });
+                                    },
+                                  );
+                                }).toList(),
+                              );
+                            })
+                            .toList(),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            _categories
+                              ..clear()
+                              ..addAll(temporarySelection.toSet().toList());
+                          });
+                          Navigator.pop(context);
+                        },
+                        icon: const Icon(Icons.check),
+                        label: Text(l10n.saveCategorySelection),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   Future<void> _saveProduct() async {
@@ -782,6 +861,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
 
   Widget _buildCategoriesSection(Color borderColor) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final subtleText = theme.colorScheme.onSurface.withValues(alpha: 0.6);
     final chipBg = theme.colorScheme.onSurface.withValues(alpha: 0.08);
 
@@ -824,7 +904,10 @@ class _EditProductDialogState extends State<EditProductDialog> {
             children: _categories
                 .map(
                   (cat) => Chip(
-                    label: Text(cat, style: theme.textTheme.bodySmall),
+                    label: Text(
+                      ProductCategoryCatalog.prettyLabel(cat, l10n),
+                      style: theme.textTheme.bodySmall,
+                    ),
                     backgroundColor: chipBg,
                     side: BorderSide.none,
                     deleteIcon:
@@ -835,23 +918,13 @@ class _EditProductDialogState extends State<EditProductDialog> {
                 .toList(),
           ),
           const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: CustomTextField(
-                  controller: _newCategoryController,
-                  label: '',
-                  prefixIcon: Icons.category,
-                  hint: AppLocalizations.of(context)!.newCategory,
-                ),
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                icon: Icon(Icons.add_circle, color: theme.colorScheme.primary),
-                onPressed: _addCategory,
-                iconSize: 32,
-              ),
-            ],
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: _openCategorySelector,
+              icon: const Icon(Icons.category_outlined),
+              label: Text(l10n.chooseCategories),
+            ),
           ),
         ],
       ),

@@ -514,7 +514,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get noCategorizedProductsSection =>
-      'Вы еще не распределили продукты в этом разделе.\nДобавьте продукты из поиска или списка.';
+      'Вы еще не распределили продукты в этом разделе.\nДобавьте продукты из своего инвентаря, чтобы видеть их по разделам.';
 
   @override
   String get featureInDevelopment => 'Функция в разработке';
@@ -582,6 +582,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get fullName => 'Полное имя';
+
+  @override
+  String get userNameLabel => 'Имя пользователя';
 
   @override
   String get enterName => 'Введите имя';
@@ -903,4 +906,109 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get save => 'Сохранить';
+
+  @override
+  String get selectCategoriesTitle => 'Выберите категории';
+
+  @override
+  String get chooseCategories => 'Выбрать категории';
+
+  @override
+  String get saveCategorySelection => 'Сохранить выбор';
+
+  @override
+  String get sectionFacial => 'Лицо';
+
+  @override
+  String get sectionCorporal => 'Тело';
+
+  @override
+  String get sectionCapilar => 'Волосы';
+
+  @override
+  String get sectionMaquillaje => 'Макияж';
+
+  @override
+  String get sectionMedicamentosSuplementos => 'Лекарства и добавки';
+
+  @override
+  String get sectionOtros => 'Другое';
+
+  @override
+  String get subLimpieza => 'Очищение';
+
+  @override
+  String get subSerums => 'Сыворотки';
+
+  @override
+  String get subCremas => 'Кремы';
+
+  @override
+  String get subContornoOjos => 'Контур глаз';
+
+  @override
+  String get subTratamientos => 'Уход';
+
+  @override
+  String get subProteccion => 'Защита';
+
+  @override
+  String get subGel => 'Гель';
+
+  @override
+  String get subCrema => 'Крем';
+
+  @override
+  String get subManos => 'Руки';
+
+  @override
+  String get subDesodorante => 'Дезодорант';
+
+  @override
+  String get subChampu => 'Шампунь';
+
+  @override
+  String get subMascarilla => 'Маска';
+
+  @override
+  String get subAcondicionador => 'Кондиционер';
+
+  @override
+  String get subSerumCapilar => 'Сыворотка для волос';
+
+  @override
+  String get subRostro => 'Лицо';
+
+  @override
+  String get subOjos => 'Глаза';
+
+  @override
+  String get subLabios => 'Губы';
+
+  @override
+  String get subCejas => 'Брови';
+
+  @override
+  String get subMedicamentos => 'Лекарства';
+
+  @override
+  String get subSuplementos => 'Добавки';
+
+  @override
+  String get subUnas => 'Ногти';
+
+  @override
+  String get subFragancia => 'Ароматы';
+
+  @override
+  String get subCacaoLabial => 'Бальзам для губ';
+
+  @override
+  String get subHigieneIntima => 'Интимная гигиена';
+
+  @override
+  String get subSolaresCorporales => 'Солнцезащита для тела';
+
+  @override
+  String get subOtros => 'Другое';
 }

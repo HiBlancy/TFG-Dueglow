@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import '../constants/product_category_catalog.dart';
+import '../models/beauty_product.dart';
+import '../services/product_service.dart';
+import 'product_screen.dart';
 import '../widgets/main_toolbar.dart';
-import '../widgets/custom_button.dart';
 import '../l10n/app_localizations.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -11,49 +14,29 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final Map<String, List<Map<String, dynamic>>> _stashData = {
-    'Facial': [
-      {'name': 'Limpieza', 'icon': Icons.water_drop_outlined},
-      {'name': 'Sérums', 'icon': Icons.science_outlined},
-      {'name': 'Hidratación', 'icon': Icons.spa_outlined},
-      {'name': 'Tratamientos', 'icon': Icons.auto_fix_high_outlined},
-      {'name': 'Protección', 'icon': Icons.wb_sunny_outlined},
-    ],
-    'Corporal': [
-      {'name': 'Gel exfoliante', 'icon': Icons.grain},
-      {'name': 'Crema', 'icon': Icons.clean_hands_outlined},
-      {'name': 'Manos', 'icon': Icons.front_hand_outlined},
-      {'name': 'Desodorante', 'icon': Icons.air_outlined},
-    ],
-    'Capilar': [
-      {'name': 'Champú', 'icon': Icons.wash_outlined},
-      {'name': 'Mascarilla', 'icon': Icons.face_retouching_natural},
-      {'name': 'Acondicionador', 'icon': Icons.water_outlined},
-      {'name': 'Sérum capilar', 'icon': Icons.spa_outlined},
-    ],
-    'Maquillaje': [
-      {'name': 'Rostro', 'icon': Icons.brush_outlined},
-      {'name': 'Ojos', 'icon': Icons.remove_red_eye_outlined},
-      {'name': 'Labios', 'icon': Icons.face_4_outlined},
-      {'name': 'Cejas', 'icon': Icons.auto_awesome_outlined},
-    ],
-    'Otros': [
-      {'name': 'Uñas', 'icon': Icons.back_hand_outlined},
-      {'name': 'Fragancia', 'icon': Icons.local_florist_outlined},
-      {'name': 'Higiene íntima', 'icon': Icons.sanitizer_outlined},
-      {'name': 'Solares corporales', 'icon': Icons.sunny},
-    ],
-  };
-
+  final ProductService _productService = ProductService();
   final Map<String, String> _selectedSubcategories = {};
+  List<BeautyProduct> _products = [];
+  bool _isLoadingProducts = false;
 
   @override
   void initState() {
     super.initState();
-    _stashData.forEach((key, value) {
-      if (value.isNotEmpty) {
-        _selectedSubcategories[key] = value.first['name'];
+    for (final section in ProductCategoryCatalog.sections) {
+      if (section.options.isNotEmpty) {
+        _selectedSubcategories[section.id] = section.options.first.id;
       }
+    }
+    _loadProducts();
+  }
+
+  Future<void> _loadProducts() async {
+    setState(() => _isLoadingProducts = true);
+    final paginated = await _productService.getProducts(listType: 'have', limit: 200);
+    if (!mounted) return;
+    setState(() {
+      _products = paginated?.products ?? [];
+      _isLoadingProducts = false;
     });
   }
 
@@ -62,7 +45,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final isDark = theme.brightness == Brightness.dark;
-    final tabs = _stashData.keys.toList();
+    final tabs = ProductCategoryCatalog.sections;
 
     return DefaultTabController(
       length: tabs.length,
@@ -77,7 +60,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Expanded(
               child: TabBarView(
                 children: tabs
-                    .map((tab) => _buildTabContent(tab, theme, isDark))
+                    .map((tab) => _buildTabContent(tab.id, theme, isDark))
                     .toList(),
               ),
             ),
@@ -87,7 +70,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildTabBar(ThemeData theme, List<String> tabs, bool isDark) {
+  Widget _buildTabBar(ThemeData theme, List<CategorySection> tabs, bool isDark) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       color: theme.colorScheme.surface,
       child: Column(
@@ -115,7 +99,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   (tab) => Tab(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Text(tab),
+                      child: Text(tab.localizedName(l10n)),
                     ),
                   ),
                 )
@@ -133,8 +117,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildTabContent(String categoryName, ThemeData theme, bool isDark) {
-    final subcategories = _stashData[categoryName] ?? [];
+    final section = ProductCategoryCatalog.getSection(categoryName);
+    final subcategories = section?.options ?? [];
     final selectedSub = _selectedSubcategories[categoryName];
+    final filteredProducts = _filterProducts(categoryName, selectedSub);
 
     return SingleChildScrollView(
       child: Column(
@@ -147,15 +133,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
             isDark,
           ),
 
-          _buildEmptyState(selectedSub, subcategories, theme, isDark),
+          if (_isLoadingProducts)
+            const Padding(
+              padding: EdgeInsets.all(40),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (filteredProducts.isEmpty)
+            _buildEmptyState(selectedSub, subcategories, theme, isDark)
+          else
+            _buildProductsList(filteredProducts, theme),
         ],
       ),
     );
   }
 
+  List<BeautyProduct> _filterProducts(String sectionId, String? subcategoryId) {
+    if (subcategoryId == null) return const [];
+    return _products.where((product) {
+      final categories = product.categories;
+      if (categories == null || categories.isEmpty) return false;
+      return ProductCategoryCatalog.matchesSubcategory(
+        categories: categories,
+        sectionId: sectionId,
+        subcategoryId: subcategoryId,
+      );
+    }).toList();
+  }
+
   Widget _buildSubcategorySelector(
     String categoryName,
-    List<Map<String, dynamic>> subcategories,
+    List<CategoryOption> subcategories,
     String? selectedSub,
     ThemeData theme,
     bool isDark,
@@ -167,13 +174,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           final isSmallScreen = constraints.maxWidth < 520;
 
           final cards = subcategories.map((sub) {
-            final isSelected = sub['name'] == selectedSub;
+            final isSelected = sub.id == selectedSub;
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               child: GestureDetector(
                 onTap: () {
                   setState(
-                    () => _selectedSubcategories[categoryName] = sub['name'],
+                    () => _selectedSubcategories[categoryName] = sub.id,
                   );
                 },
                 child: _buildSubcategoryCard(sub, isSelected, theme, isDark),
@@ -200,7 +207,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildSubcategoryCard(
-    Map<String, dynamic> sub,
+    CategoryOption sub,
     bool isSelected,
     ThemeData theme,
     bool isDark,
@@ -238,7 +245,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 : null,
           ),
           child: Icon(
-            sub['icon'] as IconData,
+            sub.icon,
             size: 28,
             color: isSelected
                 ? theme.colorScheme.primary
@@ -250,7 +257,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         SizedBox(
           width: 92,
           child: Text(
-            sub['name'] as String,
+            sub.localizedName(AppLocalizations.of(context)!),
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -269,7 +276,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildEmptyState(
     String? selectedSub,
-    List<Map<String, dynamic>> subcategories,
+    List<CategoryOption> subcategories,
     ThemeData theme,
     bool isDark,
   ) {
@@ -278,7 +285,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     final selectedItem = subcategories.firstWhere(
-      (s) => s['name'] == selectedSub,
+      (s) => s.id == selectedSub,
       orElse: () => subcategories.first,
     );
 
@@ -307,7 +314,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               color: theme.colorScheme.primary.withValues(alpha: 0.15),
             ),
             child: Icon(
-              selectedItem['icon'] as IconData,
+              selectedItem.icon,
               size: 64,
               color: theme.colorScheme.primary.withValues(alpha: 0.6),
             ),
@@ -315,7 +322,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 28),
 
           Text(
-            AppLocalizations.of(context)!.yourProductsOf(selectedSub),
+            AppLocalizations.of(context)!.yourProductsOf(
+              selectedItem.localizedName(AppLocalizations.of(context)!),
+            ),
             textAlign: TextAlign.center,
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
@@ -332,44 +341,50 @@ class _ProfileScreenState extends State<ProfileScreen> {
               height: 1.5,
             ),
           ),
-          const SizedBox(height: 32),
-
-          SizedBox(
-            width: double.infinity,
-            child: CustomButton(
-              text: AppLocalizations.of(context)!.addProduct,
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Row(
-                      children: [
-                        Icon(Icons.info, color: theme.colorScheme.onPrimary),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            AppLocalizations.of(context)!.featureInDevelopment,
-                            style: TextStyle(
-                              color: theme.colorScheme.onPrimary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    backgroundColor: theme.colorScheme.primary,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                );
-              },
-              type: ButtonType.primary,
-              size: ButtonSize.full,
-              icon: Icons.add,
-            ),
-          ),
         ],
       ),
+    );
+  }
+
+  Widget _buildProductsList(List<BeautyProduct> products, ThemeData theme) {
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      itemCount: products.length,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      separatorBuilder: (_, _) => const SizedBox(height: 10),
+      itemBuilder: (context, index) {
+        final product = products[index];
+        return Card(
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            leading: CircleAvatar(
+              backgroundColor: theme.colorScheme.primaryContainer,
+              backgroundImage: (product.imageUrl?.isNotEmpty == true)
+                  ? NetworkImage(product.imageUrl!)
+                  : null,
+              child: (product.imageUrl?.isNotEmpty == true)
+                  ? null
+                  : Icon(Icons.spa_outlined, color: theme.colorScheme.primary),
+            ),
+            title: Text(product.name),
+            subtitle: Text(
+              product.brand?.trim().isNotEmpty == true
+                  ? product.brand!
+                  : AppLocalizations.of(context)!.noBrand,
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ProductScreen(product: product),
+                ),
+              ).then((_) => _loadProducts());
+            },
+          ),
+        );
+      },
     );
   }
 }

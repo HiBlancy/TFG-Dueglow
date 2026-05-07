@@ -1,6 +1,7 @@
 
 import 'dart:io';
 import 'package:dueglow/constants/app_constants.dart';
+import 'package:dueglow/constants/product_category_catalog.dart';
 import 'package:flutter/material.dart';
 import '../models/beauty_product.dart';
 import '../services/product_service.dart';
@@ -27,7 +28,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final _barcodeController = TextEditingController();
   final _paoController = TextEditingController();
   final _notesController = TextEditingController();
-  final _newCategoryController = TextEditingController();
 
   DateTime? _expirationDate;
   DateTime? _openedDate;
@@ -48,7 +48,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
     _barcodeController.dispose();
     _paoController.dispose();
     _notesController.dispose();
-    _newCategoryController.dispose();
     super.dispose();
   }
 
@@ -161,14 +160,93 @@ class _AddProductScreenState extends State<AddProductScreen> {
     if (picked != null && mounted) setState(() => onDateSelected(picked));
   }
 
-  void _addCategory() {
-    final newCat = _newCategoryController.text.trim();
-    if (newCat.isNotEmpty && !_categories.contains(newCat)) {
-      setState(() {
-        _categories.add(newCat);
-        _newCategoryController.clear();
-      });
-    }
+  Future<void> _openCategorySelector() async {
+    final l10n = AppLocalizations.of(context)!;
+    final temporarySelection = List<String>.from(_categories);
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.category_outlined),
+                        const SizedBox(width: 8),
+                        Text(
+                          l10n.selectCategoriesTitle,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Flexible(
+                      child: ListView(
+                        shrinkWrap: true,
+                        children: ProductCategoryCatalog.sections.map((section) {
+                              return ExpansionTile(
+                                title: Text(section.localizedName(l10n)),
+                                children: section.options.map((option) {
+                                  final scopedLabel =
+                                      ProductCategoryCatalog.scopedLabel(
+                                        section.id,
+                                        option.id,
+                                      );
+                                  final isSelected =
+                                      temporarySelection.contains(scopedLabel);
+                                  return CheckboxListTile(
+                                    value: isSelected,
+                                    secondary: Icon(option.icon),
+                                    title: Text(option.localizedName(l10n)),
+                                    controlAffinity:
+                                        ListTileControlAffinity.leading,
+                                    onChanged: (selected) {
+                                      setModalState(() {
+                                        if (selected == true) {
+                                          temporarySelection.add(scopedLabel);
+                                        } else {
+                                          temporarySelection.remove(scopedLabel);
+                                        }
+                                      });
+                                    },
+                                  );
+                                }).toList(),
+                              );
+                            })
+                            .toList(),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            _categories
+                              ..clear()
+                              ..addAll(temporarySelection.toSet().toList());
+                          });
+                          Navigator.pop(context);
+                        },
+                        icon: const Icon(Icons.check),
+                        label: Text(l10n.saveCategorySelection),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
 
@@ -259,7 +337,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
       _barcodeController.clear();
       _paoController.clear();
       _notesController.clear();
-      _newCategoryController.clear();
       _expirationDate = null;
       _openedDate = null;
       _categories.clear();
@@ -743,30 +820,17 @@ class _AddProductScreenState extends State<AddProductScreen> {
   }
 
   Widget _buildCategoriesSection(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: CustomTextField(
-                controller: _newCategoryController,
-                label: AppLocalizations.of(context)!.category,
-                prefixIcon: Icons.category_outlined,
-                hint: AppLocalizations.of(context)!.categoryHint,
-              ),
-            ),
-            const SizedBox(width: 8),
-            IconButton.filled(
-              onPressed: _addCategory,
-              icon: const Icon(Icons.add),
-              style: IconButton.styleFrom(
-                backgroundColor: theme.colorScheme.primaryContainer,
-                foregroundColor: theme.colorScheme.primary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-          ],
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: _openCategorySelector,
+            icon: const Icon(Icons.category_outlined),
+            label: Text(l10n.chooseCategories),
+          ),
         ),
         if (_categories.isNotEmpty) ...[
           const SizedBox(height: 12),
@@ -774,7 +838,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
             spacing: 8,
             runSpacing: 8,
             children: _categories.map((cat) => Chip(
-              label: Text(cat, style: const TextStyle(fontSize: 12)),
+              label: Text(ProductCategoryCatalog.prettyLabel(cat, l10n), style: const TextStyle(fontSize: 12)),
               onDeleted: () => setState(() => _categories.remove(cat)),
               backgroundColor: theme.colorScheme.surface,
               side: BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),

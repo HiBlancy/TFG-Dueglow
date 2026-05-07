@@ -241,7 +241,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       CustomTextField(
         controller: _nameController,
-        label: AppLocalizations.of(context)!.fullName,
+        label: AppLocalizations.of(context)!.userNameLabel,
         hint: AppLocalizations.of(context)!.enterName,
         prefixIcon: Icons.person_outline,
         validator: (value) {

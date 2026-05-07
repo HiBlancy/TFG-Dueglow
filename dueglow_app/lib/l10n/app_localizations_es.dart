@@ -509,7 +509,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get noCategorizedProductsSection =>
-      'Aún no has categorizado ningún producto en esta sección.\nAgrega productos desde la búsqueda o tu lista.';
+      'Aún no has categorizado ningún producto en esta sección.\nAgrega productos desde tu inventario para verlos ordenados por sección.';
 
   @override
   String get featureInDevelopment => 'Funcionalidad en desarrollo';
@@ -577,6 +577,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get fullName => 'Nombre completo';
+
+  @override
+  String get userNameLabel => 'Nombre de usuario';
 
   @override
   String get enterName => 'Ingrese su nombre';
@@ -898,4 +901,109 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get save => 'Guardar';
+
+  @override
+  String get selectCategoriesTitle => 'Selecciona categorías';
+
+  @override
+  String get chooseCategories => 'Elegir categorías';
+
+  @override
+  String get saveCategorySelection => 'Guardar selección';
+
+  @override
+  String get sectionFacial => 'Facial';
+
+  @override
+  String get sectionCorporal => 'Corporal';
+
+  @override
+  String get sectionCapilar => 'Capilar';
+
+  @override
+  String get sectionMaquillaje => 'Maquillaje';
+
+  @override
+  String get sectionMedicamentosSuplementos => 'Medicamentos y suplementos';
+
+  @override
+  String get sectionOtros => 'Otros';
+
+  @override
+  String get subLimpieza => 'Limpieza';
+
+  @override
+  String get subSerums => 'Sérums';
+
+  @override
+  String get subCremas => 'Cremas';
+
+  @override
+  String get subContornoOjos => 'Contorno de ojos';
+
+  @override
+  String get subTratamientos => 'Tratamientos';
+
+  @override
+  String get subProteccion => 'Protección';
+
+  @override
+  String get subGel => 'Gel';
+
+  @override
+  String get subCrema => 'Crema';
+
+  @override
+  String get subManos => 'Manos';
+
+  @override
+  String get subDesodorante => 'Desodorante';
+
+  @override
+  String get subChampu => 'Champú';
+
+  @override
+  String get subMascarilla => 'Mascarilla';
+
+  @override
+  String get subAcondicionador => 'Acondicionador';
+
+  @override
+  String get subSerumCapilar => 'Sérum capilar';
+
+  @override
+  String get subRostro => 'Rostro';
+
+  @override
+  String get subOjos => 'Ojos';
+
+  @override
+  String get subLabios => 'Labios';
+
+  @override
+  String get subCejas => 'Cejas';
+
+  @override
+  String get subMedicamentos => 'Medicamentos';
+
+  @override
+  String get subSuplementos => 'Suplementos';
+
+  @override
+  String get subUnas => 'Uñas';
+
+  @override
+  String get subFragancia => 'Fragancia';
+
+  @override
+  String get subCacaoLabial => 'Cacao de labios';
+
+  @override
+  String get subHigieneIntima => 'Higiene íntima';
+
+  @override
+  String get subSolaresCorporales => 'Solares corporales';
+
+  @override
+  String get subOtros => 'Otros';
 }

@@ -1021,7 +1021,7 @@ abstract class AppLocalizations {
   /// No description provided for @noCategorizedProductsSection.
   ///
   /// In es, this message translates to:
-  /// **'Aún no has categorizado ningún producto en esta sección.\nAgrega productos desde la búsqueda o tu lista.'**
+  /// **'Aún no has categorizado ningún producto en esta sección.\nAgrega productos desde tu inventario para verlos ordenados por sección.'**
   String get noCategorizedProductsSection;
 
   /// No description provided for @featureInDevelopment.
@@ -1143,6 +1143,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Nombre completo'**
   String get fullName;
+
+  /// No description provided for @userNameLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre de usuario'**
+  String get userNameLabel;
 
   /// No description provided for @enterName.
   ///
@@ -1743,6 +1749,216 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Guardar'**
   String get save;
+
+  /// No description provided for @selectCategoriesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Selecciona categorías'**
+  String get selectCategoriesTitle;
+
+  /// No description provided for @chooseCategories.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegir categorías'**
+  String get chooseCategories;
+
+  /// No description provided for @saveCategorySelection.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar selección'**
+  String get saveCategorySelection;
+
+  /// No description provided for @sectionFacial.
+  ///
+  /// In es, this message translates to:
+  /// **'Facial'**
+  String get sectionFacial;
+
+  /// No description provided for @sectionCorporal.
+  ///
+  /// In es, this message translates to:
+  /// **'Corporal'**
+  String get sectionCorporal;
+
+  /// No description provided for @sectionCapilar.
+  ///
+  /// In es, this message translates to:
+  /// **'Capilar'**
+  String get sectionCapilar;
+
+  /// No description provided for @sectionMaquillaje.
+  ///
+  /// In es, this message translates to:
+  /// **'Maquillaje'**
+  String get sectionMaquillaje;
+
+  /// No description provided for @sectionMedicamentosSuplementos.
+  ///
+  /// In es, this message translates to:
+  /// **'Medicamentos y suplementos'**
+  String get sectionMedicamentosSuplementos;
+
+  /// No description provided for @sectionOtros.
+  ///
+  /// In es, this message translates to:
+  /// **'Otros'**
+  String get sectionOtros;
+
+  /// No description provided for @subLimpieza.
+  ///
+  /// In es, this message translates to:
+  /// **'Limpieza'**
+  String get subLimpieza;
+
+  /// No description provided for @subSerums.
+  ///
+  /// In es, this message translates to:
+  /// **'Sérums'**
+  String get subSerums;
+
+  /// No description provided for @subCremas.
+  ///
+  /// In es, this message translates to:
+  /// **'Cremas'**
+  String get subCremas;
+
+  /// No description provided for @subContornoOjos.
+  ///
+  /// In es, this message translates to:
+  /// **'Contorno de ojos'**
+  String get subContornoOjos;
+
+  /// No description provided for @subTratamientos.
+  ///
+  /// In es, this message translates to:
+  /// **'Tratamientos'**
+  String get subTratamientos;
+
+  /// No description provided for @subProteccion.
+  ///
+  /// In es, this message translates to:
+  /// **'Protección'**
+  String get subProteccion;
+
+  /// No description provided for @subGel.
+  ///
+  /// In es, this message translates to:
+  /// **'Gel'**
+  String get subGel;
+
+  /// No description provided for @subCrema.
+  ///
+  /// In es, this message translates to:
+  /// **'Crema'**
+  String get subCrema;
+
+  /// No description provided for @subManos.
+  ///
+  /// In es, this message translates to:
+  /// **'Manos'**
+  String get subManos;
+
+  /// No description provided for @subDesodorante.
+  ///
+  /// In es, this message translates to:
+  /// **'Desodorante'**
+  String get subDesodorante;
+
+  /// No description provided for @subChampu.
+  ///
+  /// In es, this message translates to:
+  /// **'Champú'**
+  String get subChampu;
+
+  /// No description provided for @subMascarilla.
+  ///
+  /// In es, this message translates to:
+  /// **'Mascarilla'**
+  String get subMascarilla;
+
+  /// No description provided for @subAcondicionador.
+  ///
+  /// In es, this message translates to:
+  /// **'Acondicionador'**
+  String get subAcondicionador;
+
+  /// No description provided for @subSerumCapilar.
+  ///
+  /// In es, this message translates to:
+  /// **'Sérum capilar'**
+  String get subSerumCapilar;
+
+  /// No description provided for @subRostro.
+  ///
+  /// In es, this message translates to:
+  /// **'Rostro'**
+  String get subRostro;
+
+  /// No description provided for @subOjos.
+  ///
+  /// In es, this message translates to:
+  /// **'Ojos'**
+  String get subOjos;
+
+  /// No description provided for @subLabios.
+  ///
+  /// In es, this message translates to:
+  /// **'Labios'**
+  String get subLabios;
+
+  /// No description provided for @subCejas.
+  ///
+  /// In es, this message translates to:
+  /// **'Cejas'**
+  String get subCejas;
+
+  /// No description provided for @subMedicamentos.
+  ///
+  /// In es, this message translates to:
+  /// **'Medicamentos'**
+  String get subMedicamentos;
+
+  /// No description provided for @subSuplementos.
+  ///
+  /// In es, this message translates to:
+  /// **'Suplementos'**
+  String get subSuplementos;
+
+  /// No description provided for @subUnas.
+  ///
+  /// In es, this message translates to:
+  /// **'Uñas'**
+  String get subUnas;
+
+  /// No description provided for @subFragancia.
+  ///
+  /// In es, this message translates to:
+  /// **'Fragancia'**
+  String get subFragancia;
+
+  /// No description provided for @subCacaoLabial.
+  ///
+  /// In es, this message translates to:
+  /// **'Cacao de labios'**
+  String get subCacaoLabial;
+
+  /// No description provided for @subHigieneIntima.
+  ///
+  /// In es, this message translates to:
+  /// **'Higiene íntima'**
+  String get subHigieneIntima;
+
+  /// No description provided for @subSolaresCorporales.
+  ///
+  /// In es, this message translates to:
+  /// **'Solares corporales'**
+  String get subSolaresCorporales;
+
+  /// No description provided for @subOtros.
+  ///
+  /// In es, this message translates to:
+  /// **'Otros'**
+  String get subOtros;
 }
 
 class _AppLocalizationsDelegate
