@@ -5,6 +5,8 @@ import '../l10n/app_localizations.dart';
 
 class CustomAppBar extends StatelessWidget {
   final String title;
+  /// When set, replaces the default [title] text (e.g. branded app mark).
+  final Widget? titleWidget;
   final Widget child;
   final List<Widget>? actions;
   final bool showDrawer;
@@ -16,6 +18,7 @@ class CustomAppBar extends StatelessWidget {
   const CustomAppBar({
     super.key,
     required this.title,
+    this.titleWidget,
     required this.child,
     this.actions,
     this.showDrawer = true,
@@ -33,7 +36,8 @@ class CustomAppBar extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(title, style: TextStyle(color: foregroundColor)),
+        title: titleWidget ??
+            Text(title, style: TextStyle(color: foregroundColor)),
         centerTitle: true,
         backgroundColor: backgroundColor,
         scrolledUnderElevation: 0,

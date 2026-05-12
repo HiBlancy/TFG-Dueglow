@@ -3,11 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeProvider extends ChangeNotifier {
-  ThemeMode _themeMode = ThemeMode.system;
+  ThemeMode _themeMode;
   static const String _themeKey = 'theme_mode';
 
-  ThemeProvider() {
-    _loadTheme();
+  ThemeProvider({required ThemeMode initial}) : _themeMode = initial;
+
+  /// Read persisted theme so the first frame already matches saved preference.
+  static Future<ThemeMode> readInitialThemeMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    final themeModeIndex = prefs.getInt(_themeKey);
+    if (themeModeIndex != null &&
+        themeModeIndex >= 0 &&
+        themeModeIndex < ThemeMode.values.length) {
+      return ThemeMode.values[themeModeIndex];
+    }
+    return ThemeMode.system;
   }
 
   ThemeMode get themeMode => _themeMode;
@@ -15,16 +25,6 @@ class ThemeProvider extends ChangeNotifier {
   bool get isDarkMode {
 
     return _themeMode == ThemeMode.dark;
-  }
-
-  Future<void> _loadTheme() async {
-    final prefs = await SharedPreferences.getInstance();
-    final themeModeIndex = prefs.getInt(_themeKey);
-
-    if (themeModeIndex != null && themeModeIndex >= 0 && themeModeIndex < ThemeMode.values.length) {
-      _themeMode = ThemeMode.values[themeModeIndex];
-      notifyListeners();
-    }
   }
 
   Future<void> _saveTheme(ThemeMode mode) async {

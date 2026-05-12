@@ -125,8 +125,17 @@ class _ThemeTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final theme = Theme.of(context);
+    final resolvedBrightness = theme.brightness;
 
     final l10n = AppLocalizations.of(context)!;
+
+    // ThemeMode.system follows the device; settings only lists light/dark, so
+    // mark the row that matches what the user actually sees.
+    final mode = themeProvider.themeMode;
+    final lightSelected = mode == ThemeMode.light ||
+        (mode == ThemeMode.system && resolvedBrightness == Brightness.light);
+    final darkSelected = mode == ThemeMode.dark ||
+        (mode == ThemeMode.system && resolvedBrightness == Brightness.dark);
 
     return Column(
       children: [
@@ -134,7 +143,7 @@ class _ThemeTile extends StatelessWidget {
         ListTile(
           leading: Icon(Icons.light_mode, color: theme.colorScheme.primary),
           title: Text(l10n.lightMode),
-          trailing: themeProvider.themeMode == ThemeMode.light
+          trailing: lightSelected
               ? Icon(Icons.check_circle, color: theme.colorScheme.primary)
               : null,
           onTap: () => themeProvider.setLightMode(),
@@ -144,7 +153,7 @@ class _ThemeTile extends StatelessWidget {
         ListTile(
           leading: Icon(Icons.dark_mode, color: theme.colorScheme.primary),
           title: Text(l10n.darkMode),
-          trailing: themeProvider.themeMode == ThemeMode.dark
+          trailing: darkSelected
               ? Icon(Icons.check_circle, color: theme.colorScheme.primary)
               : null,
           onTap: () => themeProvider.setDarkMode(),

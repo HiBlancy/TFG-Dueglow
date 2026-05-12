@@ -4,6 +4,8 @@ import '../models/routine_model.dart';
 import '../models/beauty_product.dart';
 import '../services/routine_service.dart';
 import '../services/product_service.dart';
+import '../constants/app_constants.dart';
+import '../widgets/app_brand_title.dart';
 import '../widgets/main_toolbar.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_text_field.dart';
@@ -478,7 +480,8 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
         if (!didPop) Navigator.pop(context, _hasChanges);
       },
       child: CustomAppBar(
-        title: _routine.name,
+        title: AppConstants.appName,
+        titleWidget: const AppBrandTitle(),
         showDrawer: false,
         showBackButton: true,
         onBack: () => Navigator.pop(context, _hasChanges),

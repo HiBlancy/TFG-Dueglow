@@ -17,11 +17,15 @@ import 'widgets/bottom_app_bar.dart';
 import 'constants/app_constants.dart';
 import '../l10n/app_localizations.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final initialTheme = await ThemeProvider.readInitialThemeMode();
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(
+          create: (_) => ThemeProvider(initial: initialTheme),
+        ),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
       ],
       child: const MyApp(),

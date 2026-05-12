@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../models/beauty_product.dart';
 import '../models/product_list_type.dart';
 import '../models/routine_model.dart';
 import '../services/product_service.dart';
 import '../services/routine_service.dart';
+import '../widgets/app_brand_title.dart';
 import '../widgets/edit_product_dialog.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/warning_dialog.dart';
@@ -698,17 +698,7 @@ class _ProductScreenState extends State<ProductScreen> {
         elevation: 0,
         backgroundColor: theme.colorScheme.surface,
         foregroundColor: theme.colorScheme.primary,
-        title: Text(
-          'DueGlow',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: GoogleFonts.crimsonText(
-            fontSize: 30,
-            fontWeight: FontWeight.w600,
-            fontStyle: FontStyle.italic,
-            color: theme.colorScheme.primary,
-          ),
-        ),
+        title: const AppBrandTitle(),
         actions: [
           if (isProductSaved)
             IconButton(
