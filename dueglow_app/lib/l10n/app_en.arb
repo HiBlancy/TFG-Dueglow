@@ -302,6 +302,7 @@
   "productNameRequiredLabel": "Product name *",
   "productNameHint": "Ex: Moisturizing cream",
   "brand": "Brand",
+  "brandRequiredLabel": "Brand *",
   "brandHint": "Ex: Nivea",
   "expiresLabel": "Expires: {date}",
   "@expiresLabel": {
@@ -426,6 +427,7 @@
   "imageDeletedSuccess": "Image deleted successfully",
   "deleteImageError": "Error deleting image",
   "nameRequiredError": "Name is required",
+  "brandRequiredError": "Brand is required",
   "imageUploadError": "Error uploading image",
   "saveChangesError": "Error saving changes",
   "expirationWithDate": "Expiration: {date}",

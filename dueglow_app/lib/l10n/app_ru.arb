@@ -301,6 +301,7 @@
   "productNameRequiredLabel": "Название продукта *",
   "productNameHint": "Пример: Увлажняющий крем",
   "brand": "Бренд",
+  "brandRequiredLabel": "Бренд *",
   "brandHint": "Пример: Nivea",
   "expiresLabel": "Годен до: {date}",
   "@expiresLabel": {
@@ -425,6 +426,7 @@
   "imageDeletedSuccess": "Изображение успешно удалено",
   "deleteImageError": "Ошибка при удалении изображения",
   "nameRequiredError": "Название обязательно",
+  "brandRequiredError": "Бренд обязателен",
   "imageUploadError": "Ошибка загрузки изображения",
   "saveChangesError": "Ошибка сохранения изменений",
   "expirationWithDate": "Срок годности: {date}",

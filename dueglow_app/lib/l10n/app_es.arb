@@ -303,6 +303,7 @@
   "productNameRequiredLabel": "Nombre del producto *",
   "productNameHint": "Ej: Crema Hidratante",
   "brand": "Marca",
+  "brandRequiredLabel": "Marca *",
   "brandHint": "Ej: Nivea",
   "expiresLabel": "Caduca: {date}",
   "@expiresLabel": {
@@ -427,6 +428,7 @@
   "imageDeletedSuccess": "Imagen eliminada correctamente",
   "deleteImageError": "Error al eliminar la imagen",
   "nameRequiredError": "El nombre es obligatorio",
+  "brandRequiredError": "La marca es obligatoria",
   "imageUploadError": "Error al subir la imagen",
   "saveChangesError": "Error al guardar los cambios",
   "expirationWithDate": "Caducidad: {date}",

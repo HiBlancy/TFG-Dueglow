@@ -324,6 +324,10 @@ class _EditProductDialogState extends State<EditProductDialog> {
     _showSnackBar(AppLocalizations.of(context)!.nameRequiredError, isError: true);
     return;
   }
+  if (_brandController.text.trim().isEmpty) {
+    _showSnackBar(AppLocalizations.of(context)!.brandRequiredError, isError: true);
+    return;
+  }
 
   setState(() => _isUploadingImage = true);
 
@@ -350,7 +354,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
 
     final updatedProductData = {
       'name': _nameController.text.trim(),
-      'brand': _brandController.text.trim().isEmpty ? null : _brandController.text.trim(),
+      'brand': _brandController.text.trim(),
       'categories': _categories.isEmpty ? null : _categories,
       'notes': _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
       'rating': _rating,
@@ -452,7 +456,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
 
                     CustomTextField(
                       controller: _brandController,
-                      label: AppLocalizations.of(context)!.brand,
+                      label: AppLocalizations.of(context)!.brandRequiredLabel,
                       prefixIcon: Icons.branding_watermark,
                       hint: AppLocalizations.of(context)!.brandHint,
                     ),

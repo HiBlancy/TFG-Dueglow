@@ -12,7 +12,6 @@ enum HaveProductsFilter { all, opened, expired }
 enum ProductSortOption {
   addedNewest,
   alphabetical,
-  openedDateNewest,
   expirationSoonest,
 }
 
@@ -184,10 +183,6 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
           return dateB.compareTo(dateA);
         case ProductSortOption.alphabetical:
           return a.name.toLowerCase().compareTo(b.name.toLowerCase());
-        case ProductSortOption.openedDateNewest:
-          final dateA = a.openedDate ?? DateTime.fromMillisecondsSinceEpoch(0);
-          final dateB = b.openedDate ?? DateTime.fromMillisecondsSinceEpoch(0);
-          return dateB.compareTo(dateA);
         case ProductSortOption.expirationSoonest:
           final dateA =
               a.expirationDate ?? DateTime.fromMillisecondsSinceEpoch(253402300799000);
@@ -292,8 +287,6 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
         return 'Recientes';
       case ProductSortOption.alphabetical:
         return 'A-Z';
-      case ProductSortOption.openedDateNewest:
-        return 'Apertura';
       case ProductSortOption.expirationSoonest:
         return 'Caducidad';
     }
@@ -305,8 +298,6 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
         return Icons.schedule;
       case ProductSortOption.alphabetical:
         return Icons.sort_by_alpha;
-      case ProductSortOption.openedDateNewest:
-        return Icons.lock_open;
       case ProductSortOption.expirationSoonest:
         return Icons.event_busy;
     }

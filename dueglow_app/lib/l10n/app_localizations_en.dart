@@ -656,6 +656,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get brand => 'Brand';
 
   @override
+  String get brandRequiredLabel => 'Brand *';
+
+  @override
   String get brandHint => 'Ex: Nivea';
 
   @override
@@ -876,6 +879,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nameRequiredError => 'Name is required';
+
+  @override
+  String get brandRequiredError => 'Brand is required';
 
   @override
   String get imageUploadError => 'Error uploading image';

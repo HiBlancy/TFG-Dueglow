@@ -1300,6 +1300,12 @@ abstract class AppLocalizations {
   /// **'Marca'**
   String get brand;
 
+  /// No description provided for @brandRequiredLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Marca *'**
+  String get brandRequiredLabel;
+
   /// No description provided for @brandHint.
   ///
   /// In es, this message translates to:
@@ -1707,6 +1713,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'El nombre es obligatorio'**
   String get nameRequiredError;
+
+  /// No description provided for @brandRequiredError.
+  ///
+  /// In es, this message translates to:
+  /// **'La marca es obligatoria'**
+  String get brandRequiredError;
 
   /// No description provided for @imageUploadError.
   ///

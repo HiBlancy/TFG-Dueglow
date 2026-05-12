@@ -663,6 +663,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get brand => 'Бренд';
 
   @override
+  String get brandRequiredLabel => 'Бренд *';
+
+  @override
   String get brandHint => 'Пример: Nivea';
 
   @override
@@ -883,6 +886,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get nameRequiredError => 'Название обязательно';
+
+  @override
+  String get brandRequiredError => 'Бренд обязателен';
 
   @override
   String get imageUploadError => 'Ошибка загрузки изображения';

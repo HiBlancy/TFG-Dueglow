@@ -438,7 +438,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
                   CustomTextField(
                     controller: _brandController,
-                    label: AppLocalizations.of(context)!.brand,
+                    label: AppLocalizations.of(context)!.brandRequiredLabel,
                     prefixIcon: Icons.branding_watermark_outlined,
                     hint: AppLocalizations.of(context)!.brandHint,
                     validator: (v) => v?.trim().isEmpty == true ? AppLocalizations.of(context)!.requiredField : null,
