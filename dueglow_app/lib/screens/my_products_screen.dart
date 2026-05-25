@@ -18,8 +18,6 @@ enum ProductSortOption {
 class MyProductsScreen extends StatefulWidget {
   final ProductListType? initialListType;
   final HaveProductsFilter? initialHaveFilter;
-  /// True when this screen is pushed on top of another (e.g. from Home), so the
-  /// app bar shows a back control. False when used as a bottom-tab root.
   final bool showBackButton;
 
   const MyProductsScreen({

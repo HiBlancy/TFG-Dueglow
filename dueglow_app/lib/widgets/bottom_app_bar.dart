@@ -79,7 +79,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
       BottomNavigationBarItem(
         icon: Icon(Icons.category_outlined),
         activeIcon: Icon(Icons.category),
-        label: l10n.profile, // cambiar de perfil a categorias
+        label: l10n.categories,
       ),
     ];
 

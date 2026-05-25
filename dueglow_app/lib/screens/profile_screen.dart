@@ -4,6 +4,7 @@ import '../models/beauty_product.dart';
 import '../services/product_service.dart';
 import 'product_screen.dart';
 import '../widgets/main_toolbar.dart';
+import '../widgets/vanity_product_card.dart';
 import '../l10n/app_localizations.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -141,7 +142,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           else if (filteredProducts.isEmpty)
             _buildEmptyState(selectedSub, subcategories, theme, isDark)
           else
-            _buildProductsList(filteredProducts, theme),
+            _buildProductsList(filteredProducts),
         ],
       ),
     );
@@ -346,43 +347,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProductsList(List<BeautyProduct> products, ThemeData theme) {
-    return ListView.separated(
+  Widget _buildProductsList(List<BeautyProduct> products) {
+    return GridView.builder(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-      itemCount: products.length,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      separatorBuilder: (_, _) => const SizedBox(height: 10),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 14,
+        crossAxisSpacing: 14,
+        childAspectRatio: 0.68,
+      ),
+      itemCount: products.length,
       itemBuilder: (context, index) {
         final product = products[index];
-        return Card(
-          child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            leading: CircleAvatar(
-              backgroundColor: theme.colorScheme.primaryContainer,
-              backgroundImage: (product.imageUrl?.isNotEmpty == true)
-                  ? NetworkImage(product.imageUrl!)
-                  : null,
-              child: (product.imageUrl?.isNotEmpty == true)
-                  ? null
-                  : Icon(Icons.spa_outlined, color: theme.colorScheme.primary),
-            ),
-            title: Text(product.name),
-            subtitle: Text(
-              product.brand?.trim().isNotEmpty == true
-                  ? product.brand!
-                  : AppLocalizations.of(context)!.noBrand,
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ProductScreen(product: product),
-                ),
-              ).then((_) => _loadProducts());
-            },
-          ),
+        return VanityProductCard(
+          product: product,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ProductScreen(product: product),
+              ),
+            ).then((_) => _loadProducts());
+          },
         );
       },
     );
