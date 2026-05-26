@@ -506,5 +506,34 @@
   "faqOpenFinishQ": "How do I mark a product as opened or finished?",
   "faqOpenFinishA": "On the product detail screen you can mark it as opened (today or another date), close it again, or mark it as finished. Finished items are recorded in your monthly usage history.",
   "faqDeleteAccountQ": "How do I delete my account?",
-  "faqDeleteAccountA": "In \"Settings\", at the bottom, tap \"Delete account\". This is permanent: products, routines, images, and all linked data are removed. Only confirm if you are sure."
+  "faqDeleteAccountA": "In \"Settings\", at the bottom, tap \"Delete account\". This is permanent: products, routines, images, and all linked data are removed. Only confirm if you are sure.",
+  "tutorialSkip": "Skip",
+  "tutorialNext": "Next",
+  "tutorialBack": "Back",
+  "tutorialFinish": "Get started!",
+  "tutorialStepOf": "Step {current} of {total}",
+  "@tutorialStepOf": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "tutorialReplayTitle": "View app tutorial",
+  "tutorialReplaySubtitle": "Walk through each section again: home, products, routines, and more.",
+  "tutorialWelcomeTitle": "Welcome to DueGlow",
+  "tutorialWelcomeBody": "We'll guide you through the main sections so you know where everything is and how to move around the app.",
+  "tutorialHomeTitle": "Home",
+  "tutorialHomeBody": "See your next routine, products expiring soon, and your monthly usage summary. This is your daily dashboard.",
+  "tutorialProductsTitle": "My products",
+  "tutorialProductsBody": "Manage what you own, your wishlist, and what you've finished. Filter by opened or expired and tap a product for details.",
+  "tutorialNewTitle": "Add product",
+  "tutorialNewBody": "Create products by scanning a barcode, searching the database, or filling in the details manually.",
+  "tutorialRoutinesTitle": "Routines",
+  "tutorialRoutinesBody": "Create morning or night routines, pick weekdays, and add products from your vanity.",
+  "tutorialVanityTitle": "Vanity by category",
+  "tutorialVanityBody": "Browse your products organized by beauty category: skincare, makeup, hair, and more.",
+  "tutorialDrawerTitle": "Side menu",
+  "tutorialDrawerBody": "Tap the menu icon (☰) at the top right for settings, edit profile, FAQs, and log out.",
+  "tutorialDoneTitle": "You're all set!",
+  "tutorialDoneBody": "You know the essentials. You can replay this tutorial anytime from the top of the FAQs screen."
 }

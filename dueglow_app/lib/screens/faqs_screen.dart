@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../widgets/main_toolbar.dart';
 import '../l10n/app_localizations.dart';
+import '../constants/app_constants.dart';
+import '../models/tutorial_launch.dart';
 
 class FAQsScreen extends StatelessWidget {
   const FAQsScreen({super.key});
@@ -18,6 +20,14 @@ class FAQsScreen extends StatelessWidget {
         _FaqEntry(l10n.faqDeleteAccountQ, l10n.faqDeleteAccountA),
       ];
 
+  void _replayTutorial(BuildContext context) {
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      AppConstants.routeHome,
+      (route) => false,
+      arguments: TutorialLaunch.replay,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -30,11 +40,74 @@ class FAQsScreen extends StatelessWidget {
       showBackButton: true,
       child: ListView.separated(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-        itemCount: entries.length,
+        itemCount: entries.length + 1,
         separatorBuilder: (context, index) => const SizedBox(height: 10),
         itemBuilder: (context, index) {
-          return _FaqTile(entry: entries[index], theme: theme);
+          if (index == 0) {
+            return _TutorialReplayCard(
+              theme: theme,
+              l10n: l10n,
+              onPressed: () => _replayTutorial(context),
+            );
+          }
+          return _FaqTile(entry: entries[index - 1], theme: theme);
         },
+      ),
+    );
+  }
+}
+
+class _TutorialReplayCard extends StatelessWidget {
+  final ThemeData theme;
+  final AppLocalizations l10n;
+  final VoidCallback onPressed;
+
+  const _TutorialReplayCard({
+    required this.theme,
+    required this.l10n,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.35),
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onPressed,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Icon(Icons.school_outlined, color: theme.colorScheme.primary, size: 32),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.tutorialReplayTitle,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.tutorialReplaySubtitle,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: theme.colorScheme.primary),
+            ],
+          ),
+        ),
       ),
     );
   }

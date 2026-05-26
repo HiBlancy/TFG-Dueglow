@@ -1114,4 +1114,84 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get faqDeleteAccountA =>
       'In \"Settings\", at the bottom, tap \"Delete account\". This is permanent: products, routines, images, and all linked data are removed. Only confirm if you are sure.';
+
+  @override
+  String get tutorialSkip => 'Skip';
+
+  @override
+  String get tutorialNext => 'Next';
+
+  @override
+  String get tutorialBack => 'Back';
+
+  @override
+  String get tutorialFinish => 'Get started!';
+
+  @override
+  String tutorialStepOf(int current, int total) {
+    return 'Step $current of $total';
+  }
+
+  @override
+  String get tutorialReplayTitle => 'View app tutorial';
+
+  @override
+  String get tutorialReplaySubtitle =>
+      'Walk through each section again: home, products, routines, and more.';
+
+  @override
+  String get tutorialWelcomeTitle => 'Welcome to DueGlow';
+
+  @override
+  String get tutorialWelcomeBody =>
+      'We\'ll guide you through the main sections so you know where everything is and how to move around the app.';
+
+  @override
+  String get tutorialHomeTitle => 'Home';
+
+  @override
+  String get tutorialHomeBody =>
+      'See your next routine, products expiring soon, and your monthly usage summary. This is your daily dashboard.';
+
+  @override
+  String get tutorialProductsTitle => 'My products';
+
+  @override
+  String get tutorialProductsBody =>
+      'Manage what you own, your wishlist, and what you\'ve finished. Filter by opened or expired and tap a product for details.';
+
+  @override
+  String get tutorialNewTitle => 'Add product';
+
+  @override
+  String get tutorialNewBody =>
+      'Create products by scanning a barcode, searching the database, or filling in the details manually.';
+
+  @override
+  String get tutorialRoutinesTitle => 'Routines';
+
+  @override
+  String get tutorialRoutinesBody =>
+      'Create morning or night routines, pick weekdays, and add products from your vanity.';
+
+  @override
+  String get tutorialVanityTitle => 'Vanity by category';
+
+  @override
+  String get tutorialVanityBody =>
+      'Browse your products organized by beauty category: skincare, makeup, hair, and more.';
+
+  @override
+  String get tutorialDrawerTitle => 'Side menu';
+
+  @override
+  String get tutorialDrawerBody =>
+      'Tap the menu icon (☰) at the top right for settings, edit profile, FAQs, and log out.';
+
+  @override
+  String get tutorialDoneTitle => 'You\'re all set!';
+
+  @override
+  String get tutorialDoneBody =>
+      'You know the essentials. You can replay this tutorial anytime from the top of the FAQs screen.';
 }

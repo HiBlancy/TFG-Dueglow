@@ -18,6 +18,7 @@ import 'widgets/bottom_app_bar.dart';
 import 'constants/app_constants.dart';
 import '../l10n/app_localizations.dart';
 import 'screens/auth_gate_screen.dart';
+import 'models/tutorial_launch.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -72,8 +73,16 @@ class MyApp extends StatelessWidget {
             AppConstants.routeRegister: (context) => const RegisterScreen(),
             AppConstants.routeSplash: (context) => const AuthGateScreen(),
             AppConstants.routeLogin: (context) => const LoginScreen(),
-            AppConstants.routeHome: (context) => const BottomNavBar(),
-            AppConstants.routeProfile: (context) => const BottomNavBar(initialIndex: 4),
+            AppConstants.routeHome: (context) {
+              final args = ModalRoute.of(context)?.settings.arguments;
+              final launch = args is TutorialLaunch ? args : null;
+              return BottomNavBar(tutorialLaunch: launch);
+            },
+            AppConstants.routeProfile: (context) {
+              final args = ModalRoute.of(context)?.settings.arguments;
+              final launch = args is TutorialLaunch ? args : null;
+              return BottomNavBar(initialIndex: 4, tutorialLaunch: launch);
+            },
             AppConstants.routeSettings: (context) => const SettingsScreen(),
             AppConstants.routeScan: (context) => const ScanScreen(),
             AppConstants.routeSearch: (context) => const SearchScreen(),

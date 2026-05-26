@@ -507,5 +507,34 @@
   "faqOpenFinishQ": "¿Cómo marco un producto como abierto o terminado?",
   "faqOpenFinishA": "En el detalle del producto puedes marcarlo como abierto (con la fecha del día u otra), cerrarlo de nuevo o marcarlo como terminado. Los terminados se registran en tu historial de uso mensual.",
   "faqDeleteAccountQ": "¿Cómo borro mi cuenta?",
-  "faqDeleteAccountA": "En «Configuración», al final, está «Borrar cuenta». Es una acción permanente: se eliminan productos, rutinas, imágenes y todos los datos asociados. Solo confírmalo si estás seguro."
+  "faqDeleteAccountA": "En «Configuración», al final, está «Borrar cuenta». Es una acción permanente: se eliminan productos, rutinas, imágenes y todos los datos asociados. Solo confírmalo si estás seguro.",
+  "tutorialSkip": "Saltar",
+  "tutorialNext": "Siguiente",
+  "tutorialBack": "Atrás",
+  "tutorialFinish": "¡Empezar!",
+  "tutorialStepOf": "Paso {current} de {total}",
+  "@tutorialStepOf": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "tutorialReplayTitle": "Ver tutorial de la app",
+  "tutorialReplaySubtitle": "Recorre de nuevo cada sección: inicio, productos, rutinas y más.",
+  "tutorialWelcomeTitle": "Bienvenida a DueGlow",
+  "tutorialWelcomeBody": "Te guiaremos por las secciones principales para que sepas dónde está cada cosa y cómo moverte por la app.",
+  "tutorialHomeTitle": "Inicio",
+  "tutorialHomeBody": "Aquí ves tu próxima rutina, los productos que caducan pronto y el resumen de uso mensual. Es tu panel de control diario.",
+  "tutorialProductsTitle": "Mis productos",
+  "tutorialProductsBody": "Gestiona lo que tienes, tu wishlist y lo que has terminado. Filtra por abiertos o caducados y toca un producto para ver su detalle.",
+  "tutorialNewTitle": "Añadir producto",
+  "tutorialNewBody": "Crea productos escaneando el código de barras, buscando en la base de datos o rellenando los datos a mano.",
+  "tutorialRoutinesTitle": "Rutinas",
+  "tutorialRoutinesBody": "Crea rutinas de mañana o de noche, elige los días de la semana y añade productos de tu tocador.",
+  "tutorialVanityTitle": "Tocador por categorías",
+  "tutorialVanityBody": "Explora tus productos organizados por categoría de belleza: skincare, maquillaje, cabello y más.",
+  "tutorialDrawerTitle": "Menú lateral",
+  "tutorialDrawerBody": "Pulsa el icono de menú (☰) arriba a la derecha para acceder a configuración, editar perfil, preguntas frecuentes y cerrar sesión.",
+  "tutorialDoneTitle": "¡Listo!",
+  "tutorialDoneBody": "Ya conoces lo esencial. Puedes volver a ver este tutorial cuando quieras desde el inicio de las preguntas frecuentes."
 }

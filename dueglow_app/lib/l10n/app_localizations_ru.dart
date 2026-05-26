@@ -1120,4 +1120,84 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get faqDeleteAccountA =>
       'В «Настройках» внизу — «Удалить аккаунт». Это безвозвратно: удаляются продукты, рутины, изображения и все связанные данные. Подтверждайте только если уверены.';
+
+  @override
+  String get tutorialSkip => 'Пропустить';
+
+  @override
+  String get tutorialNext => 'Далее';
+
+  @override
+  String get tutorialBack => 'Назад';
+
+  @override
+  String get tutorialFinish => 'Начать!';
+
+  @override
+  String tutorialStepOf(int current, int total) {
+    return 'Шаг $current из $total';
+  }
+
+  @override
+  String get tutorialReplayTitle => 'Просмотреть обучение';
+
+  @override
+  String get tutorialReplaySubtitle =>
+      'Снова пройдите все разделы: главная, продукты, рутины и другое.';
+
+  @override
+  String get tutorialWelcomeTitle => 'Добро пожаловать в DueGlow';
+
+  @override
+  String get tutorialWelcomeBody =>
+      'Мы покажем основные разделы, чтобы вы знали, где что находится и как пользоваться приложением.';
+
+  @override
+  String get tutorialHomeTitle => 'Главная';
+
+  @override
+  String get tutorialHomeBody =>
+      'Здесь следующая рутина, скоро истекающие продукты и месячная статистика. Ваш ежедневный обзор.';
+
+  @override
+  String get tutorialProductsTitle => 'Мои продукты';
+
+  @override
+  String get tutorialProductsBody =>
+      'Управляйте тем, что есть, wishlist и завершёнными. Фильтруйте по открытым или просроченным и откройте детали продукта.';
+
+  @override
+  String get tutorialNewTitle => 'Добавить продукт';
+
+  @override
+  String get tutorialNewBody =>
+      'Создавайте продукты сканированием штрихкода, поиском в базе или ручным вводом данных.';
+
+  @override
+  String get tutorialRoutinesTitle => 'Рутины';
+
+  @override
+  String get tutorialRoutinesBody =>
+      'Создавайте утренние и вечерние рутины, выбирайте дни недели и добавляйте продукты с туалетного столика.';
+
+  @override
+  String get tutorialVanityTitle => 'Туалетный столик по категориям';
+
+  @override
+  String get tutorialVanityBody =>
+      'Просматривайте продукты по категориям красоты: уход, макияж, волосы и другие.';
+
+  @override
+  String get tutorialDrawerTitle => 'Боковое меню';
+
+  @override
+  String get tutorialDrawerBody =>
+      'Нажмите иконку меню (☰) справа вверху: настройки, профиль, FAQ и выход.';
+
+  @override
+  String get tutorialDoneTitle => 'Готово!';
+
+  @override
+  String get tutorialDoneBody =>
+      'Вы знаете основы. Обучение можно повторить в начале раздела FAQ.';
 }

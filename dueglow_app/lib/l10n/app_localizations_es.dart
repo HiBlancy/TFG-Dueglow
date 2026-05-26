@@ -1117,4 +1117,84 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get faqDeleteAccountA =>
       'En «Configuración», al final, está «Borrar cuenta». Es una acción permanente: se eliminan productos, rutinas, imágenes y todos los datos asociados. Solo confírmalo si estás seguro.';
+
+  @override
+  String get tutorialSkip => 'Saltar';
+
+  @override
+  String get tutorialNext => 'Siguiente';
+
+  @override
+  String get tutorialBack => 'Atrás';
+
+  @override
+  String get tutorialFinish => '¡Empezar!';
+
+  @override
+  String tutorialStepOf(int current, int total) {
+    return 'Paso $current de $total';
+  }
+
+  @override
+  String get tutorialReplayTitle => 'Ver tutorial de la app';
+
+  @override
+  String get tutorialReplaySubtitle =>
+      'Recorre de nuevo cada sección: inicio, productos, rutinas y más.';
+
+  @override
+  String get tutorialWelcomeTitle => 'Bienvenida a DueGlow';
+
+  @override
+  String get tutorialWelcomeBody =>
+      'Te guiaremos por las secciones principales para que sepas dónde está cada cosa y cómo moverte por la app.';
+
+  @override
+  String get tutorialHomeTitle => 'Inicio';
+
+  @override
+  String get tutorialHomeBody =>
+      'Aquí ves tu próxima rutina, los productos que caducan pronto y el resumen de uso mensual. Es tu panel de control diario.';
+
+  @override
+  String get tutorialProductsTitle => 'Mis productos';
+
+  @override
+  String get tutorialProductsBody =>
+      'Gestiona lo que tienes, tu wishlist y lo que has terminado. Filtra por abiertos o caducados y toca un producto para ver su detalle.';
+
+  @override
+  String get tutorialNewTitle => 'Añadir producto';
+
+  @override
+  String get tutorialNewBody =>
+      'Crea productos escaneando el código de barras, buscando en la base de datos o rellenando los datos a mano.';
+
+  @override
+  String get tutorialRoutinesTitle => 'Rutinas';
+
+  @override
+  String get tutorialRoutinesBody =>
+      'Crea rutinas de mañana o de noche, elige los días de la semana y añade productos de tu tocador.';
+
+  @override
+  String get tutorialVanityTitle => 'Tocador por categorías';
+
+  @override
+  String get tutorialVanityBody =>
+      'Explora tus productos organizados por categoría de belleza: skincare, maquillaje, cabello y más.';
+
+  @override
+  String get tutorialDrawerTitle => 'Menú lateral';
+
+  @override
+  String get tutorialDrawerBody =>
+      'Pulsa el icono de menú (☰) arriba a la derecha para acceder a configuración, editar perfil, preguntas frecuentes y cerrar sesión.';
+
+  @override
+  String get tutorialDoneTitle => '¡Listo!';
+
+  @override
+  String get tutorialDoneBody =>
+      'Ya conoces lo esencial. Puedes volver a ver este tutorial cuando quieras desde el inicio de las preguntas frecuentes.';
 }

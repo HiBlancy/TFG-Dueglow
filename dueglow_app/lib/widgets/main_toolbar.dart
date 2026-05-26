@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../constants/app_constants.dart';
 import '../l10n/app_localizations.dart';
+import 'tutorial_target.dart';
 
 class CustomAppBar extends StatelessWidget {
   final String title;
@@ -15,6 +16,9 @@ class CustomAppBar extends StatelessWidget {
   final Color? appBarColor;
   final VoidCallback? onBack;
 
+  /// Only set on the home shell so tutorial spotlight keys stay unique.
+  final String? menuTutorialTargetId;
+
   const CustomAppBar({
     super.key,
     required this.title,
@@ -26,6 +30,7 @@ class CustomAppBar extends StatelessWidget {
     this.bottom,
     this.appBarColor,
     this.onBack,
+    this.menuTutorialTargetId,
   });
 
   @override
@@ -53,10 +58,19 @@ class CustomAppBar extends StatelessWidget {
           ...?actions,
           if (showDrawer)
             Builder(
-              builder: (context) => IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () => Scaffold.of(context).openEndDrawer(),
-              ),
+              builder: (context) {
+                final menuButton = IconButton(
+                  icon: const Icon(Icons.menu),
+                  onPressed: () => Scaffold.of(context).openEndDrawer(),
+                );
+                if (menuTutorialTargetId != null) {
+                  return TutorialTarget(
+                    id: menuTutorialTargetId!,
+                    child: menuButton,
+                  );
+                }
+                return menuButton;
+              },
             ),
         ],
         bottom: bottom,

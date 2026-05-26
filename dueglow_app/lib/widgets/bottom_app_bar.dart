@@ -5,12 +5,18 @@ import '../screens/home_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/routines_screen.dart';
 import '../l10n/app_localizations.dart';
+import '../models/app_tutorial_step.dart';
+import '../models/tutorial_launch.dart';
+import '../services/onboarding_service.dart';
+import 'app_tutorial_overlay.dart';
+import 'tutorial_bottom_nav_bar.dart';
 
 class BottomNavBar extends StatefulWidget {
   final int initialIndex;
   final Widget? child;
   final List<BottomNavigationBarItem>? items;
   final bool showLabels;
+  final TutorialLaunch? tutorialLaunch;
 
   const BottomNavBar({
     super.key,
@@ -18,6 +24,7 @@ class BottomNavBar extends StatefulWidget {
     this.child,
     this.items,
     this.showLabels = true,
+    this.tutorialLaunch,
   });
 
   @override
@@ -27,6 +34,11 @@ class BottomNavBar extends StatefulWidget {
 class _BottomNavBarState extends State<BottomNavBar> {
   late int _currentIndex;
   late List<Widget> _screens;
+
+  bool _tutorialVisible = false;
+  int _tutorialStepIndex = 0;
+  late final List<AppTutorialStep> _tutorialSteps;
+  late final List<GlobalKey> _tabKeys;
 
   @override
   void initState() {
@@ -39,9 +51,65 @@ class _BottomNavBarState extends State<BottomNavBar> {
       RoutinesScreen(),
       ProfileScreen(),
     ];
+    _tutorialSteps = AppTutorialStep.all();
+    _tabKeys = List.generate(5, (_) => GlobalKey());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeStartTutorial());
+  }
+
+  Future<void> _maybeStartTutorial() async {
+    final launch = widget.tutorialLaunch;
+    var show = false;
+
+    if (launch == TutorialLaunch.newUser || launch == TutorialLaunch.replay) {
+      show = true;
+    } else {
+      show = !(await OnboardingService.isCompleted());
+    }
+
+    if (!mounted || !show) return;
+
+    setState(() {
+      _tutorialStepIndex = 0;
+      _tutorialVisible = true;
+      _applyTutorialTab(_tutorialSteps[0]);
+    });
+  }
+
+  void _applyTutorialTab(AppTutorialStep step) {
+    final tab = step.tabIndex;
+    if (tab != null) {
+      _currentIndex = tab;
+    }
+  }
+
+  Future<void> _finishTutorial() async {
+    await OnboardingService.markCompleted();
+    if (!mounted) return;
+    setState(() => _tutorialVisible = false);
+  }
+
+  void _tutorialNext() {
+    final isLast = _tutorialStepIndex >= _tutorialSteps.length - 1;
+    if (isLast) {
+      _finishTutorial();
+      return;
+    }
+    setState(() {
+      _tutorialStepIndex++;
+      _applyTutorialTab(_tutorialSteps[_tutorialStepIndex]);
+    });
+  }
+
+  void _tutorialBack() {
+    if (_tutorialStepIndex <= 0) return;
+    setState(() {
+      _tutorialStepIndex--;
+      _applyTutorialTab(_tutorialSteps[_tutorialStepIndex]);
+    });
   }
 
   void _onTap(int index) {
+    if (_tutorialVisible) return;
     setState(() {
       _currentIndex = index;
     });
@@ -83,31 +151,51 @@ class _BottomNavBarState extends State<BottomNavBar> {
       ),
     ];
 
+    final navItems = widget.items ?? defaultItems;
     final body = widget.child ?? _screens[_currentIndex];
+    final step = _tutorialVisible ? _tutorialSteps[_tutorialStepIndex] : null;
 
-    return Scaffold(
-      body: body,
-
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(color: borderColor, width: 0.5),
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Scaffold(
+          body: body,
+          bottomNavigationBar: Container(
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(color: borderColor, width: 0.5),
+              ),
+            ),
+            child: TutorialBottomNavBar(
+              currentIndex: _currentIndex,
+              onTap: _onTap,
+              items: navItems,
+              tabKeys: _tabKeys,
+              selectedColor: theme.colorScheme.primary,
+              unselectedColor: unselectedColor,
+              backgroundColor: theme.colorScheme.surface,
+              showLabels: widget.showLabels,
+            ),
           ),
         ),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: _onTap,
-          type: BottomNavigationBarType.fixed,
-
-          selectedItemColor: theme.colorScheme.primary,
-          unselectedItemColor: unselectedColor,
-          backgroundColor: theme.colorScheme.surface,
-          elevation: 0,
-          showSelectedLabels: widget.showLabels,
-          showUnselectedLabels: widget.showLabels,
-          items: widget.items ?? defaultItems,
-        ),
-      ),
+        if (_tutorialVisible && step != null)
+          AppTutorialOverlay(
+            currentStep: _tutorialStepIndex,
+            totalSteps: _tutorialSteps.length,
+            title: step.title(l10n),
+            body: step.body(l10n),
+            icon: step.icon,
+            tabKeys: _tabKeys,
+            highlightTabIndex:
+                step.highlightNavTab ? step.tabIndex : null,
+            contentTargetIds: step.contentTargetIds,
+            showBack: _tutorialStepIndex > 0,
+            isLast: _tutorialStepIndex == _tutorialSteps.length - 1,
+            onNext: _tutorialNext,
+            onBack: _tutorialBack,
+            onSkip: _finishTutorial,
+          ),
+      ],
     );
   }
 }

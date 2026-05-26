@@ -6,6 +6,7 @@ import 'product_screen.dart';
 import '../widgets/main_toolbar.dart';
 import '../widgets/vanity_product_card.dart';
 import '../l10n/app_localizations.dart';
+import '../widgets/tutorial_target.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -73,7 +74,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildTabBar(ThemeData theme, List<CategorySection> tabs, bool isDark) {
     final l10n = AppLocalizations.of(context)!;
-    return Container(
+    return TutorialTarget(
+      id: 'vanity_tabs',
+      child: Container(
       color: theme.colorScheme.surface,
       child: Column(
         children: [
@@ -113,6 +116,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 : theme.colorScheme.outline.withValues(alpha: 0.08),
           ),
         ],
+      ),
       ),
     );
   }

@@ -7,6 +7,7 @@ import '../widgets/custom_button.dart';
 import 'add_routine_screen.dart';
 import 'routine_detail.screen.dart';
 import '../l10n/app_localizations.dart';
+import '../widgets/tutorial_target.dart';
 
 class RoutinesScreen extends StatefulWidget {
   const RoutinesScreen({super.key});
@@ -129,7 +130,9 @@ class _RoutinesScreenState extends State<RoutinesScreen>
           Column(
             children: [
 
-              Container(
+              TutorialTarget(
+                id: 'routines_tabs',
+                child: Container(
                 margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
                 decoration: BoxDecoration(
                   color: isDark
@@ -172,6 +175,7 @@ class _RoutinesScreenState extends State<RoutinesScreen>
                     ),
                   ],
                 ),
+              ),
               ),
               const SizedBox(height: 8),
 

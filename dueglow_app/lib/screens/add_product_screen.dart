@@ -10,6 +10,7 @@ import '../widgets/main_toolbar.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_text_field.dart';
 import '../l10n/app_localizations.dart';
+import '../widgets/tutorial_target.dart';
 
 class AddProductScreen extends StatefulWidget {
   const AddProductScreen({super.key});
@@ -372,7 +373,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
         child: Column(
           children: [
 
-            Row(
+            TutorialTarget(
+              id: 'add_shortcuts',
+              child: Row(
               children: [
                 Expanded(
                   child: _buildQuickActionCard(
@@ -394,6 +397,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   ),
                 ),
               ],
+            ),
             ),
             const SizedBox(height: 32),
 

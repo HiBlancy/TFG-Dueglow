@@ -1,6 +1,6 @@
 class AppConstants {
   static const String appName = 'DueGlow';
-  static const String version = '1.0.3';
+  static const String version = '1.1.2';
 
   static const String routeSplash = '/';
   static const String routeLogin = '/login';
@@ -24,4 +24,5 @@ class AppConstants {
   static const String prefUserBD = 'user_birthday';
   static const String prefUserProfileImage = 'user_profile_image';
   static const String prefIsLoggedIn = 'is_logged_in';
+  static const String prefOnboardingComplete = 'onboarding_complete';
 }

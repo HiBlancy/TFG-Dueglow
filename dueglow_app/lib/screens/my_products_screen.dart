@@ -7,6 +7,7 @@ import '../widgets/main_toolbar.dart';
 import '../widgets/product_card.dart';
 import 'product_screen.dart';
 import '../l10n/app_localizations.dart';
+import '../widgets/tutorial_target.dart';
 
 enum HaveProductsFilter { all, opened, expired }
 enum ProductSortOption {
@@ -544,7 +545,9 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
   Widget _buildFilterChips(ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
 
-    return Container(
+    return TutorialTarget(
+      id: 'products_lists',
+      child: Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
@@ -568,6 +571,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
             );
           }).toList(),
         ),
+      ),
       ),
     );
   }

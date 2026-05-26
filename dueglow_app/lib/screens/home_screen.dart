@@ -11,6 +11,7 @@ import 'product_screen.dart';
 import 'my_products_screen.dart';
 import '../models/product_list_type.dart';
 import '../l10n/app_localizations.dart';
+import '../widgets/tutorial_target.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -96,6 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
       title: 'DueGlow',
       showDrawer: true,
       showBackButton: false,
+      menuTutorialTargetId: 'app_menu',
       child: RefreshIndicator(
         onRefresh: _refreshData,
         child: _isLoading
@@ -197,7 +199,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Card(
+      child: TutorialTarget(
+        id: 'home_routine',
+        child: Card(
         elevation: 0,
         color: color,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -295,6 +299,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+      ),
     );
   }
 
@@ -366,7 +371,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final displayProducts = _expiringSoonProducts.take(6).toList();
 
-  return Column(
+  return TutorialTarget(
+    id: 'home_expiring',
+    child: Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Padding(
@@ -449,6 +456,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       const SizedBox(height: 24),
     ],
+    ),
   );
 }
 

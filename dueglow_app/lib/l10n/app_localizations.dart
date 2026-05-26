@@ -2151,6 +2151,144 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'En «Configuración», al final, está «Borrar cuenta». Es una acción permanente: se eliminan productos, rutinas, imágenes y todos los datos asociados. Solo confírmalo si estás seguro.'**
   String get faqDeleteAccountA;
+
+  /// No description provided for @tutorialSkip.
+  ///
+  /// In es, this message translates to:
+  /// **'Saltar'**
+  String get tutorialSkip;
+
+  /// No description provided for @tutorialNext.
+  ///
+  /// In es, this message translates to:
+  /// **'Siguiente'**
+  String get tutorialNext;
+
+  /// No description provided for @tutorialBack.
+  ///
+  /// In es, this message translates to:
+  /// **'Atrás'**
+  String get tutorialBack;
+
+  /// No description provided for @tutorialFinish.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Empezar!'**
+  String get tutorialFinish;
+
+  /// No description provided for @tutorialStepOf.
+  ///
+  /// In es, this message translates to:
+  /// **'Paso {current} de {total}'**
+  String tutorialStepOf(int current, int total);
+
+  /// No description provided for @tutorialReplayTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver tutorial de la app'**
+  String get tutorialReplayTitle;
+
+  /// No description provided for @tutorialReplaySubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Recorre de nuevo cada sección: inicio, productos, rutinas y más.'**
+  String get tutorialReplaySubtitle;
+
+  /// No description provided for @tutorialWelcomeTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Bienvenida a DueGlow'**
+  String get tutorialWelcomeTitle;
+
+  /// No description provided for @tutorialWelcomeBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Te guiaremos por las secciones principales para que sepas dónde está cada cosa y cómo moverte por la app.'**
+  String get tutorialWelcomeBody;
+
+  /// No description provided for @tutorialHomeTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicio'**
+  String get tutorialHomeTitle;
+
+  /// No description provided for @tutorialHomeBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Aquí ves tu próxima rutina, los productos que caducan pronto y el resumen de uso mensual. Es tu panel de control diario.'**
+  String get tutorialHomeBody;
+
+  /// No description provided for @tutorialProductsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Mis productos'**
+  String get tutorialProductsTitle;
+
+  /// No description provided for @tutorialProductsBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Gestiona lo que tienes, tu wishlist y lo que has terminado. Filtra por abiertos o caducados y toca un producto para ver su detalle.'**
+  String get tutorialProductsBody;
+
+  /// No description provided for @tutorialNewTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir producto'**
+  String get tutorialNewTitle;
+
+  /// No description provided for @tutorialNewBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Crea productos escaneando el código de barras, buscando en la base de datos o rellenando los datos a mano.'**
+  String get tutorialNewBody;
+
+  /// No description provided for @tutorialRoutinesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Rutinas'**
+  String get tutorialRoutinesTitle;
+
+  /// No description provided for @tutorialRoutinesBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Crea rutinas de mañana o de noche, elige los días de la semana y añade productos de tu tocador.'**
+  String get tutorialRoutinesBody;
+
+  /// No description provided for @tutorialVanityTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tocador por categorías'**
+  String get tutorialVanityTitle;
+
+  /// No description provided for @tutorialVanityBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Explora tus productos organizados por categoría de belleza: skincare, maquillaje, cabello y más.'**
+  String get tutorialVanityBody;
+
+  /// No description provided for @tutorialDrawerTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Menú lateral'**
+  String get tutorialDrawerTitle;
+
+  /// No description provided for @tutorialDrawerBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Pulsa el icono de menú (☰) arriba a la derecha para acceder a configuración, editar perfil, preguntas frecuentes y cerrar sesión.'**
+  String get tutorialDrawerBody;
+
+  /// No description provided for @tutorialDoneTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Listo!'**
+  String get tutorialDoneTitle;
+
+  /// No description provided for @tutorialDoneBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya conoces lo esencial. Puedes volver a ver este tutorial cuando quieras desde el inicio de las preguntas frecuentes.'**
+  String get tutorialDoneBody;
 }
 
 class _AppLocalizationsDelegate

@@ -5,6 +5,7 @@ import '../services/auth_service.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_button.dart';
 import '../l10n/app_localizations.dart';
+import '../models/tutorial_launch.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -96,6 +97,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil(
               AppConstants.routeHome,
               (route) => false,
+              arguments: TutorialLaunch.newUser,
             );
           }
         });
