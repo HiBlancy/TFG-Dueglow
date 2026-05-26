@@ -209,35 +209,31 @@ class AppLocalizationsEs extends AppLocalizations {
   String get notifications => 'Notificaciones';
 
   @override
-  String get notifText => 'Recibir alertas y actualizaciones';
+  String get notifText => 'Alertas y avisos';
 
   @override
-  String get notifMasterSubtitle =>
-      'Activa o desactiva todos los recordatorios de DueGlow';
+  String get notifMasterSubtitle => 'Activa o desactiva todo';
 
   @override
-  String get notifTypesHeader => 'Tipos de aviso';
+  String get notifTypesHeader => 'Por tipo';
 
   @override
-  String get notifExpirationTitle => 'Caducidad de productos';
+  String get notifExpirationTitle => 'Caducidad';
 
   @override
-  String get notifExpirationSubtitle =>
-      'Avisos a 30, 25, 20, 15, 10 y 5 días, el día de caducidad y cuando caduca';
+  String get notifExpirationSubtitle => 'Días previos, día D y caducado';
 
   @override
-  String get notifRoutinesTitle => 'Rutinas de skincare';
+  String get notifRoutinesTitle => 'Rutinas';
 
   @override
-  String get notifRoutinesSubtitle =>
-      'Te avisa antes de tu próxima rutina de mañana o noche';
+  String get notifRoutinesSubtitle => 'Antes de mañana o noche';
 
   @override
   String get notifWeeklyTitle => 'Resumen semanal';
 
   @override
-  String get notifWeeklySubtitle =>
-      'Cada domingo, un repaso de productos que caducan pronto';
+  String get notifWeeklySubtitle => 'Cada domingo';
 
   @override
   String get appearance => 'Apariencia';
@@ -300,6 +296,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get notificationsDisabled => 'Notificaciones desactivadas';
+
+  @override
+  String get notifPermissionHint =>
+      'Preferencia guardada. Si no recibes avisos, actívalas en Ajustes del teléfono.';
 
   @override
   String get allProducts => 'Todos los productos';

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -50,8 +52,8 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => _isLoading = false);
 
       if (authData != null && mounted) {
-        await NotificationsCoordinator.refresh();
-        if (!mounted) return;
+        // Best-effort; must not block login if local notifications fail.
+        unawaited(NotificationsCoordinator.refresh());
         Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil(
           AppConstants.routeHome,
           (route) => false,

@@ -208,34 +208,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notifications => 'Notifications';
 
   @override
-  String get notifText => 'Receive alerts and updates';
+  String get notifText => 'Alerts and reminders';
 
   @override
-  String get notifMasterSubtitle => 'Turn all DueGlow reminders on or off';
+  String get notifMasterSubtitle => 'Turn everything on or off';
 
   @override
-  String get notifTypesHeader => 'Reminder types';
+  String get notifTypesHeader => 'By type';
 
   @override
-  String get notifExpirationTitle => 'Product expiration';
+  String get notifExpirationTitle => 'Expiration';
 
   @override
-  String get notifExpirationSubtitle =>
-      'Alerts at 30, 25, 20, 15, 10 and 5 days, on expiry day, and when expired';
+  String get notifExpirationSubtitle => 'Days before, expiry day, and after';
 
   @override
-  String get notifRoutinesTitle => 'Skincare routines';
+  String get notifRoutinesTitle => 'Routines';
 
   @override
-  String get notifRoutinesSubtitle =>
-      'Reminds you before your next morning or night routine';
+  String get notifRoutinesSubtitle => 'Before morning or night';
 
   @override
   String get notifWeeklyTitle => 'Weekly summary';
 
   @override
-  String get notifWeeklySubtitle =>
-      'Every Sunday, a recap of products expiring soon';
+  String get notifWeeklySubtitle => 'Every Sunday';
 
   @override
   String get appearance => 'Appearance';
@@ -298,6 +295,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationsDisabled => 'Notifications disabled';
+
+  @override
+  String get notifPermissionHint =>
+      'Preference saved. If alerts don\'t appear, enable them in your phone Settings.';
 
   @override
   String get allProducts => 'All products';

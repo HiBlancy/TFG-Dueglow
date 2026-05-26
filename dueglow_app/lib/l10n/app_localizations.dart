@@ -469,43 +469,43 @@ abstract class AppLocalizations {
   /// No description provided for @notifText.
   ///
   /// In es, this message translates to:
-  /// **'Recibir alertas y actualizaciones'**
+  /// **'Alertas y avisos'**
   String get notifText;
 
   /// No description provided for @notifMasterSubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Activa o desactiva todos los recordatorios de DueGlow'**
+  /// **'Activa o desactiva todo'**
   String get notifMasterSubtitle;
 
   /// No description provided for @notifTypesHeader.
   ///
   /// In es, this message translates to:
-  /// **'Tipos de aviso'**
+  /// **'Por tipo'**
   String get notifTypesHeader;
 
   /// No description provided for @notifExpirationTitle.
   ///
   /// In es, this message translates to:
-  /// **'Caducidad de productos'**
+  /// **'Caducidad'**
   String get notifExpirationTitle;
 
   /// No description provided for @notifExpirationSubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Avisos a 30, 25, 20, 15, 10 y 5 días, el día de caducidad y cuando caduca'**
+  /// **'Días previos, día D y caducado'**
   String get notifExpirationSubtitle;
 
   /// No description provided for @notifRoutinesTitle.
   ///
   /// In es, this message translates to:
-  /// **'Rutinas de skincare'**
+  /// **'Rutinas'**
   String get notifRoutinesTitle;
 
   /// No description provided for @notifRoutinesSubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Te avisa antes de tu próxima rutina de mañana o noche'**
+  /// **'Antes de mañana o noche'**
   String get notifRoutinesSubtitle;
 
   /// No description provided for @notifWeeklyTitle.
@@ -517,7 +517,7 @@ abstract class AppLocalizations {
   /// No description provided for @notifWeeklySubtitle.
   ///
   /// In es, this message translates to:
-  /// **'Cada domingo, un repaso de productos que caducan pronto'**
+  /// **'Cada domingo'**
   String get notifWeeklySubtitle;
 
   /// No description provided for @appearance.
@@ -639,6 +639,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Notificaciones desactivadas'**
   String get notificationsDisabled;
+
+  /// No description provided for @notifPermissionHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Preferencia guardada. Si no recibes avisos, actívalas en Ajustes del teléfono.'**
+  String get notifPermissionHint;
 
   /// No description provided for @allProducts.
   ///

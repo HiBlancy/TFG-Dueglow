@@ -19,21 +19,23 @@ class NotificationPreferencesProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setMasterEnabled(bool value) async {
-    if (value) {
-      final granted = await NotificationService.instance.requestPermission();
-      if (!granted) return;
-    } else {
+  /// Updates master + all type toggles. Returns whether system notification
+  /// permission is granted when enabling (in-app preference is always saved).
+  Future<bool> setMasterEnabled(bool value) async {
+    if (!value) {
       await NotificationService.instance.cancelAll();
     }
 
     _settings = NotificationSettings(
       masterEnabled: value,
-      expirationEnabled: _settings.expirationEnabled,
-      routinesEnabled: _settings.routinesEnabled,
-      weeklyDigestEnabled: _settings.weeklyDigestEnabled,
+      expirationEnabled: value,
+      routinesEnabled: value,
+      weeklyDigestEnabled: value,
     );
     await _persistAndSync();
+
+    if (!value) return true;
+    return NotificationService.instance.requestPermission();
   }
 
   Future<void> setExpirationEnabled(bool value) async {

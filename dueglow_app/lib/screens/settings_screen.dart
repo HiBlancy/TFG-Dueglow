@@ -99,67 +99,70 @@ class _NotificationsSection extends StatelessWidget {
               title: l10n.notifications,
               subtitle: l10n.notifMasterSubtitle,
               value: s.masterEnabled,
-              onChanged: (v) => _toggle(context, () => provider.setMasterEnabled(v), v, l10n),
+              onChanged: (v) => _toggleMaster(context, provider, v, l10n),
             ),
-            if (s.masterEnabled) ...[
-              const SizedBox(height: 4),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                child: Text(
-                  l10n.notifTypesHeader,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
+            if (s.masterEnabled)
+              Theme(
+                data: theme.copyWith(dividerColor: Colors.transparent),
+                child: ExpansionTile(
+                  leading: Icon(Icons.tune_outlined, color: theme.colorScheme.primary),
+                  title: Text(l10n.notifTypesHeader),
+                  tilePadding: const EdgeInsets.symmetric(horizontal: 8),
+                  childrenPadding: EdgeInsets.zero,
+                  children: [
+                    _NotificationSwitchTile(
+                      icon: Icons.event_busy_outlined,
+                      title: l10n.notifExpirationTitle,
+                      subtitle: l10n.notifExpirationSubtitle,
+                      value: s.expirationEnabled,
+                      dense: true,
+                      onChanged: (v) => provider.setExpirationEnabled(v),
+                    ),
+                    _NotificationSwitchTile(
+                      icon: Icons.schedule_outlined,
+                      title: l10n.notifRoutinesTitle,
+                      subtitle: l10n.notifRoutinesSubtitle,
+                      value: s.routinesEnabled,
+                      dense: true,
+                      onChanged: (v) => provider.setRoutinesEnabled(v),
+                    ),
+                    _NotificationSwitchTile(
+                      icon: Icons.calendar_view_week_outlined,
+                      title: l10n.notifWeeklyTitle,
+                      subtitle: l10n.notifWeeklySubtitle,
+                      value: s.weeklyDigestEnabled,
+                      dense: true,
+                      onChanged: (v) => provider.setWeeklyDigestEnabled(v),
+                    ),
+                  ],
                 ),
               ),
-              _NotificationSwitchTile(
-                icon: Icons.event_busy_outlined,
-                title: l10n.notifExpirationTitle,
-                subtitle: l10n.notifExpirationSubtitle,
-                value: s.expirationEnabled,
-                enabled: s.masterEnabled,
-                onChanged: (v) =>
-                    _toggle(context, () => provider.setExpirationEnabled(v), v, l10n),
-              ),
-              _NotificationSwitchTile(
-                icon: Icons.schedule_outlined,
-                title: l10n.notifRoutinesTitle,
-                subtitle: l10n.notifRoutinesSubtitle,
-                value: s.routinesEnabled,
-                enabled: s.masterEnabled,
-                onChanged: (v) =>
-                    _toggle(context, () => provider.setRoutinesEnabled(v), v, l10n),
-              ),
-              _NotificationSwitchTile(
-                icon: Icons.calendar_view_week_outlined,
-                title: l10n.notifWeeklyTitle,
-                subtitle: l10n.notifWeeklySubtitle,
-                value: s.weeklyDigestEnabled,
-                enabled: s.masterEnabled,
-                onChanged: (v) =>
-                    _toggle(context, () => provider.setWeeklyDigestEnabled(v), v, l10n),
-              ),
-            ],
           ],
         );
       },
     );
   }
 
-  Future<void> _toggle(
+  Future<void> _toggleMaster(
     BuildContext context,
-    Future<void> Function() action,
+    NotificationPreferencesProvider provider,
     bool value,
     AppLocalizations l10n,
   ) async {
-    await action();
+    final systemOk = await provider.setMasterEnabled(value);
     if (!context.mounted) return;
+
+    final message = !value
+        ? l10n.notificationsDisabled
+        : systemOk
+            ? l10n.notificationsEnabled
+            : l10n.notifPermissionHint;
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(value ? l10n.notificationsEnabled : l10n.notificationsDisabled),
+        content: Text(message),
         behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 1),
+        duration: Duration(seconds: systemOk ? 1 : 3),
       ),
     );
   }
@@ -168,17 +171,17 @@ class _NotificationsSection extends StatelessWidget {
 class _NotificationSwitchTile extends StatelessWidget {
   final IconData icon;
   final String title;
-  final String subtitle;
+  final String? subtitle;
   final bool value;
-  final bool enabled;
+  final bool dense;
   final ValueChanged<bool> onChanged;
 
   const _NotificationSwitchTile({
     required this.icon,
     required this.title,
-    required this.subtitle,
+    this.subtitle,
     required this.value,
-    this.enabled = true,
+    this.dense = false,
     required this.onChanged,
   });
 
@@ -188,12 +191,16 @@ class _NotificationSwitchTile extends StatelessWidget {
     final subtleText = theme.colorScheme.onSurface.withValues(alpha: 0.6);
 
     return ListTile(
+      dense: dense,
+      visualDensity: dense ? VisualDensity.compact : null,
       leading: Icon(icon, color: theme.colorScheme.primary),
       title: Text(title),
-      subtitle: Text(subtitle, style: TextStyle(color: subtleText, height: 1.35)),
+      subtitle: subtitle == null
+          ? null
+          : Text(subtitle!, style: TextStyle(color: subtleText, height: 1.25)),
       trailing: Switch(
         value: value,
-        onChanged: enabled ? onChanged : null,
+        onChanged: onChanged,
       ),
     );
   }

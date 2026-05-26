@@ -10,13 +10,30 @@ class NotificationService {
   static final NotificationService instance = NotificationService._();
 
   final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
-  bool _initialized = false;
+  bool _pluginReady = false;
 
   static const String _channelId = 'dueglow_reminders';
   static const String _channelName = 'DueGlow reminders';
 
+  static const WindowsInitializationSettings _windowsSettings =
+      WindowsInitializationSettings(
+    appName: 'DueGlow',
+    appUserModelId: 'DueGlow.App.Notifications',
+    guid: '7c4e8f2a-1b3d-4e5f-9a6b-2d8c0e4f1a7b',
+  );
+
+  static const LinuxInitializationSettings _linuxSettings =
+      LinuxInitializationSettings(defaultActionName: 'Open');
+
+  bool get isReady => _pluginReady;
+
   Future<void> initialize() async {
-    if (_initialized) return;
+    if (kIsWeb) {
+      _pluginReady = false;
+      return;
+    }
+
+    if (_pluginReady && _isPlatformInstanceReady()) return;
 
     tz_data.initializeTimeZones();
     try {
@@ -29,43 +46,74 @@ class NotificationService {
       tz.setLocalLocation(tz.UTC);
     }
 
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const iosSettings = DarwinInitializationSettings(
-      requestAlertPermission: false,
-      requestBadgePermission: false,
-      requestSoundPermission: false,
-    );
+    try {
+      const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+      const darwinSettings = DarwinInitializationSettings(
+        requestAlertPermission: false,
+        requestBadgePermission: false,
+        requestSoundPermission: false,
+      );
 
-    await _plugin.initialize(
-      const InitializationSettings(
-        android: androidSettings,
-        iOS: iosSettings,
-      ),
-    );
+      final result = await _plugin.initialize(
+        const InitializationSettings(
+          android: androidSettings,
+          iOS: darwinSettings,
+          macOS: darwinSettings,
+          linux: _linuxSettings,
+          windows: _windowsSettings,
+        ),
+      );
 
-    await _plugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(
-          const AndroidNotificationChannel(
-            _channelId,
-            _channelName,
-            description: 'Caducidad, rutinas y recordatorios',
-            importance: Importance.high,
-          ),
-        );
+      _pluginReady = result == true && _isPlatformInstanceReady();
 
-    _initialized = true;
+      if (_pluginReady) {
+        await _plugin
+            .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin>()
+            ?.createNotificationChannel(
+              const AndroidNotificationChannel(
+                _channelId,
+                _channelName,
+                description: 'Caducidad, rutinas y recordatorios',
+                importance: Importance.high,
+              ),
+            );
+      } else if (kDebugMode) {
+        debugPrint('NotificationService: plugin initialize returned $result');
+      }
+    } catch (e, st) {
+      _pluginReady = false;
+      if (kDebugMode) {
+        debugPrint('NotificationService: initialize failed ($e)\n$st');
+      }
+    }
+  }
+
+  bool _isPlatformInstanceReady() {
+    try {
+      FlutterLocalNotificationsPlatform.instance;
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<bool> requestPermission() async {
     await initialize();
+    if (!_pluginReady) {
+      // In-app preference can still be on; scheduling is a no-op until supported.
+      return !kIsWeb;
+    }
 
     final android = _plugin.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
     if (android != null) {
+      if (await android.areNotificationsEnabled() == true) return true;
+
       final granted = await android.requestNotificationsPermission();
       if (granted == true) return true;
+
+      return await android.areNotificationsEnabled() ?? false;
     }
 
     final ios = _plugin.resolvePlatformSpecificImplementation<
@@ -88,7 +136,13 @@ class NotificationService {
     required String body,
   }) async {
     await initialize();
-    await _plugin.show(id, title, body, _details());
+    if (!_pluginReady) return;
+
+    try {
+      await _plugin.show(id, title, body, _details());
+    } catch (e) {
+      if (kDebugMode) debugPrint('NotificationService.showInstant: $e');
+    }
   }
 
   Future<void> schedule({
@@ -98,23 +152,45 @@ class NotificationService {
     required DateTime when,
   }) async {
     await initialize();
+    if (!_pluginReady) return;
     if (!when.isAfter(DateTime.now())) return;
 
-    final scheduled = tz.TZDateTime.from(when, tz.local);
-
-    await _plugin.zonedSchedule(
-      id,
-      title,
-      body,
-      scheduled,
-      _details(),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-    );
+    try {
+      final scheduled = tz.TZDateTime.from(when, tz.local);
+      await _plugin.zonedSchedule(
+        id,
+        title,
+        body,
+        scheduled,
+        _details(),
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      );
+    } catch (e) {
+      if (kDebugMode) debugPrint('NotificationService.schedule: $e');
+    }
   }
 
-  Future<void> cancel(int id) => _plugin.cancel(id);
+  Future<void> cancel(int id) async {
+    await initialize();
+    if (!_pluginReady) return;
 
-  Future<void> cancelAll() => _plugin.cancelAll();
+    try {
+      await _plugin.cancel(id);
+    } catch (e) {
+      if (kDebugMode) debugPrint('NotificationService.cancel: $e');
+    }
+  }
+
+  Future<void> cancelAll() async {
+    await initialize();
+    if (!_pluginReady) return;
+
+    try {
+      await _plugin.cancelAll();
+    } catch (e) {
+      if (kDebugMode) debugPrint('NotificationService.cancelAll: $e');
+    }
+  }
 
   NotificationDetails _details() {
     return const NotificationDetails(

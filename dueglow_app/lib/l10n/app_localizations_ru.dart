@@ -212,35 +212,31 @@ class AppLocalizationsRu extends AppLocalizations {
   String get notifications => 'Уведомления';
 
   @override
-  String get notifText => 'Получать уведомления и обновления';
+  String get notifText => 'Оповещения и напоминания';
 
   @override
-  String get notifMasterSubtitle =>
-      'Включить или выключить все напоминания DueGlow';
+  String get notifMasterSubtitle => 'Включить или выключить всё';
 
   @override
-  String get notifTypesHeader => 'Типы напоминаний';
+  String get notifTypesHeader => 'По типу';
 
   @override
-  String get notifExpirationTitle => 'Срок годности продуктов';
+  String get notifExpirationTitle => 'Срок годности';
 
   @override
-  String get notifExpirationSubtitle =>
-      'За 30, 25, 20, 15, 10 и 5 дней, в день истечения и после';
+  String get notifExpirationSubtitle => 'За дни до, в день и после';
 
   @override
-  String get notifRoutinesTitle => 'Рутины ухода';
+  String get notifRoutinesTitle => 'Рутины';
 
   @override
-  String get notifRoutinesSubtitle =>
-      'Напоминание перед следующей утренней или вечерней рутиной';
+  String get notifRoutinesSubtitle => 'Перед утром или вечером';
 
   @override
-  String get notifWeeklyTitle => 'Еженедельный обзор';
+  String get notifWeeklyTitle => 'Еженедельно';
 
   @override
-  String get notifWeeklySubtitle =>
-      'Каждое воскресенье — продукты с истекающим сроком';
+  String get notifWeeklySubtitle => 'Каждое воскресенье';
 
   @override
   String get appearance => 'Внешний вид';
@@ -303,6 +299,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get notificationsDisabled => 'Уведомления выключены';
+
+  @override
+  String get notifPermissionHint =>
+      'Настройка сохранена. Если уведомления не приходят, включите их в настройках телефона.';
 
   @override
   String get allProducts => 'Все продукты';
