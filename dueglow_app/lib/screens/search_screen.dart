@@ -4,6 +4,7 @@ import '../widgets/main_toolbar.dart';
 import '../services/beauty_api_service.dart';
 import '../models/beauty_product.dart';
 import 'product_screen.dart';
+import 'package:lottie/lottie.dart';
 import '../l10n/app_localizations.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -37,14 +38,10 @@ class _SearchScreenState extends State<SearchScreen> {
     _scrollController.addListener(_onScroll);
   }
 
-
-
   void _onSearchChanged() {
-
     _debounceTimer?.cancel();
 
     final query = _searchController.text.trim();
-
 
     if (query.isEmpty) {
       setState(() {
@@ -54,7 +51,6 @@ class _SearchScreenState extends State<SearchScreen> {
       });
       return;
     }
-
 
     _debounceTimer = Timer(const Duration(milliseconds: 600), () {
       if (query.length >= 2) {
@@ -176,9 +172,7 @@ class _SearchScreenState extends State<SearchScreen> {
       showBackButton: true,
       child: Column(
         children: [
-
           _buildSearchBar(theme, isDark),
-
 
           Expanded(child: _buildBody(theme)),
         ],
@@ -198,16 +192,13 @@ class _SearchScreenState extends State<SearchScreen> {
         controller: _searchController,
         focusNode: _searchFocusNode,
         textInputAction: TextInputAction.search,
-        style: theme.textTheme.bodyMedium?.copyWith(
-          letterSpacing: 0.3,
-        ),
+        style: theme.textTheme.bodyMedium?.copyWith(letterSpacing: 0.3),
         cursorColor: theme.colorScheme.primary,
         decoration: InputDecoration(
           hintText: AppLocalizations.of(context)!.searchNameBrand,
           hintStyle: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
           ),
-
 
           prefixIcon: Padding(
             padding: const EdgeInsets.only(left: 16, right: 12),
@@ -219,8 +210,10 @@ class _SearchScreenState extends State<SearchScreen> {
               size: 24,
             ),
           ),
-          prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
-
+          prefixIconConstraints: const BoxConstraints(
+            minWidth: 0,
+            minHeight: 0,
+          ),
 
           suffixIcon: _searchController.text.isNotEmpty
               ? Padding(
@@ -231,11 +224,11 @@ class _SearchScreenState extends State<SearchScreen> {
                           child: SizedBox(
                             width: 20,
                             height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                theme.colorScheme.primary,
-                              ),
+                            child: Lottie.asset(
+                              'assets/loading.json',
+                              width: 20,
+                              height: 20,
+                              repeat: true,
                             ),
                           ),
                         )
@@ -250,7 +243,6 @@ class _SearchScreenState extends State<SearchScreen> {
                         ),
                 )
               : null,
-
 
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
@@ -267,12 +259,8 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(
-              color: theme.colorScheme.primary,
-              width: 2,
-            ),
+            borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
           ),
-
 
           filled: true,
           fillColor: searchBgColor,
@@ -294,16 +282,20 @@ class _SearchScreenState extends State<SearchScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(
-              color: theme.colorScheme.primary,
-              strokeWidth: 3,
+            SizedBox(
+              width: 80,
+              height: 80,
+              child: Lottie.asset(
+                'assets/loading.json',
+                width: 80,
+                height: 80,
+                repeat: true,
+              ),
             ),
             const SizedBox(height: 16),
             Text(
               AppLocalizations.of(context)!.searchLoading,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: subtleText,
-              ),
+              style: theme.textTheme.bodyMedium?.copyWith(color: subtleText),
             ),
           ],
         ),
@@ -437,7 +429,6 @@ class _SearchScreenState extends State<SearchScreen> {
       );
     }
 
-
     final showLoadMoreFooter = _hasMore || _isLoadingMore;
 
     return ListView.builder(
@@ -452,9 +443,11 @@ class _SearchScreenState extends State<SearchScreen> {
               child: SizedBox(
                 width: 28,
                 height: 28,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  color: theme.colorScheme.primary,
+                child: Lottie.asset(
+                  'assets/loading.json',
+                  width: 28,
+                  height: 28,
+                  repeat: true,
                 ),
               ),
             ),
@@ -550,15 +543,10 @@ class _ProductTileState extends State<_ProductTile>
               padding: const EdgeInsets.all(12),
               child: Row(
                 children: [
-
                   _buildProductImage(theme),
                   const SizedBox(width: 12),
 
-
-                  Expanded(
-                    child: _buildProductInfo(theme),
-                  ),
-
+                  Expanded(child: _buildProductInfo(theme)),
 
                   Icon(
                     Icons.chevron_right_rounded,
@@ -593,8 +581,8 @@ class _ProductTileState extends State<_ProductTile>
           width: 1,
         ),
       ),
-      child: widget.product.imageUrl != null &&
-              widget.product.imageUrl!.isNotEmpty
+      child:
+          widget.product.imageUrl != null && widget.product.imageUrl!.isNotEmpty
           ? ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: Image.network(
@@ -608,11 +596,11 @@ class _ProductTileState extends State<_ProductTile>
                     child: SizedBox(
                       width: 24,
                       height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          theme.colorScheme.primary.withValues(alpha: 0.5),
-                        ),
+                      child: Lottie.asset(
+                        'assets/loading.json',
+                        width: 24,
+                        height: 24,
+                        repeat: true,
                       ),
                     ),
                   );
@@ -638,7 +626,6 @@ class _ProductTileState extends State<_ProductTile>
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-
         Text(
           widget.product.name,
           maxLines: 1,
@@ -650,9 +637,7 @@ class _ProductTileState extends State<_ProductTile>
         ),
         const SizedBox(height: 4),
 
-
-        if (widget.product.brand != null &&
-            widget.product.brand!.isNotEmpty)
+        if (widget.product.brand != null && widget.product.brand!.isNotEmpty)
           Text(
             widget.product.brand!,
             maxLines: 1,

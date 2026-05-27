@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import '../constants/app_constants.dart';
 import '../services/auth_service.dart';
 import '../services/notifications_coordinator.dart';
@@ -62,9 +63,17 @@ class _AuthGateScreenState extends State<AuthGateScreen> {
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       body: Center(
-        child: CircularProgressIndicator(color: theme.colorScheme.primary),
+        child: SizedBox(
+          width: 80,
+          height: 80,
+          child: Lottie.asset(
+            'assets/loading.json',
+            width: 80,
+            height: 80,
+            repeat: true,
+          ),
+        ),
       ),
     );
   }
 }
-

@@ -31,6 +31,8 @@ dependencies:
   timezone: ^0.10.0
   flutter_timezone: ^4.1.0
 
+  lottie: 3.3.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -40,4 +42,5 @@ flutter:
   uses-material-design: true
   assets:
     - assets/logo.png
+    - assets/loading.json
   generate: true

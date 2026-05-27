@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import '../constants/app_constants.dart';
 import '../models/beauty_product.dart';
 import '../models/routine_model.dart';
@@ -101,7 +102,18 @@ class _HomeScreenState extends State<HomeScreen> {
       child: RefreshIndicator(
         onRefresh: _refreshData,
         child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? Center(
+                child: SizedBox(
+                  width: 80,
+                  height: 80,
+                  child: Lottie.asset(
+                    'assets/loading.json',
+                    width: 80,
+                    height: 80,
+                    repeat: true,
+                  ),
+                ),
+              )
             : SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: Column(
@@ -138,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   style: theme.textTheme.displayLarge?.copyWith(
                                     fontWeight: FontWeight.w500,
                                     fontSize: 30,
-                                    color: theme.colorScheme.primary
+                                    color: theme.colorScheme.primary,
                                   ),
                                 ),
                               ],
@@ -148,8 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             width: 80,
                             height: 80,
                             child: Icon(
-                              Icons
-                                  .eco_outlined,
+                              Icons.eco_outlined,
                               size: 80,
                               color: theme.colorScheme.surfaceTint.withValues(
                                 alpha: 0.2,
@@ -179,16 +190,15 @@ class _HomeScreenState extends State<HomeScreen> {
     if (hour < 14) {
       return AppLocalizations.of(context)!.morningGreeting(name).toUpperCase();
     } else if (hour < 18) {
-      return AppLocalizations.of(context)!.afternoonGreeting(name).toUpperCase();
+      return AppLocalizations.of(
+        context,
+      )!.afternoonGreeting(name).toUpperCase();
     } else {
       return AppLocalizations.of(context)!.eveningGreeting(name).toUpperCase();
     }
   }
 
-  Widget _buildQuickActions(
-    ThemeData theme,
-    bool isDark,
-  ) {
+  Widget _buildQuickActions(ThemeData theme, bool isDark) {
     final color = isDark
         ? theme.colorScheme.primaryContainer.withValues(alpha: 0.35)
         : theme.colorScheme.primaryContainer.withValues(alpha: 0.45);
@@ -202,103 +212,112 @@ class _HomeScreenState extends State<HomeScreen> {
       child: TutorialTarget(
         id: 'home_routine',
         child: Card(
-        elevation: 0,
-        color: color,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          onTap: () async {
-            if (!hasRoutine) {
-              await Navigator.pushNamed(context, AppConstants.routeMyRoutines);
-              await _loadUserData();
-              return;
-            }
-            final changed = await Navigator.push<bool>(
-              context,
-              MaterialPageRoute(
-                builder: (_) => RoutineDetailScreen(routine: routine!),
-              ),
-            );
-            if (changed == true) {
-              await _loadUserData();
-            }
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-            child: hasRoutine
-                ? Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primary.withValues(alpha: 0.14),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          isMorningRoutine
-                              ? Icons.wb_sunny_outlined
-                              : Icons.nights_stay_outlined,
-                          color: theme.colorScheme.primary,
-                          size: 22,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              AppLocalizations.of(context)!.nextRoutineTitle,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
+          elevation: 0,
+          color: color,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: () async {
+              if (!hasRoutine) {
+                await Navigator.pushNamed(
+                  context,
+                  AppConstants.routeMyRoutines,
+                );
+                await _loadUserData();
+                return;
+              }
+              final changed = await Navigator.push<bool>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => RoutineDetailScreen(routine: routine!),
+                ),
+              );
+              if (changed == true) {
+                await _loadUserData();
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+              child: hasRoutine
+                  ? Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primary.withValues(
+                              alpha: 0.14,
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              routine!.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${nextRoutine.slotLabel} • ${AppLocalizations.of(context)!.productsCount(routine.products.length, routine.products.length == 1 ? '' : 's')}',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            isMorningRoutine
+                                ? Icons.wb_sunny_outlined
+                                : Icons.nights_stay_outlined,
+                            color: theme.colorScheme.primary,
+                            size: 22,
+                          ),
                         ),
-                      ),
-                      Icon(
-                        Icons.chevron_right_rounded,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ],
-                  )
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!.routinesTitle,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                AppLocalizations.of(context)!.nextRoutineTitle,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                routine!.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${nextRoutine.slotLabel} • ${AppLocalizations.of(context)!.productsCount(routine.products.length, routine.products.length == 1 ? '' : 's')}',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        AppLocalizations.of(context)!.createFirstRoutineHomeHint,
-                        style: theme.textTheme.bodySmall?.copyWith(
+                        Icon(
+                          Icons.chevron_right_rounded,
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.routinesTitle,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          AppLocalizations.of(
+                            context,
+                          )!.createFirstRoutineHomeHint,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -365,111 +384,118 @@ class _HomeScreenState extends State<HomeScreen> {
         : l10n.slotInDaysNight(dayOffset);
   }
 
- Widget _buildExpiringSoonProducts(bool isDark) {
-  final theme = Theme.of(context);
-  final l10n = AppLocalizations.of(context)!;
+  Widget _buildExpiringSoonProducts(bool isDark) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
-  final displayProducts = _expiringSoonProducts.take(6).toList();
+    final displayProducts = _expiringSoonProducts.take(6).toList();
 
-  return TutorialTarget(
-    id: 'home_expiring',
-    child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.expiringSoon,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return TutorialTarget(
+      id: 'home_expiring',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Text(
-                    l10n.prioritizeExpiringHint,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: isDark
-                          ? theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7)
-                          : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-                    ),
+                Text(
+                  l10n.expiringSoon,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                if (_expiredProductsCount > 0)
-                  InkWell(
-                    onTap: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const MyProductsScreen(
-                            initialListType: ProductListType.have,
-                            initialHaveFilter: HaveProductsFilter.expired,
-                            showBackButton: true,
-                          ),
-                        ),
-                      );
-                      await _loadUserData();
-                    },
-                    borderRadius: BorderRadius.circular(8),
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
                       child: Text(
-                        'Tienes $_expiredProductsCount productos caducados',
+                        l10n.prioritizeExpiringHint,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.error,
-                          fontWeight: FontWeight.w600,
+                          color: isDark
+                              ? theme.colorScheme.onSurfaceVariant.withValues(
+                                  alpha: 0.7,
+                                )
+                              : theme.colorScheme.onSurfaceVariant.withValues(
+                                  alpha: 0.7,
+                                ),
                         ),
                       ),
                     ),
-                  ),
+                    if (_expiredProductsCount > 0)
+                      InkWell(
+                        onTap: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const MyProductsScreen(
+                                initialListType: ProductListType.have,
+                                initialHaveFilter: HaveProductsFilter.expired,
+                                showBackButton: true,
+                              ),
+                            ),
+                          );
+                          await _loadUserData();
+                        },
+                        borderRadius: BorderRadius.circular(8),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 12),
+                          child: Text(
+                            'Tienes $_expiredProductsCount productos caducados',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.error,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ],
             ),
-          ],
-        ),
-      ),
-      const SizedBox(height: 16),
-      if (_expiringSoonProducts.isEmpty)
-        _buildEmptyCard(theme, l10n, isDark)
-      else
-        SizedBox(
-          height: 260,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            itemCount: displayProducts.length,
-            itemBuilder: (context, index) => Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: SizedBox(
-                width: 160,
-                child: _buildExpiringProductCardVertical(
-                  displayProducts[index],
-                  isDark,
+          ),
+          const SizedBox(height: 16),
+          if (_expiringSoonProducts.isEmpty)
+            _buildEmptyCard(theme, l10n, isDark)
+          else
+            SizedBox(
+              height: 260,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                itemCount: displayProducts.length,
+                itemBuilder: (context, index) => Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: SizedBox(
+                    width: 160,
+                    child: _buildExpiringProductCardVertical(
+                      displayProducts[index],
+                      isDark,
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
-      const SizedBox(height: 24),
-    ],
-    ),
-  );
-}
+          const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
 
   Widget _buildMonthlyUsageSection(bool isDark) {
     final theme = Theme.of(context);
     final stats = _yearlyOverview.data;
-    final latestSix = stats.length > 6 ? stats.sublist(stats.length - 6) : stats;
+    final latestSix = stats.length > 6
+        ? stats.sublist(stats.length - 6)
+        : stats;
     final maxValue = latestSix.isEmpty
         ? 1
         : latestSix
-            .map((item) => item.productsUsedCount)
-            .reduce((a, b) => a > b ? a : b);
-    final currentMonthCount = _currentMonthStats?.productsUsedCount ??
+              .map((item) => item.productsUsedCount)
+              .reduce((a, b) => a > b ? a : b);
+    final currentMonthCount =
+        _currentMonthStats?.productsUsedCount ??
         (stats.isNotEmpty ? stats.last.productsUsedCount : 0);
 
     return Padding(
@@ -538,7 +564,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: latestSix.map((item) {
-                    final ratio = item.productsUsedCount / (maxValue == 0 ? 1 : maxValue);
+                    final ratio =
+                        item.productsUsedCount / (maxValue == 0 ? 1 : maxValue);
                     final barHeight = 18 + (ratio * 62);
                     final shortMonth = item.monthName.length >= 3
                         ? item.monthName.substring(0, 3)
@@ -674,130 +701,127 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildExpiringProductCardVertical(BeautyProduct product, bool isDark) {
-  final theme = Theme.of(context);
-  final days = _daysUntilExpiration(product.expirationDate!);
-  final isDanger = days <= 7;
-  final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final days = _daysUntilExpiration(product.expirationDate!);
+    final isDanger = days <= 7;
+    final l10n = AppLocalizations.of(context)!;
 
-  final cardColor = isDark
-      ? theme.colorScheme.primaryContainer.withValues(alpha: 0.15)
-      : theme.colorScheme.primaryContainer.withValues(alpha: 0.2);
+    final cardColor = isDark
+        ? theme.colorScheme.primaryContainer.withValues(alpha: 0.15)
+        : theme.colorScheme.primaryContainer.withValues(alpha: 0.2);
 
-  return Card(
-    elevation: 0,
-    color: cardColor,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(16),
-    ),
-    child: InkWell(
-      onTap: () => _navigateToProduct(product),
-      borderRadius: BorderRadius.circular(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                height: 100,
-                width: double.infinity,
-                color: isDark
-                    ? theme.colorScheme.surfaceContainerHigh
-                    : theme.colorScheme.surfaceContainerLow,
-                child: product.imageUrl != null
-                    ? Image.network(
-                        product.imageUrl!,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                      )
-                    : Icon(
-                        Icons.face_retouching_natural,
-                        size: 40,
-                        color: isDark
-                            ? theme.colorScheme.primary.withValues(alpha: 0.5)
-                            : theme.colorScheme.outline,
-                      ),
+    return Card(
+      elevation: 0,
+      color: cardColor,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: InkWell(
+        onTap: () => _navigateToProduct(product),
+        borderRadius: BorderRadius.circular(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  height: 100,
+                  width: double.infinity,
+                  color: isDark
+                      ? theme.colorScheme.surfaceContainerHigh
+                      : theme.colorScheme.surfaceContainerLow,
+                  child: product.imageUrl != null
+                      ? Image.network(
+                          product.imageUrl!,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                        )
+                      : Icon(
+                          Icons.face_retouching_natural,
+                          size: 40,
+                          color: isDark
+                              ? theme.colorScheme.primary.withValues(alpha: 0.5)
+                              : theme.colorScheme.outline,
+                        ),
+                ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  product.brand ?? '',
-                  style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  product.name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.brand ?? '',
+                    style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isDanger
-                        ? theme.colorScheme.errorContainer
-                        : (isDark
-                            ? theme.colorScheme.primaryContainer.withValues(alpha: 0.6)
-                            : theme.colorScheme.primaryContainer.withValues(alpha: 0.7)),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    days == 0 ? l10n.today : '$days ${l10n.days}',
-                    style: TextStyle(
+                  const SizedBox(height: 2),
+                  Text(
+                    product.name,
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 11,
+                      fontSize: 13,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
                       color: isDanger
-                          ? theme.colorScheme.onErrorContainer
+                          ? theme.colorScheme.errorContainer
                           : (isDark
-                              ? theme.colorScheme.onPrimaryContainer
-                              : theme.colorScheme.onPrimaryContainer),
+                                ? theme.colorScheme.primaryContainer.withValues(
+                                    alpha: 0.6,
+                                  )
+                                : theme.colorScheme.primaryContainer.withValues(
+                                    alpha: 0.7,
+                                  )),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      days == 0 ? l10n.today : '$days ${l10n.days}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 11,
+                        color: isDanger
+                            ? theme.colorScheme.onErrorContainer
+                            : (isDark
+                                  ? theme.colorScheme.onPrimaryContainer
+                                  : theme.colorScheme.onPrimaryContainer),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-int _daysUntilExpiration(DateTime expirationDate) {
-  final now = DateTime.now();
-  final today = DateTime(now.year, now.month, now.day);
-  final expiration = DateTime(
-    expirationDate.year,
-    expirationDate.month,
-    expirationDate.day,
-  );
-  return expiration.difference(today).inDays;
-}
-
+  int _daysUntilExpiration(DateTime expirationDate) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final expiration = DateTime(
+      expirationDate.year,
+      expirationDate.month,
+      expirationDate.day,
+    );
+    return expiration.difference(today).inDays;
+  }
 }
 
 class _UpcomingRoutineInfo {
   final Routine routine;
   final String slotLabel;
 
-  _UpcomingRoutineInfo({
-    required this.routine,
-    required this.slotLabel,
-  });
+  _UpcomingRoutineInfo({required this.routine, required this.slotLabel});
 }
-

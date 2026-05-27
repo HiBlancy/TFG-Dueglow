@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import '../constants/product_category_catalog.dart';
 import '../models/beauty_product.dart';
 import '../services/product_service.dart';
@@ -34,7 +35,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _loadProducts() async {
     setState(() => _isLoadingProducts = true);
-    final paginated = await _productService.getProducts(listType: 'have', limit: 200);
+    final paginated = await _productService.getProducts(
+      listType: 'have',
+      limit: 200,
+    );
     if (!mounted) return;
     setState(() {
       _products = paginated?.products ?? [];
@@ -72,51 +76,55 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildTabBar(ThemeData theme, List<CategorySection> tabs, bool isDark) {
+  Widget _buildTabBar(
+    ThemeData theme,
+    List<CategorySection> tabs,
+    bool isDark,
+  ) {
     final l10n = AppLocalizations.of(context)!;
     return TutorialTarget(
       id: 'vanity_tabs',
       child: Container(
-      color: theme.colorScheme.surface,
-      child: Column(
-        children: [
-          TabBar(
-            isScrollable: true,
-            tabAlignment: TabAlignment.center,
-            indicatorColor: theme.colorScheme.primary,
-            indicatorSize: TabBarIndicatorSize.label,
-            indicatorWeight: 3,
-            labelColor: theme.colorScheme.primary,
-            unselectedLabelColor: theme.colorScheme.onSurface.withValues(
-              alpha: 0.5,
-            ),
-            labelStyle: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
-            ),
-            unselectedLabelStyle: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            tabs: tabs
-                .map(
-                  (tab) => Tab(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Text(tab.localizedName(l10n)),
+        color: theme.colorScheme.surface,
+        child: Column(
+          children: [
+            TabBar(
+              isScrollable: true,
+              tabAlignment: TabAlignment.center,
+              indicatorColor: theme.colorScheme.primary,
+              indicatorSize: TabBarIndicatorSize.label,
+              indicatorWeight: 3,
+              labelColor: theme.colorScheme.primary,
+              unselectedLabelColor: theme.colorScheme.onSurface.withValues(
+                alpha: 0.5,
+              ),
+              labelStyle: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
+              unselectedLabelStyle: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              tabs: tabs
+                  .map(
+                    (tab) => Tab(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Text(tab.localizedName(l10n)),
+                      ),
                     ),
-                  ),
-                )
-                .toList(),
-          ),
-          Divider(
-            height: 1,
-            color: isDark
-                ? theme.colorScheme.outline.withValues(alpha: 0.1)
-                : theme.colorScheme.outline.withValues(alpha: 0.08),
-          ),
-        ],
-      ),
+                  )
+                  .toList(),
+            ),
+            Divider(
+              height: 1,
+              color: isDark
+                  ? theme.colorScheme.outline.withValues(alpha: 0.1)
+                  : theme.colorScheme.outline.withValues(alpha: 0.08),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -139,9 +147,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
 
           if (_isLoadingProducts)
-            const Padding(
-              padding: EdgeInsets.all(40),
-              child: Center(child: CircularProgressIndicator()),
+            Padding(
+              padding: const EdgeInsets.all(40),
+              child: Center(
+                child: SizedBox(
+                  width: 60,
+                  height: 60,
+                  child: Lottie.asset(
+                    'assets/loading.json',
+                    width: 60,
+                    height: 60,
+                    repeat: true,
+                  ),
+                ),
+              ),
             )
           else if (filteredProducts.isEmpty)
             _buildEmptyState(selectedSub, subcategories, theme, isDark)
@@ -184,9 +203,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               child: GestureDetector(
                 onTap: () {
-                  setState(
-                    () => _selectedSubcategories[categoryName] = sub.id,
-                  );
+                  setState(() => _selectedSubcategories[categoryName] = sub.id);
                 },
                 child: _buildSubcategoryCard(sub, isSelected, theme, isDark),
               ),

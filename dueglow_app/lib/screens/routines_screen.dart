@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import '../models/routine_model.dart';
 import '../services/routine_service.dart';
 import '../widgets/main_toolbar.dart';
@@ -44,7 +44,11 @@ class _RoutinesScreenState extends State<RoutinesScreen>
       final routines = await _routineService.getRoutines();
       if (mounted) setState(() => _routines = routines);
     } catch (e) {
-      if (mounted) _showSnackBar(AppLocalizations.of(context)!.routinesLoadError, isError: true);
+      if (mounted)
+        _showSnackBar(
+          AppLocalizations.of(context)!.routinesLoadError,
+          isError: true,
+        );
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -55,7 +59,9 @@ class _RoutinesScreenState extends State<RoutinesScreen>
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.deleteRoutineTitle),
-        content: Text(AppLocalizations.of(context)!.deleteRoutineQuestion(routine.name)),
+        content: Text(
+          AppLocalizations.of(context)!.deleteRoutineQuestion(routine.name),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -80,7 +86,10 @@ class _RoutinesScreenState extends State<RoutinesScreen>
       NotificationsCoordinator.refresh();
       await _loadRoutines();
     } catch (e) {
-      _showSnackBar(AppLocalizations.of(context)!.routineDeleteError, isError: true);
+      _showSnackBar(
+        AppLocalizations.of(context)!.routineDeleteError,
+        isError: true,
+      );
     }
   }
 
@@ -105,7 +114,9 @@ class _RoutinesScreenState extends State<RoutinesScreen>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? theme.colorScheme.error : theme.colorScheme.primary,
+        backgroundColor: isError
+            ? theme.colorScheme.error
+            : theme.colorScheme.primary,
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
       ),
@@ -131,71 +142,95 @@ class _RoutinesScreenState extends State<RoutinesScreen>
         children: [
           Column(
             children: [
-
               TutorialTarget(
                 id: 'routines_tabs',
                 child: Container(
-                margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? theme.colorScheme.primaryContainer.withValues(alpha: 0.15)
-                      : theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: TabBar(
-                  controller: _tabController,
-                  indicator: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    borderRadius: BorderRadius.circular(13),
+                  margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? theme.colorScheme.primaryContainer.withValues(
+                            alpha: 0.15,
+                          )
+                        : theme.colorScheme.primaryContainer.withValues(
+                            alpha: 0.3,
+                          ),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  dividerColor: Colors.transparent,
-                  labelColor: theme.colorScheme.onPrimary,
-                  unselectedLabelColor: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                  labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                  padding: const EdgeInsets.all(4),
-                  tabs: [
-                    Tab(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.wb_sunny_outlined, size: 18),
-                          SizedBox(width: 6),
-                          Text(l10n.morning),
-                        ],
-                      ),
+                  child: TabBar(
+                    controller: _tabController,
+                    indicator: BoxDecoration(
+                      color: theme.colorScheme.primary,
+                      borderRadius: BorderRadius.circular(13),
                     ),
-                    Tab(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.nights_stay_outlined, size: 18),
-                          SizedBox(width: 6),
-                          Text(l10n.night),
-                        ],
-                      ),
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    dividerColor: Colors.transparent,
+                    labelColor: theme.colorScheme.onPrimary,
+                    unselectedLabelColor: theme.colorScheme.onSurface
+                        .withValues(alpha: 0.6),
+                    labelStyle: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
                     ),
-                  ],
+                    padding: const EdgeInsets.all(4),
+                    tabs: [
+                      Tab(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.wb_sunny_outlined, size: 18),
+                            SizedBox(width: 6),
+                            Text(l10n.morning),
+                          ],
+                        ),
+                      ),
+                      Tab(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.nights_stay_outlined, size: 18),
+                            SizedBox(width: 6),
+                            Text(l10n.night),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
               ),
               const SizedBox(height: 8),
 
-
               Expanded(
                 child: _isLoading
-                    ? const Center(child: CircularProgressIndicator())
+                    ? Center(
+                        child: SizedBox(
+                          width: 60,
+                          height: 60,
+                          child: Lottie.asset(
+                            'assets/loading.json',
+                            width: 60,
+                            height: 60,
+                            repeat: true,
+                          ),
+                        ),
+                      )
                     : TabBarView(
                         controller: _tabController,
                         children: [
-                          _buildRoutineList(_morningRoutines, RoutineType.morning, isDark),
-                          _buildRoutineList(_nightRoutines, RoutineType.night, isDark),
+                          _buildRoutineList(
+                            _morningRoutines,
+                            RoutineType.morning,
+                            isDark,
+                          ),
+                          _buildRoutineList(
+                            _nightRoutines,
+                            RoutineType.night,
+                            isDark,
+                          ),
                         ],
                       ),
               ),
             ],
           ),
-
 
           Positioned(
             bottom: 20,
@@ -213,7 +248,11 @@ class _RoutinesScreenState extends State<RoutinesScreen>
     );
   }
 
-  Widget _buildRoutineList(List<Routine> routines, RoutineType type, bool isDark) {
+  Widget _buildRoutineList(
+    List<Routine> routines,
+    RoutineType type,
+    bool isDark,
+  ) {
     if (routines.isEmpty) {
       return _buildEmptyState(type, isDark);
     }
@@ -249,7 +288,9 @@ class _RoutinesScreenState extends State<RoutinesScreen>
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                isMorning ? Icons.wb_sunny_outlined : Icons.nights_stay_outlined,
+                isMorning
+                    ? Icons.wb_sunny_outlined
+                    : Icons.nights_stay_outlined,
                 size: 36,
                 color: theme.colorScheme.primary.withValues(alpha: 0.6),
               ),
@@ -263,7 +304,11 @@ class _RoutinesScreenState extends State<RoutinesScreen>
             ),
             const SizedBox(height: 8),
             Text(
-              l10n.createFirstRoutineHint(isMorning ? l10n.morning.toLowerCase() : l10n.night.toLowerCase()),
+              l10n.createFirstRoutineHint(
+                isMorning
+                    ? l10n.morning.toLowerCase()
+                    : l10n.night.toLowerCase(),
+              ),
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
@@ -296,7 +341,15 @@ class _RoutinesScreenState extends State<RoutinesScreen>
       'saturday': 'S',
       'sunday': 'D',
     };
-    final allDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    final allDays = [
+      'monday',
+      'tuesday',
+      'wednesday',
+      'thursday',
+      'friday',
+      'saturday',
+      'sunday',
+    ];
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -322,17 +375,20 @@ class _RoutinesScreenState extends State<RoutinesScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                        color: theme.colorScheme.primary.withValues(
+                          alpha: 0.12,
+                        ),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
-                        isMorning ? Icons.wb_sunny_outlined : Icons.nights_stay_outlined,
+                        isMorning
+                            ? Icons.wb_sunny_outlined
+                            : Icons.nights_stay_outlined,
                         size: 22,
                         color: theme.colorScheme.primary,
                       ),
@@ -351,7 +407,9 @@ class _RoutinesScreenState extends State<RoutinesScreen>
                           Text(
                             '${routine.products.length} producto${routine.products.length != 1 ? 's' : ''}',
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
+                              color: theme.colorScheme.onSurface.withValues(
+                                alpha: 0.55,
+                              ),
                             ),
                           ),
                         ],
@@ -373,7 +431,6 @@ class _RoutinesScreenState extends State<RoutinesScreen>
                   ],
                 ),
 
-
                 const SizedBox(height: 14),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -391,7 +448,9 @@ class _RoutinesScreenState extends State<RoutinesScreen>
                         border: Border.all(
                           color: isActive
                               ? theme.colorScheme.primary
-                              : theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                              : theme.colorScheme.outlineVariant.withValues(
+                                  alpha: 0.4,
+                                ),
                         ),
                       ),
                       child: Text(
@@ -401,13 +460,14 @@ class _RoutinesScreenState extends State<RoutinesScreen>
                           fontWeight: FontWeight.bold,
                           color: isActive
                               ? theme.colorScheme.onPrimary
-                              : theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                              : theme.colorScheme.onSurface.withValues(
+                                  alpha: 0.4,
+                                ),
                         ),
                       ),
                     );
                   }).toList(),
                 ),
-
 
                 if (routine.products.isNotEmpty) ...[
                   const SizedBox(height: 14),
@@ -420,12 +480,16 @@ class _RoutinesScreenState extends State<RoutinesScreen>
                         final p = routine.products[i];
                         return Container(
                           margin: const EdgeInsets.only(right: 8),
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: theme.colorScheme.surface,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                              color: theme.colorScheme.outlineVariant
+                                  .withValues(alpha: 0.4),
                             ),
                           ),
                           child: Row(
@@ -434,14 +498,18 @@ class _RoutinesScreenState extends State<RoutinesScreen>
                               Icon(
                                 Icons.face_retouching_natural,
                                 size: 14,
-                                color: theme.colorScheme.primary.withValues(alpha: 0.6),
+                                color: theme.colorScheme.primary.withValues(
+                                  alpha: 0.6,
+                                ),
                               ),
                               const SizedBox(width: 5),
                               Text(
                                 p.name,
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                                  color: theme.colorScheme.onSurface.withValues(
+                                    alpha: 0.7,
+                                  ),
                                 ),
                               ),
                             ],

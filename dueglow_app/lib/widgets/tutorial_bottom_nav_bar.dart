@@ -50,7 +50,7 @@ class TutorialBottomNavBar extends StatelessWidget {
                         IconTheme(
                           data: IconThemeData(color: color, size: 24),
                           child: selected
-                              ? (item.activeIcon ?? item.icon)
+                              ? item.activeIcon
                               : item.icon,
                         ),
                         if (showLabels && item.label != null) ...[

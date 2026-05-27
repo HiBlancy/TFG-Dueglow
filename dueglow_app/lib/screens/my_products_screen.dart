@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import '../models/beauty_product.dart';
 import '../models/product_list_type.dart';
 import '../services/product_service.dart';
@@ -10,11 +10,8 @@ import '../l10n/app_localizations.dart';
 import '../widgets/tutorial_target.dart';
 
 enum HaveProductsFilter { all, opened, expired }
-enum ProductSortOption {
-  addedNewest,
-  alphabetical,
-  expirationSoonest,
-}
+
+enum ProductSortOption { addedNewest, alphabetical, expirationSoonest }
 
 class MyProductsScreen extends StatefulWidget {
   final ProductListType? initialListType;
@@ -67,9 +64,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
     _haveProductsFilter = widget.initialHaveFilter ?? HaveProductsFilter.all;
     _refreshProducts();
 
-
     _scrollController.addListener(() {
-
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 200) {
         if (!_isMoreLoading && _hasMore && !_isLoading) {
@@ -109,12 +104,9 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
 
       if (mounted && response != null) {
         setState(() {
-          _allProducts.addAll(
-            response.products,
-          );
+          _allProducts.addAll(response.products);
           _applyCurrentFilters();
           _currentPage++;
-
 
           if (response.currentPage >= response.totalPages) {
             _hasMore = false;
@@ -178,7 +170,8 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
       result = result.where((product) {
         final name = product.name.toLowerCase();
         final brand = (product.brand ?? '').toLowerCase();
-        return name.contains(normalizedQuery) || brand.contains(normalizedQuery);
+        return name.contains(normalizedQuery) ||
+            brand.contains(normalizedQuery);
       }).toList();
     }
 
@@ -192,9 +185,11 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
           return a.name.toLowerCase().compareTo(b.name.toLowerCase());
         case ProductSortOption.expirationSoonest:
           final dateA =
-              a.expirationDate ?? DateTime.fromMillisecondsSinceEpoch(253402300799000);
+              a.expirationDate ??
+              DateTime.fromMillisecondsSinceEpoch(253402300799000);
           final dateB =
-              b.expirationDate ?? DateTime.fromMillisecondsSinceEpoch(253402300799000);
+              b.expirationDate ??
+              DateTime.fromMillisecondsSinceEpoch(253402300799000);
           return dateA.compareTo(dateB);
       }
     });
@@ -477,9 +472,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
       showBackButton: widget.showBackButton,
       child: Column(
         children: [
-
           _buildFilterChips(theme),
-
 
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
@@ -529,7 +522,6 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
 
           _buildSearchAndSortControls(theme),
 
-
           Expanded(
             child: RefreshIndicator(
               onRefresh: _refreshProducts,
@@ -548,30 +540,30 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
     return TutorialTarget(
       id: 'products_lists',
       child: Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        border: Border(
-          bottom: BorderSide(
-            color: isDark
-                ? theme.colorScheme.outline.withValues(alpha: 0.1)
-                : theme.colorScheme.outline.withValues(alpha: 0.08),
-            width: 1,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          border: Border(
+            bottom: BorderSide(
+              color: isDark
+                  ? theme.colorScheme.outline.withValues(alpha: 0.1)
+                  : theme.colorScheme.outline.withValues(alpha: 0.08),
+              width: 1,
+            ),
           ),
         ),
-      ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: ProductListType.values.map((type) {
-            final isSelected = _selectedListType == type;
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: _buildFilterChip(type, isSelected, theme),
-            );
-          }).toList(),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: ProductListType.values.map((type) {
+              final isSelected = _selectedListType == type;
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: _buildFilterChip(type, isSelected, theme),
+              );
+            }).toList(),
+          ),
         ),
-      ),
       ),
     );
   }
@@ -646,14 +638,20 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
           avatar: Icon(
             icon,
             size: 16,
-            color: selected ? theme.colorScheme.onPrimary : theme.colorScheme.primary,
+            color: selected
+                ? theme.colorScheme.onPrimary
+                : theme.colorScheme.primary,
           ),
           backgroundColor: isDark
-              ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35)
+              ? theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.35,
+                )
               : theme.colorScheme.primaryContainer.withValues(alpha: 0.2),
           selectedColor: theme.colorScheme.primary,
           labelStyle: TextStyle(
-            color: selected ? theme.colorScheme.onPrimary : theme.colorScheme.primary,
+            color: selected
+                ? theme.colorScheme.onPrimary
+                : theme.colorScheme.primary,
             fontWeight: FontWeight.w600,
           ),
           side: BorderSide(
@@ -690,7 +688,8 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
               label: l10n.filterExpired,
               icon: Icons.warning_amber_rounded,
               selected: _haveProductsFilter == HaveProductsFilter.expired,
-              onTap: () => _changeHaveProductsFilter(HaveProductsFilter.expired),
+              onTap: () =>
+                  _changeHaveProductsFilter(HaveProductsFilter.expired),
             ),
           ],
         ),
@@ -701,9 +700,11 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
   Widget _buildContent(ThemeData theme) {
     if (_isLoading) {
       return Center(
-        child: CircularProgressIndicator(
-          color: theme.colorScheme.primary,
-          strokeWidth: 3,
+        child: Lottie.asset(
+          'assets/loading.json', // tu animación
+          width: 80, // tamaño a tu gusto
+          height: 80,
+          repeat: true,
         ),
       );
     }
@@ -805,9 +806,20 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
                   onTap: () => _navigateToProduct(product),
                 );
               } else {
-                return const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 32),
-                  child: Center(child: CircularProgressIndicator()),
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 32),
+                  child: Center(
+                    child: SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: Lottie.asset(
+                        'assets/loading.json',
+                        width: 40,
+                        height: 40,
+                        repeat: true,
+                      ),
+                    ),
+                  ),
                 );
               }
             },
@@ -848,7 +860,9 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
                 ),
                 filled: true,
                 fillColor: isDark
-                    ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35)
+                    ? theme.colorScheme.surfaceContainerHighest.withValues(
+                        alpha: 0.35,
+                      )
                     : theme.colorScheme.surface,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -892,7 +906,9 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
                           size: 18,
                           color: option == _sortOption
                               ? theme.colorScheme.primary
-                              : theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                              : theme.colorScheme.onSurface.withValues(
+                                  alpha: 0.75,
+                                ),
                         ),
                         const SizedBox(width: 10),
                         Text(_sortOptionLabel(option)),
@@ -905,7 +921,9 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
                 color: isDark
-                    ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35)
+                    ? theme.colorScheme.surfaceContainerHighest.withValues(
+                        alpha: 0.35,
+                      )
                     : theme.colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
@@ -931,4 +949,3 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
     );
   }
 }
-

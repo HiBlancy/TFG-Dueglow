@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import '../constants/app_constants.dart';
 import '../providers/theme_provider.dart';
@@ -22,48 +23,37 @@ class SettingsScreen extends StatelessWidget {
       showBackButton: true,
       child: ListView(
         children: [
-
           _SettingsSection(
             title: AppLocalizations.of(context)!.general,
-            children: const [
-              _NotificationsSection(),
-            ],
+            children: const [_NotificationsSection()],
           ),
 
           Divider(color: dividerColor, height: 1),
 
-
           _SettingsSection(
             title: AppLocalizations.of(context)!.appearance,
-            children: [
-            _ThemeTile(),
-          ]),
+            children: [_ThemeTile()],
+          ),
 
           Divider(color: dividerColor, height: 1),
-
 
           _SettingsSection(
             title: AppLocalizations.of(context)!.language,
-            children: [
-            _LanguageTile(),
-          ]),
+            children: [_LanguageTile()],
+          ),
 
           Divider(color: dividerColor, height: 1),
 
-
           _SettingsSection(
             title: AppLocalizations.of(context)!.information,
-            children: [
-            _AboutTile(),
-          ]),
+            children: [_AboutTile()],
+          ),
 
           Divider(color: dividerColor, height: 1),
 
           _SettingsSection(
             title: AppLocalizations.of(context)!.deleteAccountSectionTitle,
-            children: [
-              const _DeleteAccountTile(),
-            ],
+            children: [const _DeleteAccountTile()],
           ),
 
           const SizedBox(height: 32),
@@ -73,7 +63,6 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
-
 class _NotificationsSection extends StatelessWidget {
   const _NotificationsSection();
 
@@ -82,9 +71,20 @@ class _NotificationsSection extends StatelessWidget {
     return Consumer<NotificationPreferencesProvider>(
       builder: (context, provider, _) {
         if (!provider.isLoaded) {
-          return const Padding(
-            padding: EdgeInsets.all(24),
-            child: Center(child: CircularProgressIndicator()),
+          return Padding(
+            padding: const EdgeInsets.all(24),
+            child: Center(
+              child: SizedBox(
+                width: 40,
+                height: 40,
+                child: Lottie.asset(
+                  'assets/loading.json',
+                  width: 40,
+                  height: 40,
+                  repeat: true,
+                ),
+              ),
+            ),
           );
         }
 
@@ -105,7 +105,10 @@ class _NotificationsSection extends StatelessWidget {
               Theme(
                 data: theme.copyWith(dividerColor: Colors.transparent),
                 child: ExpansionTile(
-                  leading: Icon(Icons.tune_outlined, color: theme.colorScheme.primary),
+                  leading: Icon(
+                    Icons.tune_outlined,
+                    color: theme.colorScheme.primary,
+                  ),
                   title: Text(l10n.notifTypesHeader),
                   tilePadding: const EdgeInsets.symmetric(horizontal: 8),
                   childrenPadding: EdgeInsets.zero,
@@ -155,8 +158,8 @@ class _NotificationsSection extends StatelessWidget {
     final message = !value
         ? l10n.notificationsDisabled
         : systemOk
-            ? l10n.notificationsEnabled
-            : l10n.notifPermissionHint;
+        ? l10n.notificationsEnabled
+        : l10n.notifPermissionHint;
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -198,14 +201,10 @@ class _NotificationSwitchTile extends StatelessWidget {
       subtitle: subtitle == null
           ? null
           : Text(subtitle!, style: TextStyle(color: subtleText, height: 1.25)),
-      trailing: Switch(
-        value: value,
-        onChanged: onChanged,
-      ),
+      trailing: Switch(value: value, onChanged: onChanged),
     );
   }
 }
-
 
 class _ThemeTile extends StatelessWidget {
   const _ThemeTile();
@@ -221,14 +220,15 @@ class _ThemeTile extends StatelessWidget {
     // ThemeMode.system follows the device; settings only lists light/dark, so
     // mark the row that matches what the user actually sees.
     final mode = themeProvider.themeMode;
-    final lightSelected = mode == ThemeMode.light ||
+    final lightSelected =
+        mode == ThemeMode.light ||
         (mode == ThemeMode.system && resolvedBrightness == Brightness.light);
-    final darkSelected = mode == ThemeMode.dark ||
+    final darkSelected =
+        mode == ThemeMode.dark ||
         (mode == ThemeMode.system && resolvedBrightness == Brightness.dark);
 
     return Column(
       children: [
-
         ListTile(
           leading: Icon(Icons.light_mode, color: theme.colorScheme.primary),
           title: Text(l10n.lightMode),
@@ -237,7 +237,6 @@ class _ThemeTile extends StatelessWidget {
               : null,
           onTap: () => themeProvider.setLightMode(),
         ),
-
 
         ListTile(
           leading: Icon(Icons.dark_mode, color: theme.colorScheme.primary),
@@ -252,7 +251,6 @@ class _ThemeTile extends StatelessWidget {
   }
 }
 
-
 class _LanguageTile extends StatelessWidget {
   const _LanguageTile();
 
@@ -266,7 +264,6 @@ class _LanguageTile extends StatelessWidget {
 
     return Column(
       children: [
-
         ListTile(
           leading: Icon(Icons.translate, color: theme.colorScheme.primary),
           title: Text(l10n.spanish),
@@ -279,7 +276,6 @@ class _LanguageTile extends StatelessWidget {
           },
         ),
 
-
         ListTile(
           leading: Icon(Icons.translate, color: theme.colorScheme.primary),
           title: Text(l10n.english),
@@ -291,7 +287,6 @@ class _LanguageTile extends StatelessWidget {
             localeProvider.setEnglish();
           },
         ),
-
 
         ListTile(
           leading: Icon(Icons.translate, color: theme.colorScheme.primary),
@@ -309,7 +304,6 @@ class _LanguageTile extends StatelessWidget {
   }
 }
 
-
 class _AboutTile extends StatelessWidget {
   const _AboutTile();
 
@@ -323,16 +317,17 @@ class _AboutTile extends StatelessWidget {
     return ListTile(
       leading: Icon(Icons.info, color: theme.colorScheme.primary),
       title: Text(l10n.about),
-      subtitle: Text(l10n.versionLabel('1.0.0'), style: TextStyle(color: subtleText)),
+      subtitle: Text(
+        l10n.versionLabel('1.0.0'),
+        style: TextStyle(color: subtleText),
+      ),
       trailing: Icon(Icons.chevron_right, color: subtleText),
       onTap: () {
-
         Navigator.pushNamed(context, '/about');
       },
     );
   }
 }
-
 
 class _DeleteAccountTile extends StatefulWidget {
   const _DeleteAccountTile();
@@ -391,12 +386,17 @@ class _DeleteAccountTileState extends State<_DeleteAccountTile> {
           child: AlertDialog(
             content: Row(
               children: [
-                const Padding(
+                Padding(
                   padding: EdgeInsets.only(right: 20),
                   child: SizedBox(
                     width: 28,
                     height: 28,
-                    child: CircularProgressIndicator(strokeWidth: 3),
+                    child: Lottie.asset(
+                      'assets/loading.json',
+                      width: 28,
+                      height: 28,
+                      repeat: true,
+                    ),
                   ),
                 ),
                 Expanded(child: Text(l10n.deleteAccountDeleting)),
@@ -458,15 +458,11 @@ class _DeleteAccountTileState extends State<_DeleteAccountTile> {
   }
 }
 
-
 class _SettingsSection extends StatelessWidget {
   final String title;
   final List<Widget> children;
 
-  const _SettingsSection({
-    required this.title,
-    required this.children,
-  });
+  const _SettingsSection({required this.title, required this.children});
 
   @override
   Widget build(BuildContext context) {

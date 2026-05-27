@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'dart:io';
 import '../widgets/custom_text_field.dart';
 import '../widgets/main_toolbar.dart';
@@ -93,7 +93,11 @@ class _EditScreenState extends State<EditScreen> {
       SnackBar(
         content: Text(
           message,
-          style: TextStyle(color: isError ? theme.colorScheme.onError : theme.colorScheme.onPrimary),
+          style: TextStyle(
+            color: isError
+                ? theme.colorScheme.onError
+                : theme.colorScheme.onPrimary,
+          ),
         ),
         backgroundColor: isError
             ? theme.colorScheme.error
@@ -153,7 +157,9 @@ class _EditScreenState extends State<EditScreen> {
                     ),
                     title: Text(
                       l10n.deletePhoto,
-                      style: TextStyle(color: Theme.of(context).colorScheme.error),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
                     ),
                     onTap: () {
                       Navigator.pop(context);
@@ -162,9 +168,7 @@ class _EditScreenState extends State<EditScreen> {
                         _selectedImage = null;
                         _currentProfileImageUrl = null;
                       });
-                      _showCustomSnackBar(
-                        l10n.photoMarkedForDeletion,
-                      );
+                      _showCustomSnackBar(l10n.photoMarkedForDeletion);
                     },
                   ),
                 const SizedBox(height: 8),
@@ -214,74 +218,73 @@ class _EditScreenState extends State<EditScreen> {
     setState(() => _isUploadingImage = false);
   }
 
- Future<void> _saveChanges() async {
-  final l10n = AppLocalizations.of(context)!;
-  if (!_formKey.currentState!.validate()) return;
+  Future<void> _saveChanges() async {
+    final l10n = AppLocalizations.of(context)!;
+    if (!_formKey.currentState!.validate()) return;
 
-  if (_passwordController.text.isNotEmpty &&
-      _passwordController.text != _confirmPasswordController.text) {
-    _showCustomSnackBar(l10n.passwordsDontMatch, isError: true);
-    return;
-  }
+    if (_passwordController.text.isNotEmpty &&
+        _passwordController.text != _confirmPasswordController.text) {
+      _showCustomSnackBar(l10n.passwordsDontMatch, isError: true);
+      return;
+    }
 
-  setState(() => _isSaving = true);
+    setState(() => _isSaving = true);
 
-  String? finalProfileImageUrl = _currentProfileImageUrl;
+    String? finalProfileImageUrl = _currentProfileImageUrl;
 
-  try {
-
-    if (_shouldDeleteImage) {
-      final deleted = await _authService.deleteProfileImage();
-      if (deleted != null) {
-        finalProfileImageUrl = null;
-        _shouldDeleteImage = false;
-      } else {
-        _showCustomSnackBar(l10n.deletePhotoError, isError: true);
-        setState(() => _isSaving = false);
-        return;
+    try {
+      if (_shouldDeleteImage) {
+        final deleted = await _authService.deleteProfileImage();
+        if (deleted != null) {
+          finalProfileImageUrl = null;
+          _shouldDeleteImage = false;
+        } else {
+          _showCustomSnackBar(l10n.deletePhotoError, isError: true);
+          setState(() => _isSaving = false);
+          return;
+        }
       }
-    }
 
-
-    if (_selectedImage != null) {
-      final uploaded = await _authService.uploadProfileImage(_selectedImage!);
-      if (uploaded != null && uploaded['profileImage'] != null) {
-        finalProfileImageUrl = uploaded['profileImage'];
-      } else {
-        _showCustomSnackBar(l10n.uploadPhotoError, isError: true);
-        setState(() => _isSaving = false);
-        return;
+      if (_selectedImage != null) {
+        final uploaded = await _authService.uploadProfileImage(_selectedImage!);
+        if (uploaded != null && uploaded['profileImage'] != null) {
+          finalProfileImageUrl = uploaded['profileImage'];
+        } else {
+          _showCustomSnackBar(l10n.uploadPhotoError, isError: true);
+          setState(() => _isSaving = false);
+          return;
+        }
       }
+
+      String? formattedBirthDate;
+      if (_birthDateController.text.isNotEmpty) {
+        formattedBirthDate = _convertToISODate(_birthDateController.text);
+      }
+
+      final updateResult = await _authService.updateUser(
+        name: _nameController.text.isNotEmpty ? _nameController.text : null,
+        phone: _phoneController.text.isNotEmpty ? _phoneController.text : null,
+        birthDate: formattedBirthDate,
+        password: _passwordController.text.isNotEmpty
+            ? _passwordController.text
+            : null,
+        profileImage: finalProfileImageUrl,
+      );
+
+      if (updateResult != null && mounted) {
+        await _authService.getProfile();
+        _showCustomSnackBar(l10n.profileUpdatedSuccess);
+        Navigator.pop(context, true);
+      } else {
+        _showCustomSnackBar(l10n.profileUpdateError, isError: true);
+      }
+    } catch (e) {
+      print('❌ Error en _saveChanges: $e');
+      _showCustomSnackBar(l10n.saveChangesError, isError: true);
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
     }
-
-
-    String? formattedBirthDate;
-    if (_birthDateController.text.isNotEmpty) {
-      formattedBirthDate = _convertToISODate(_birthDateController.text);
-    }
-
-    final updateResult = await _authService.updateUser(
-      name: _nameController.text.isNotEmpty ? _nameController.text : null,
-      phone: _phoneController.text.isNotEmpty ? _phoneController.text : null,
-      birthDate: formattedBirthDate,
-      password: _passwordController.text.isNotEmpty ? _passwordController.text : null,
-      profileImage: finalProfileImageUrl,
-    );
-
-    if (updateResult != null && mounted) {
-      await _authService.getProfile();
-      _showCustomSnackBar(l10n.profileUpdatedSuccess);
-      Navigator.pop(context, true);
-    } else {
-      _showCustomSnackBar(l10n.profileUpdateError, isError: true);
-    }
-  } catch (e) {
-    print('❌ Error en _saveChanges: $e');
-    _showCustomSnackBar(l10n.saveChangesError, isError: true);
-  } finally {
-    if (mounted) setState(() => _isSaving = false);
   }
-}
 
   Future<void> _selectDate() async {
     DateTime initialDate = DateTime.now();
@@ -361,8 +364,15 @@ class _EditScreenState extends State<EditScreen> {
       showBackButton: true,
       child: _isLoading
           ? Center(
-              child: CircularProgressIndicator(
-                color: theme.colorScheme.primary,
+              child: SizedBox(
+                width: 80,
+                height: 80,
+                child: Lottie.asset(
+                  'assets/loading.json',
+                  width: 80,
+                  height: 80,
+                  repeat: true,
+                ),
               ),
             )
           : Form(
@@ -429,7 +439,9 @@ class _EditScreenState extends State<EditScreen> {
                       });
                     },
                     validator: (value) {
-                      if (value != null && value.isNotEmpty && value.length < 8) {
+                      if (value != null &&
+                          value.isNotEmpty &&
+                          value.length < 8) {
                         return l10n.pass8Char;
                       }
                       if (value != null &&
@@ -514,11 +526,11 @@ class _EditScreenState extends State<EditScreen> {
                         child: SizedBox(
                           width: 24,
                           height: 24,
-                          child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              theme.colorScheme.onPrimary,
-                            ),
-                            strokeWidth: 2,
+                          child: Lottie.asset(
+                            'assets/loading.json',
+                            width: 24,
+                            height: 24,
+                            repeat: true,
                           ),
                         ),
                       ),
@@ -535,7 +547,6 @@ class _EditScreenState extends State<EditScreen> {
   Widget _buildSaveButton() {
     return Column(
       children: [
-
         ElevatedButton(
           onPressed: _isSaving ? null : _saveChanges,
           style: ElevatedButton.styleFrom(
@@ -546,9 +557,11 @@ class _EditScreenState extends State<EditScreen> {
               ? SizedBox(
                   height: 20,
                   width: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Theme.of(context).colorScheme.onPrimary,
+                  child: Lottie.asset(
+                    'assets/loading.json',
+                    width: 20,
+                    height: 20,
+                    repeat: true,
                   ),
                 )
               : Row(
@@ -572,4 +585,3 @@ class _EditScreenState extends State<EditScreen> {
     );
   }
 }
-

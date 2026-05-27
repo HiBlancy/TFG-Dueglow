@@ -11,7 +11,7 @@ class WarningDialog {
     bool isDanger = false,
   }) async {
     final theme = Theme.of(context);
-    final subtleText = theme.colorScheme.onSurface.withOpacity(0.7);
+    final subtleText = theme.colorScheme.onSurface.withValues(alpha: 0.7);
 
     final result = await showDialog<bool>(
       context: context,
@@ -22,7 +22,7 @@ class WarningDialog {
           borderRadius: BorderRadius.circular(20),
 
           side: theme.brightness == Brightness.dark
-              ? BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.1))
+              ? BorderSide(color: theme.colorScheme.onSurface.withValues(alpha: 0.1))
               : BorderSide.none,
         ),
         title: Row(
@@ -51,7 +51,7 @@ class WarningDialog {
             child: Text(
               cancelText,
 
-              style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
+              style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
             ),
           ),
           ElevatedButton(
@@ -82,7 +82,7 @@ class WarningDialog {
     required String content,
   }) async {
     final theme = Theme.of(context);
-    final subtleText = theme.colorScheme.onSurface.withOpacity(0.7);
+    final subtleText = theme.colorScheme.onSurface.withValues(alpha: 0.7);
 
     await showDialog(
       context: context,
@@ -92,7 +92,7 @@ class WarningDialog {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: theme.brightness == Brightness.dark
-              ? BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.1))
+              ? BorderSide(color: theme.colorScheme.onSurface.withValues(alpha: 0.1))
               : BorderSide.none,
         ),
         title: Row(

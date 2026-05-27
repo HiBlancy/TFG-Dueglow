@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import '../models/routine_model.dart';
 import '../models/beauty_product.dart';
 import '../services/routine_service.dart';
@@ -120,7 +120,10 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
       });
       _showSnackBar(AppLocalizations.of(context)!.productRemovedFromRoutine);
     } catch (e) {
-      _showSnackBar(AppLocalizations.of(context)!.productRemoveError, isError: true);
+      _showSnackBar(
+        AppLocalizations.of(context)!.productRemoveError,
+        isError: true,
+      );
     } finally {
       setState(() => _isLoading = false);
     }
@@ -134,11 +137,9 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
     final item = products.removeAt(oldIndex);
     products.insert(newIndex, item);
 
-
     setState(() {
       _routine = _routine.copyWith(products: products);
     });
-
 
     final reorderPayload = products
         .asMap()
@@ -156,9 +157,11 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
         _hasChanges = true;
       });
     } catch (e) {
-
       setState(() => _routine = widget.routine);
-      _showSnackBar(AppLocalizations.of(context)!.reorderProductsError, isError: true);
+      _showSnackBar(
+        AppLocalizations.of(context)!.reorderProductsError,
+        isError: true,
+      );
     }
   }
 
@@ -176,7 +179,6 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
       builder: (sheetCtx) {
         return StatefulBuilder(
           builder: (ctx, setModalState) {
-
             if (loadingProducts) {
               _productService
                   .getProducts(listType: 'have', limit: 100)
@@ -219,7 +221,6 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
               ),
               child: Column(
                 children: [
-
                   Container(
                     margin: const EdgeInsets.only(top: 12),
                     width: 40,
@@ -245,7 +246,8 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
                     child: TextField(
-                      onChanged: (value) => setModalState(() => searchQuery = value),
+                      onChanged: (value) =>
+                          setModalState(() => searchQuery = value),
                       decoration: InputDecoration(
                         hintText: AppLocalizations.of(context)!.searchNameBrand,
                         prefixIcon: const Icon(Icons.search),
@@ -259,7 +261,18 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
                   const Divider(height: 1),
                   Expanded(
                     child: loadingProducts
-                        ? const Center(child: CircularProgressIndicator())
+                        ? Center(
+                            child: SizedBox(
+                              width: 60,
+                              height: 60,
+                              child: Lottie.asset(
+                                'assets/loading.json',
+                                width: 60,
+                                height: 60,
+                                repeat: true,
+                              ),
+                            ),
+                          )
                         : available.isEmpty
                         ? Center(
                             child: Padding(
@@ -276,7 +289,9 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
                                   ),
                                   const SizedBox(height: 16),
                                   Text(
-                                    AppLocalizations.of(context)!.noMoreProductsToAdd,
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.noMoreProductsToAdd,
                                     textAlign: TextAlign.center,
                                     style: theme.textTheme.bodyMedium?.copyWith(
                                       color: theme.colorScheme.onSurface
@@ -303,7 +318,9 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
                                   ),
                                   const SizedBox(height: 16),
                                   Text(
-                                    AppLocalizations.of(context)!.searchNoResults,
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.searchNoResults,
                                     textAlign: TextAlign.center,
                                     style: theme.textTheme.bodyMedium?.copyWith(
                                       color: theme.colorScheme.onSurface
@@ -410,7 +427,10 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
       });
       _showSnackBar(AppLocalizations.of(context)!.productAddedToRoutine);
     } catch (e) {
-      _showSnackBar(AppLocalizations.of(context)!.productAddError, isError: true);
+      _showSnackBar(
+        AppLocalizations.of(context)!.productAddError,
+        isError: true,
+      );
     } finally {
       setState(() => _isLoading = false);
     }
@@ -462,7 +482,9 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? theme.colorScheme.error : theme.colorScheme.primary,
+        backgroundColor: isError
+            ? theme.colorScheme.error
+            : theme.colorScheme.primary,
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
       ),
@@ -474,7 +496,9 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final isMorning = _routine.type == RoutineType.morning;
-    final cardBg = theme.colorScheme.primaryContainer.withValues(alpha: isDark ? 0.15 : 0.2);
+    final cardBg = theme.colorScheme.primaryContainer.withValues(
+      alpha: isDark ? 0.15 : 0.2,
+    );
 
     return PopScope(
       canPop: false,
@@ -488,29 +512,40 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
         showBackButton: true,
         onBack: () => Navigator.pop(context, _hasChanges),
         child: _isLoading && _routine.products.isEmpty
-            ? const Center(child: CircularProgressIndicator())
+            ? Center(
+                child: SizedBox(
+                  width: 60,
+                  height: 60,
+                  child: Lottie.asset(
+                    'assets/loading.json',
+                    width: 60,
+                    height: 60,
+                    repeat: true,
+                  ),
+                ),
+              )
             : CustomScrollView(
                 slivers: [
-
-
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-
                           Row(
                             children: [
                               Expanded(
                                 child: _isEditing
                                     ? CustomTextField(
                                         controller: _nameController,
-                                        label: AppLocalizations.of(context)!.routineNameLabel,
-                                        prefixIcon: Icons
-                                            .edit_outlined,
+                                        label: AppLocalizations.of(
+                                          context,
+                                        )!.routineNameLabel,
+                                        prefixIcon: Icons.edit_outlined,
                                         validator: (v) => v?.isEmpty == true
-                                            ? AppLocalizations.of(context)!.requiredField
+                                            ? AppLocalizations.of(
+                                                context,
+                                              )!.requiredField
                                             : null,
                                       )
                                     : Text(
@@ -529,7 +564,6 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
                                 ),
                                 onPressed: () {
                                   if (_isEditing) {
-
                                     setState(() {
                                       _isEditing = false;
                                       _nameController.text = _routine.name;
@@ -553,9 +587,7 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
                           ),
                           const SizedBox(height: 16),
 
-
                           if (!_isEditing) ...[
-
                             Row(
                               children: [
                                 Container(
@@ -636,7 +668,6 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
                               }).toList(),
                             ),
                           ] else ...[
-
                             _buildSectionLabel(
                               theme,
                               Icons.schedule_outlined,
@@ -647,7 +678,9 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
                               children: [
                                 Expanded(
                                   child: _buildTypeCardEditable(
-                                    label: AppLocalizations.of(context)!.morning,
+                                    label: AppLocalizations.of(
+                                      context,
+                                    )!.morning,
                                     icon: Icons.wb_sunny_outlined,
                                     type: RoutineType.morning,
                                     isSelected:
@@ -673,7 +706,6 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
                               ],
                             ),
                             const SizedBox(height: 24),
-
 
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -802,7 +834,6 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
 
                           const SizedBox(height: 24),
 
-
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -816,8 +847,12 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
                                   ),
                                   Text(
                                     _routine.products.isEmpty
-                                        ? AppLocalizations.of(context)!.noProductAdded
-                                        : AppLocalizations.of(context)!.longPressReorder,
+                                        ? AppLocalizations.of(
+                                            context,
+                                          )!.noProductAdded
+                                        : AppLocalizations.of(
+                                            context,
+                                          )!.longPressReorder,
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: theme.colorScheme.onSurface
                                           .withValues(alpha: 0.5),
@@ -839,7 +874,6 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
                       ),
                     ),
                   ),
-
 
                   _routine.products.isEmpty
                       ? SliverToBoxAdapter(
@@ -948,7 +982,6 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
         leading: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-
             Container(
               width: 24,
               height: 24,
@@ -1010,7 +1043,6 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-
             IconButton(
               icon: Icon(
                 Icons.remove_circle_outline,
@@ -1120,4 +1152,3 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
     );
   }
 }
-
