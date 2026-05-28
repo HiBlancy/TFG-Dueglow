@@ -107,7 +107,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: 80,
                   height: 80,
                   child: Lottie.asset(
-                    'assets/loading.json',
+                    Theme.of(context).brightness == Brightness.dark
+                        ? 'assets/loadingGray.json'
+                        : 'assets/loading.json',
                     width: 80,
                     height: 80,
                     repeat: true,

@@ -225,7 +225,9 @@ class _SearchScreenState extends State<SearchScreen> {
                             width: 20,
                             height: 20,
                             child: Lottie.asset(
-                              'assets/loading.json',
+                              Theme.of(context).brightness == Brightness.dark
+                                  ? 'assets/loadingGray.json'
+                                  : 'assets/loading.json',
                               width: 20,
                               height: 20,
                               repeat: true,
@@ -286,7 +288,9 @@ class _SearchScreenState extends State<SearchScreen> {
               width: 80,
               height: 80,
               child: Lottie.asset(
-                'assets/loading.json',
+                Theme.of(context).brightness == Brightness.dark
+                    ? 'assets/loadingGray.json'
+                    : 'assets/loading.json',
                 width: 80,
                 height: 80,
                 repeat: true,
@@ -444,7 +448,9 @@ class _SearchScreenState extends State<SearchScreen> {
                 width: 28,
                 height: 28,
                 child: Lottie.asset(
-                  'assets/loading.json',
+                  Theme.of(context).brightness == Brightness.dark
+                        ? 'assets/loadingGray.json'
+                        : 'assets/loading.json',
                   width: 28,
                   height: 28,
                   repeat: true,
@@ -597,7 +603,9 @@ class _ProductTileState extends State<_ProductTile>
                       width: 24,
                       height: 24,
                       child: Lottie.asset(
-                        'assets/loading.json',
+                        Theme.of(context).brightness == Brightness.dark
+                            ? 'assets/loadingGray.json'
+                            : 'assets/loading.json',
                         width: 24,
                         height: 24,
                         repeat: true,

@@ -701,8 +701,10 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
     if (_isLoading) {
       return Center(
         child: Lottie.asset(
-          'assets/loading.json', // tu animación
-          width: 80, // tamaño a tu gusto
+          Theme.of(context).brightness == Brightness.dark
+              ? 'assets/loadingGray.json'
+              : 'assets/loading.json',
+          width: 80,
           height: 80,
           repeat: true,
         ),
@@ -810,12 +812,14 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 32),
                   child: Center(
                     child: SizedBox(
-                      width: 40,
-                      height: 40,
+                      width: 80,
+                      height: 80,
                       child: Lottie.asset(
-                        'assets/loading.json',
-                        width: 40,
-                        height: 40,
+                        Theme.of(context).brightness == Brightness.dark
+                            ? 'assets/loadingGray.json'
+                            : 'assets/loading.json',
+                        width: 80,
+                        height: 80,
                         repeat: true,
                       ),
                     ),

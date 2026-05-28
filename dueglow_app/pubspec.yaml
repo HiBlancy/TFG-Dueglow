@@ -43,4 +43,5 @@ flutter:
   assets:
     - assets/logo.png
     - assets/loading.json
+    - assets/loadingGray.json
   generate: true

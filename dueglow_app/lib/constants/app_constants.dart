@@ -1,6 +1,6 @@
 class AppConstants {
   static const String appName = 'DueGlow';
-  static const String version = '1.2.2';
+  static const String version = '1.2.3';
 
   static const String routeSplash = '/';
   static const String routeLogin = '/login';

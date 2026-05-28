@@ -203,12 +203,14 @@ class _RoutinesScreenState extends State<RoutinesScreen>
                 child: _isLoading
                     ? Center(
                         child: SizedBox(
-                          width: 60,
-                          height: 60,
+                          width: 80,
+                          height: 80,
                           child: Lottie.asset(
-                            'assets/loading.json',
-                            width: 60,
-                            height: 60,
+                            Theme.of(context).brightness == Brightness.dark
+                                ? 'assets/loadingGray.json'
+                                : 'assets/loading.json',
+                            width: 80,
+                            height: 80,
                             repeat: true,
                           ),
                         ),

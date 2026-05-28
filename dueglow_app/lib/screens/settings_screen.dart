@@ -75,12 +75,14 @@ class _NotificationsSection extends StatelessWidget {
             padding: const EdgeInsets.all(24),
             child: Center(
               child: SizedBox(
-                width: 40,
-                height: 40,
+                width: 80,
+                height: 80,
                 child: Lottie.asset(
-                  'assets/loading.json',
-                  width: 40,
-                  height: 40,
+                  Theme.of(context).brightness == Brightness.dark
+                        ? 'assets/loadingGray.json'
+                        : 'assets/loading.json',
+                  width: 80,
+                  height: 80,
                   repeat: true,
                 ),
               ),
@@ -389,12 +391,14 @@ class _DeleteAccountTileState extends State<_DeleteAccountTile> {
                 Padding(
                   padding: EdgeInsets.only(right: 20),
                   child: SizedBox(
-                    width: 28,
-                    height: 28,
+                    width: 80,
+                    height: 80,
                     child: Lottie.asset(
-                      'assets/loading.json',
-                      width: 28,
-                      height: 28,
+                      Theme.of(context).brightness == Brightness.dark
+                          ? 'assets/loadingGray.json'
+                          : 'assets/loading.json',
+                      width: 80,
+                      height: 80,
                       repeat: true,
                     ),
                   ),
