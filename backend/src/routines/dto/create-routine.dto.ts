@@ -4,12 +4,10 @@ import {
   IsIn,
   IsArray,
   ArrayMinSize,
-  ValidateNested,
   IsOptional,
   IsNumber,
   Min,
 } from 'class-validator';
-import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class RoutineProductDto {

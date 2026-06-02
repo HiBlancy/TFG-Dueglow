@@ -27,17 +27,15 @@ export class RoutineService {
     }));
   }
 
-  // Crea una rutina y guarda los productos con orden (0..n).
+  // Crea una rutina y guarda los productos con orden (0..n)
   async create(
     userId: string,
     createRoutineDto: CreateRoutineDto,
   ): Promise<Routine> {
-    // Si vienen productos, validar que existan y sean del usuario.
     if (createRoutineDto.products && createRoutineDto.products.length > 0) {
       await this.validateProducts(userId, createRoutineDto.products);
     }
 
-    // Guardar productos con orden.
     const productsWithOrder = this.toOrderedProducts(
       createRoutineDto.products || [],
     );
@@ -51,6 +49,7 @@ export class RoutineService {
     return newRoutine.save();
   }
 
+  // obtiene las rutinas del usuario
   async findAllByUser(userId: string): Promise<Routine[]> {
     return this.routineModel
       .find({ userId })
@@ -59,6 +58,7 @@ export class RoutineService {
       .exec();
   }
 
+  // encontrar rutina por id, validando antes que pertenezca al usuario
   async findById(id: string, userId: string): Promise<Routine | null> {
     try {
       const routine = await this.routineModel
@@ -73,11 +73,11 @@ export class RoutineService {
       }
       return routine;
     } catch (error) {
-      // Cualquier error se responde como 404 (comportamiento actual).
       throw new NotFoundException(`Rutina ${id} no encontrada`);
     }
   }
 
+  // actualizar rutina
   async update(
     id: string,
     userId: string,
@@ -93,7 +93,6 @@ export class RoutineService {
         Object.entries(updateRoutineDto).filter(([_, v]) => v !== undefined),
       );
 
-      // Si vienen productos, los convertimos a { productId, order } y validamos.
       if (updateData.products && Array.isArray(updateData.products)) {
         const productIds = updateData.products;
         updateData.products = this.toOrderedProducts(productIds);
@@ -110,11 +109,11 @@ export class RoutineService {
         );
       return updated;
     } catch (error) {
-      // Cualquier error se responde como 404 (comportamiento actual).
       throw new NotFoundException(`Rutina ${id} no encontrada`);
     }
   }
 
+  // eliminar rutina
   async delete(id: string, userId: string): Promise<Routine> {
     const routine = await this.routineModel.findById(id).exec();
     if (!routine) throw new NotFoundException(`Rutina ${id} no encontrada`);
@@ -123,7 +122,6 @@ export class RoutineService {
         'No tienes permiso para eliminar esta rutina',
       );
 
-    // Eliminar la rutina.
     const deleted = await this.routineModel.findByIdAndDelete(id).exec();
     if (!deleted)
       throw new NotFoundException(`Rutina ${id} no encontrada al eliminar`);
@@ -131,6 +129,7 @@ export class RoutineService {
     return deleted;
   }
 
+  //reorganizar los productos de una rutina
   async reorderProducts(
     id: string,
     userId: string,
@@ -143,7 +142,6 @@ export class RoutineService {
         throw new ForbiddenException();
 
       const productIds = reorderDto.products.map((p) => p.productId);
-      // Validar que los productos existan y sean del usuario.
       await this.validateProducts(userId, productIds);
 
       const updated = await this.routineModel
@@ -157,11 +155,11 @@ export class RoutineService {
       if (!updated) throw new NotFoundException();
       return updated;
     } catch (error) {
-      // Cualquier error se responde como 404 (comportamiento actual).
       throw new NotFoundException(`Rutina ${id} no encontrada`);
     }
   }
 
+  // anadir producto a la rutina
   async addProduct(
     id: string,
     userId: string,
@@ -172,17 +170,14 @@ export class RoutineService {
       throw new NotFoundException(`Rutina ${id} no encontrada`);
     }
 
-    // 2. Verificar permisos
     if (routine.userId.toString() !== userId.toString()) {
       throw new ForbiddenException(
         'No tienes permiso para actualizar esta rutina',
       );
     }
 
-    // 3. Validar que el producto exista y pertenezca al usuario
     await this.validateProducts(userId, [productId]);
 
-    // 4. Verificar duplicado
     const alreadyExists = routine.products.some(
       (p) => p.productId.toString() === productId,
     );
@@ -190,20 +185,17 @@ export class RoutineService {
       throw new BadRequestException('Este producto ya está en la rutina');
     }
 
-    // 5. Calcular siguiente orden
     const nextOrder =
       routine.products.length > 0
         ? Math.max(...routine.products.map((p) => p.order)) + 1
         : 0;
 
-    // 6. Agregar producto
     routine.products.push({
       productId: productId as any,
       order: nextOrder,
     });
     await routine.save();
 
-    // 7. Devolver rutina populada
     const populatedRoutine = await this.routineModel
       .findById(id)
       .populate('products.productId')
@@ -218,33 +210,29 @@ export class RoutineService {
     return populatedRoutine;
   }
 
+  // quitar un producto de la rutina y reordenar los restantes
   async removeProduct(
     id: string,
     userId: string,
     productId: string,
   ): Promise<Routine> {
-    // 1. Buscar la rutina (con try-catch para IDs inválidos)
     let routine;
     try {
       routine = await this.routineModel.findById(id).exec();
     } catch (error) {
-      // Si el ID tiene formato incorrecto (CastError), lanzamos 404
       throw new NotFoundException(`Rutina ${id} no encontrada`);
     }
 
-    // 2. Verificar que la rutina existe
     if (!routine) {
       throw new NotFoundException(`Rutina ${id} no encontrada`);
     }
 
-    // 3. Verificar permisos
     if (routine.userId.toString() !== userId.toString()) {
       throw new ForbiddenException(
         'No tienes permiso para modificar esta rutina',
       );
     }
 
-    // 4. Verificar que el producto existe DENTRO de la rutina
     const productExists = routine.products.some(
       (p) => p.productId.toString() === productId,
     );
@@ -254,7 +242,6 @@ export class RoutineService {
       );
     }
 
-    // 5. Eliminar el producto y reordenar los restantes
     routine.products = routine.products
       .filter((p) => p.productId.toString() !== productId)
       .map((p, index) => ({
@@ -264,7 +251,6 @@ export class RoutineService {
 
     await routine.save();
 
-    // 6. Devolver la rutina actualizada con productos populados
     const populatedRoutine = await this.routineModel
       .findById(id)
       .populate('products.productId')
@@ -279,6 +265,7 @@ export class RoutineService {
     return populatedRoutine;
   }
 
+  // valida que los productos son del usuario
   private async validateProducts(
     userId: string,
     productIds: string[],
@@ -289,7 +276,6 @@ export class RoutineService {
       .find({ _id: { $in: productIds }, userId })
       .exec();
 
-    // 404 cuando un producto no existe o no pertenece al usuario.
     if (products.length !== productIds.length) {
       throw new NotFoundException('Uno o más productos no existen');
     }

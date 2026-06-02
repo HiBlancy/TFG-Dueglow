@@ -7,7 +7,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // --- CONFIGURACIÓN DE SWAGGER ---
+  // --- CONFIGURACION DE SWAGGER ---
   const config = new DocumentBuilder()
     .setTitle('API de Cosmética y Rutinas')
     .setDescription('Documentación de la API para gestión de productos y rutinas')

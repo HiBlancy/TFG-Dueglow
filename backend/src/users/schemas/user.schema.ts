@@ -20,7 +20,7 @@ export const UserSchema = new Schema(
   { timestamps: true },
 );
 
-// comparación de contraseñas
+// comparacion de contras
 UserSchema.methods.comparePassword = async function (
   candidatePassword: string,
 ): Promise<boolean> {

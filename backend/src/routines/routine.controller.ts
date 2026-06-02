@@ -28,7 +28,7 @@ export class RoutineController {
     return { status: true, message, data };
   }
 
-  // Crea una rutina (opcionalmente con productos).
+  // Crea una rutina (opcionalmente con productos)
   @ApiOperation({ summary: 'Crear una rutina' })
   @Post()
   async create(@Req() req, @Body() createRoutineDto: CreateRoutineDto) {
@@ -39,7 +39,7 @@ export class RoutineController {
     return this.successResponse('Rutina creada exitosamente', routine);
   }
 
-  // Lista rutinas del usuario.
+  // Lista rutinas del usuario
   @ApiOperation({ summary: 'Listar rutinas del usuario autenticado' })
   @Get()
   async findAll(@Req() req) {
@@ -50,7 +50,7 @@ export class RoutineController {
     });
   }
 
-  // Obtiene una rutina por id.
+  // Obtiene una rutina por id
   @ApiOperation({ summary: 'Obtener una rutina por id' })
   @Get(':id')
   async findOne(@Req() req, @Param('id') id: string) {
@@ -61,7 +61,7 @@ export class RoutineController {
     return this.successResponse('Rutina obtenida', routine);
   }
 
-  // Actualiza nombre/tipo/productos de una rutina.
+  // Actualiza nombre/tipo/productos de una rutina
   @ApiOperation({ summary: 'Actualizar una rutina' })
   @Patch(':id')
   async update(
@@ -77,7 +77,7 @@ export class RoutineController {
     return this.successResponse('Rutina actualizada exitosamente', routine);
   }
 
-  // Elimina una rutina.
+  // Elimina una rutina
   @ApiOperation({ summary: 'Eliminar una rutina' })
   @Delete(':id')
   async delete(@Req() req, @Param('id') id: string) {
@@ -85,7 +85,7 @@ export class RoutineController {
     return this.successResponse('Rutina eliminada exitosamente', routine);
   }
 
-  // Reordena los productos de una rutina.
+  // Reordena los productos de una rutina
   @ApiOperation({ summary: 'Reordenar productos de una rutina' })
   @Patch(':id/reorder')
   async reorderProducts(
@@ -101,7 +101,7 @@ export class RoutineController {
     return this.successResponse('Productos reordenados exitosamente', routine);
   }
 
-  // Agrega un producto a una rutina.
+  // Agrega un producto a una rutina
   @ApiOperation({ summary: 'Agregar producto a una rutina' })
   @Post(':id/products')
   async addProduct(
@@ -117,7 +117,7 @@ export class RoutineController {
     return this.successResponse('Producto agregado a la rutina', routine);
   }
 
-  // Elimina un producto de una rutina.
+  // Elimina un producto de una rutina
   @ApiOperation({ summary: 'Eliminar producto de una rutina' })
   @Delete(':id/products/:productId')
   async removeProduct(

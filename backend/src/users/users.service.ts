@@ -59,7 +59,7 @@ export class UsersService {
     return this.userModel.findById(id).exec();
   }
 
-  // lista a todos los usuarios registrados sin mostrar la contraseña
+  // lista a todos los usuarios registrados sin mostrar la contra
   async getAllUsers(): Promise<User[]> {
     return this.userModel.find().select('-password').exec();
   }
@@ -136,7 +136,6 @@ export class UsersService {
     }
     await this.deleteCloudinaryImageByUrl(
       user.profileImage,
-      '🗑️ Imagen de perfil eliminada de Cloudinary',
     );
 
     const updatedUser = await this.update(userId, { profileImage: null });

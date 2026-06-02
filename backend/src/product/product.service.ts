@@ -1,7 +1,6 @@
 import {
   Injectable,
   NotFoundException,
-  ForbiddenException,
   BadRequestException
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -99,7 +98,7 @@ export class ProductService {
       if (!product) {
         throw new NotFoundException(`Producto ${id} no encontrado`);
       }
-      // Permite limpiar fechas cuando frontend envía string vacío.
+      // Permite limpiar fechas cuando frontend envia null
       if ((updateProductDto as any).expirationDate === '') {
         (updateProductDto as any).expirationDate = null;
       }
@@ -111,7 +110,7 @@ export class ProductService {
         Object.entries(updateProductDto).filter(([_, v]) => v !== undefined),
       );
 
-      // Reglas de negocio (caducidad, etc.) cuando cambian campos relacionados.
+      // Reglas de negocio (caducidad, etc.) cuando cambian campos relacionados
       this.applyBusinessRules(product, updateData);
 
       const updated = await this.productModel
@@ -132,7 +131,7 @@ export class ProductService {
   }
 
   private applyBusinessRules(product: Product, updateData: any): void {
-    // Si el producto ya está abierto y cambia el PAO, recalcular caducidad.
+    // Si el producto ya esta abierto y cambia el PAO, recalcular caducidad.
     if (
       product.isOpened &&
       updateData.periodAfterOpening !== undefined
@@ -147,8 +146,8 @@ export class ProductService {
       if (newExpiration) updateData.expirationDate = newExpiration;
     }
 
-    // Si el producto está abierto y cambia la fecha de apertura,
-    // volver a calcular usando el PAO existente (si lo hay).
+    // Si el producto esta abierto y cambia la fecha de apertura,
+    // volver a calcular usando el PAO existente (si lo hay)
     if (
       product.isOpened &&
       updateData.openedDate !== undefined &&
@@ -164,7 +163,7 @@ export class ProductService {
       if (newExpiration) updateData.expirationDate = newExpiration;
     }
 
-    // Si se marca como abierto y existe PAO, calcular caducidad (si no viene ya definida).
+    // Si se marca como abierto y existe PAO, calcular caducidad (si no viene ya definida)
     if (
       updateData.isOpened === true &&
       product.periodAfterOpening &&
@@ -260,7 +259,6 @@ export class ProductService {
     }
   }
 
-  // marcar el producto como abierto y mandar a hacer el calculo de caducidad
   // marcar el producto como abierto y mandar a hacer el calculo de caducidad
   async markAsOpened(
     id: string,
@@ -416,7 +414,7 @@ export class ProductService {
   // obtener productos caducados
   async getExpiredProducts(userId: string): Promise<Product[]> {
     const today = new Date();
-    today.setHours(23, 59, 59, 999); // Final del día de hoy
+    today.setHours(23, 59, 59, 999); //fin de dia
 
     return this.productModel
       .find({
@@ -483,7 +481,7 @@ export class ProductService {
     const mMatch = cleaned.match(/^(\d+)\s*M$/);
     if (mMatch) return parseInt(mMatch[1]);
 
-    // Solo número "12"
+    // Solo num "12"
     const numberMatch = cleaned.match(/^(\d+)$/);
     if (numberMatch) return parseInt(numberMatch[1]);
 

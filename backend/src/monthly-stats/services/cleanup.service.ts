@@ -16,30 +16,14 @@ export class CleanupService {
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
-  // CRON: se ejecuta el primer día del mes a las 00:00
+  // CRON: se ejecuta el primer dia del mes a las 00:00
   // Guarda los productos usados del MES ANTERIOR y los elimina
   @Cron('0 0 1 * *')
   async cleanupUsedProducts(): Promise<void> {
-    this.logger.log('🧹 [CRON] Iniciando limpieza mensual de productos usados');
     await this.executeCleanup(false); // false = mes anterior
   }
 
-  // Método para pruebas: guarda los productos usados del MES ACTUAL y los elimina
-  async testCleanupNow(): Promise<{ success: boolean; message: string }> {
-    try {
-      this.logger.log('🧪 [TEST] Ejecutando limpieza de pruebas (mes actual)');
-      await this.executeCleanup(true); // true = mes actual
-      return {
-        success: true,
-        message: 'Limpieza de pruebas ejecutada exitosamente',
-      };
-    } catch (error) {
-      this.logger.error(`❌ Error en limpieza de pruebas: ${error.message}`);
-      return { success: false, message: `Error: ${error.message}` };
-    }
-  }
-
-  // Lógica común para la limpieza
+  // logica comun para la limpieza
   private async executeCleanup(useCurrentMonth: boolean): Promise<void> {
     try {
       const now = new Date();
@@ -49,9 +33,6 @@ export class CleanupService {
       if (useCurrentMonth) {
         year = now.getFullYear();
         month = now.getMonth() + 1;
-        this.logger.log(
-          `Archivando productos para el mes actual: ${month}/${year}`,
-        );
       } else {
         // Mes anterior
         if (now.getMonth() === 0) {
@@ -61,9 +42,6 @@ export class CleanupService {
           year = now.getFullYear();
           month = now.getMonth();
         }
-        this.logger.log(
-          `Archivando productos para el mes anterior: ${month}/${year}`,
-        );
       }
 
       const usersWithUsed = await this.productModel.aggregate([
@@ -78,7 +56,6 @@ export class CleanupService {
       ]);
 
       if (usersWithUsed.length === 0) {
-        this.logger.log('No hay productos usados para limpiar');
         return;
       }
 
@@ -101,7 +78,6 @@ export class CleanupService {
           if (publicId) {
             try {
               await this.cloudinaryService.deleteImage(publicId);
-              this.logger.debug(`Imagen eliminada: ${publicId}`);
             } catch (err: any) {
               this.logger.warn(
                 `Error eliminando imagen ${publicId}: ${err.message}`,
@@ -113,14 +89,9 @@ export class CleanupService {
         await this.productModel.deleteMany({
           _id: { $in: userData.productIds },
         });
-        this.logger.log(
-          `Usuario ${userId}: ${count} productos usados archivados (${month}/${year})`,
-        );
       }
 
-      this.logger.log('✅ Limpieza completada');
     } catch (error) {
-      this.logger.error(`❌ Error en limpieza: ${error.message}`, error.stack);
       throw error; // Para que el método de pruebas pueda capturarlo
     }
   }

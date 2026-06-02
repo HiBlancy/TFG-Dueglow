@@ -25,5 +25,4 @@ export const MonthlyStatsSchema = new Schema(
   { timestamps: true, strict: false },
 );
 
-// Índice compuesto para evitar duplicados y búsquedas rápidas
 MonthlyStatsSchema.index({ userId: 1, year: 1, month: 1 }, { unique: true });

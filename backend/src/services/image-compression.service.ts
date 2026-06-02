@@ -3,19 +3,13 @@ import sharp from 'sharp';
 
 @Injectable()
 export class ImageCompressionService {
-  /**
-   * Comprime una imagen para perfil de usuario
-   * @param buffer - Buffer de la imagen original
-   * @param originalMime - Tipo MIME original
-   * @returns Buffer de la imagen comprimida
-   */
   async compressProfileImage(buffer: Buffer, originalMime: string): Promise<Buffer> {
     try {
       const metadata = await sharp(buffer).metadata();
       
       console.log(`📐 Imagen original: ${metadata.width}x${metadata.height}, ${(buffer.length / 1024).toFixed(2)}KB`);
       
-      // Configuración para foto de perfil
+      // Configuracion para foto de perfil
       const MAX_WIDTH = 500;
       const MAX_HEIGHT = 500;
       const QUALITY = 80; // Calidad 80% es suficiente para perfil
@@ -37,12 +31,11 @@ export class ImageCompressionService {
       }
       
       const compressedBuffer = await pipeline.toBuffer();
-      const compressedSizeKB = compressedBuffer.length / 1024;
       
       console.log(`✨ Imagen comprimida: ${(compressedBuffer.length / 1024).toFixed(2)}KB`);
       console.log(`💾 Ahorro: ${((1 - compressedBuffer.length / buffer.length) * 100).toFixed(1)}%`);
       
-      // Validar que no exceda 1MB después de comprimir
+      // Validar que no exceda 1MB despues de comprimir
       if (compressedBuffer.length > 1024 * 1024) {
         throw new BadRequestException('La imagen después de comprimir es mayor a 1MB');
       }
@@ -55,20 +48,17 @@ export class ImageCompressionService {
     }
   }
   
-  /**
-   * Método general para compresión de imágenes (para futuros productos)
-   */
   async compressProductImage(buffer: Buffer, originalMime: string): Promise<Buffer> {
     const metadata = await sharp(buffer).metadata();
     
-    // Configuración para productos (tamaño más grande)
+    // Configuracion para productos (mas grande)
     const MAX_WIDTH = 1200;
     const MAX_HEIGHT = 1200;
     const QUALITY = 85; // Calidad ligeramente mejor para productos
     
     let pipeline = sharp(buffer)
       .resize(MAX_WIDTH, MAX_HEIGHT, {
-        fit: 'inside',      // Mantiene proporción
+        fit: 'inside',      // Mantiene proporcion
         withoutEnlargement: true
       });
     

@@ -310,14 +310,6 @@ export class ProductController {
     return this.successResponse('Estadísticas del mes actual', stats);
   }
 
-  // endpoint de pruebas (mes actual)
-  @ApiOperation({ summary: 'Ejecutar limpieza de prueba del mes actual' })
-  @Post('cleanup/test')
-  async triggerTestCleanup(@Req() req) {
-    const result = await this.cleanupService.testCleanupNow();
-    return this.successResponse(result.message, result);
-  }
-
   // llamada de prueba para hacer limpieza sin tener que ser fin de mes
   @ApiOperation({ summary: 'Ejecutar limpieza manual de productos usados' })
   @Post('cleanup/execute')

@@ -52,9 +52,5 @@ export const RoutineSchema = new Schema(
   },
   { timestamps: true, strict: false },
 );
-//
-// // Índice para búsquedas rápidas por usuario
-// RoutineSchema.index({ userId: 1 });
 
-// Índice compuesto para evitar rutinas duplicadas por usuario y nombre
 RoutineSchema.index({ userId: 1, name: 1 }, { sparse: true });

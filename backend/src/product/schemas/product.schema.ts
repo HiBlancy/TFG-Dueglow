@@ -40,12 +40,11 @@ export const ProductSchema = new Schema(
   { timestamps: true, strict: false },
 );
 
-// Índice compuesto para evitar duplicados (mismo producto en misma lista)
 ProductSchema.index({ userId: 1, barcode: 1, listType: 1 }, { sparse: true });
 ProductSchema.virtual('isExpired').get(function () {
   if (!this.expirationDate) return false;
-  const expDate = new Date(this.expirationDate); // convierte "2025-12-25" a Date UTC
+  const expDate = new Date(this.expirationDate);
   const today = new Date();
-  today.setHours(0, 0, 0, 0); // normalizar a medianoche UTC
+  today.setHours(0, 0, 0, 0);
   return today > expDate;
 });

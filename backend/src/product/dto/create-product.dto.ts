@@ -67,13 +67,12 @@ export class CreateProductDto {
     // Si no hay valor, retornamos undefined
     if (value === null || value === undefined) return undefined;
 
-    // Convertir a número (si es string numérico o número)
+    // Convertir a num
     const num = typeof value === 'number' ? value : parseInt(value, 10);
 
-    // Si no es un número válido, retornamos el valor original (fallará en @Matches)
     if (isNaN(num)) return value;
 
-    // Añadimos la 'M' automáticamente
+    // Anadimos la 'M' auto
     return `${num}M`;
   })
   @IsString()

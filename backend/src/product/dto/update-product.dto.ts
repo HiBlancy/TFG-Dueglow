@@ -1,4 +1,3 @@
-// update-product.dto.ts - ACTUALIZADO para aceptar nulls
 import {
   IsOptional,
   IsString,
@@ -27,7 +26,7 @@ export class UpdateProductDto {
   @IsOptional()
   @IsString()
   @IsNotEmpty()
-  brand?: string | null; // ✅ Permitir null
+  brand?: string | null;
 
   @ApiPropertyOptional({
     example: 'https://example.com/product.jpg',
@@ -36,12 +35,12 @@ export class UpdateProductDto {
   })
   @IsOptional()
   @IsUrl()
-  imageUrl?: string | null; // ✅ Permitir null
+  imageUrl?: string | null;
 
   @ApiPropertyOptional({ example: '1234567890123', description: 'Codigo de barras', nullable: true })
   @IsOptional()
   @IsString()
-  barcode?: string | null; // ✅ Permitir null
+  barcode?: string | null;
 
   @ApiPropertyOptional({
     example: ['serum', 'vitamina-c'],
@@ -51,19 +50,19 @@ export class UpdateProductDto {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  categories?: string[] | null; // ✅ Permitir null
+  categories?: string[] | null;
 
   @ApiPropertyOptional({ example: 'Ideal para piel sensible', description: 'Notas', nullable: true })
   @IsOptional()
   @IsString()
-  notes?: string | null; // ✅ Permitir null (para limpiar)
+  notes?: string | null;
 
   @ApiPropertyOptional({ example: 4, description: 'Valoracion de 1 a 5', nullable: true })
   @IsOptional()
   @IsNumber()
   @Min(1)
   @Max(5)
-  rating?: number | null; // ✅ Permitir null (para limpiar)
+  rating?: number | null;
 
   @ApiPropertyOptional({ example: 'have', enum: ['wishlist', 'have', 'used'], description: 'Lista destino' })
   @IsOptional()
@@ -78,7 +77,7 @@ export class UpdateProductDto {
   @IsOptional()
   @Transform(({ value }) => {
     if (value === null) return null;
-    // Permite limpiar la fecha enviando string vacío desde frontend.
+    // Permite limpiar la fecha enviando string vacio
     if (value === '') return null;
     if (value === undefined) return undefined;
     const date = new Date(value);
@@ -87,7 +86,7 @@ export class UpdateProductDto {
       Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),
     );
   })
-  expirationDate?: Date | string | null; // ✅ Permitir null (para limpiar)
+  expirationDate?: Date | string | null;
 
   @ApiPropertyOptional({
     example: '12M',
@@ -96,17 +95,16 @@ export class UpdateProductDto {
   })
   @IsOptional()
   @Transform(({ value }) => {
-    // Permitir limpiar PAO enviando null o string vacío.
+    // Permitir limpiar PAO enviando null
     if (value === null || value === '') return null;
     if (value === undefined) return undefined;
 
-    // Convertir a número (si es string numérico o número)
+    // Convertir a num
     const num = typeof value === 'number' ? value : parseInt(value, 10);
 
-    // Si no es un número válido, retornamos el valor original (fallará en @Matches)
     if (isNaN(num)) return value;
 
-    // Añadimos la 'M' automáticamente
+    // Anadimos la 'M' auto
     return `${num}M`;
   })
   @IsString()
@@ -123,10 +121,10 @@ export class UpdateProductDto {
   @IsOptional()
   @Type(() => Date)
   @IsDate()
-  openedDate?: Date | string | null; // ✅ Permitir null (para limpiar)
+  openedDate?: Date | string | null;
 
   @ApiPropertyOptional({ example: true, description: 'Indica si el producto esta abierto', nullable: true })
   @IsOptional()
   @IsBoolean()
-  isOpened?: boolean | null; // ✅ Permitir null
+  isOpened?: boolean | null;
 }
