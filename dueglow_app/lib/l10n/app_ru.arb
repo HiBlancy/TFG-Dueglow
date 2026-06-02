@@ -543,5 +543,45 @@
   "tutorialDrawerTitle": "Боковое меню",
   "tutorialDrawerBody": "Нажмите иконку меню (☰) справа вверху: настройки, профиль, FAQ и выход.",
   "tutorialDoneTitle": "Готово!",
-  "tutorialDoneBody": "Вы знаете основы. Обучение можно повторить в начале раздела FAQ."
+  "tutorialDoneBody": "Вы знаете основы. Обучение можно повторить в начале раздела FAQ.",
+  "homeExpiredProductsCount": "{count, plural, =1{У вас 1 просроченный продукт} few{У вас {count} просроченных продукта} many{У вас {count} просроченных продуктов} other{У вас {count} просроченных продукта}}",
+  "@homeExpiredProductsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productListHave": "Есть",
+  "productListWishlist": "Желаемое",
+  "productListUsed": "Завершённые",
+  "sortTooltip": "Сортировка",
+  "sortRecent": "Недавние",
+  "sortAlphabetical": "А-Я",
+  "sortByExpiration": "Срок годности",
+  "understood": "Понятно",
+  "continueButton": "Продолжить",
+  "loginTagline": "Ваша персональная бьюти-рутина",
+  "errorWithMessage": "Ошибка: {message}",
+  "@errorWithMessage": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "dayMondayShort": "Пн",
+  "dayMonday": "Понедельник",
+  "dayTuesdayShort": "Вт",
+  "dayTuesday": "Вторник",
+  "dayWednesdayShort": "Ср",
+  "dayWednesday": "Среда",
+  "dayThursdayShort": "Чт",
+  "dayThursday": "Четверг",
+  "dayFridayShort": "Пт",
+  "dayFriday": "Пятница",
+  "daySaturdayShort": "Сб",
+  "daySaturday": "Суббота",
+  "daySundayShort": "Вс",
+  "daySunday": "Воскресенье"
 }

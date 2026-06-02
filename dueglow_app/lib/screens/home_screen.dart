@@ -444,7 +444,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Padding(
                           padding: const EdgeInsets.only(left: 12),
                           child: Text(
-                            'Tienes $_expiredProductsCount productos caducados',
+                            l10n.homeExpiredProductsCount(
+                              _expiredProductsCount,
+                            ),
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.error,
                               fontWeight: FontWeight.w600,

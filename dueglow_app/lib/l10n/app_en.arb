@@ -544,5 +544,45 @@
   "tutorialDrawerTitle": "Side menu",
   "tutorialDrawerBody": "Tap the menu icon (☰) at the top right for settings, edit profile, FAQs, and log out.",
   "tutorialDoneTitle": "You're all set!",
-  "tutorialDoneBody": "You know the essentials. You can replay this tutorial anytime from the top of the FAQs screen."
+  "tutorialDoneBody": "You know the essentials. You can replay this tutorial anytime from the top of the FAQs screen.",
+  "homeExpiredProductsCount": "{count, plural, =1{You have 1 expired product} other{You have {count} expired products}}",
+  "@homeExpiredProductsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productListHave": "I have",
+  "productListWishlist": "Wishlist",
+  "productListUsed": "Finished",
+  "sortTooltip": "Sort",
+  "sortRecent": "Recent",
+  "sortAlphabetical": "A-Z",
+  "sortByExpiration": "Expiration",
+  "understood": "Got it",
+  "continueButton": "Continue",
+  "loginTagline": "Your personalized beauty routine",
+  "errorWithMessage": "Error: {message}",
+  "@errorWithMessage": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "dayMondayShort": "Mo",
+  "dayMonday": "Monday",
+  "dayTuesdayShort": "Tu",
+  "dayTuesday": "Tuesday",
+  "dayWednesdayShort": "We",
+  "dayWednesday": "Wednesday",
+  "dayThursdayShort": "Th",
+  "dayThursday": "Thursday",
+  "dayFridayShort": "Fr",
+  "dayFriday": "Friday",
+  "daySaturdayShort": "Sa",
+  "daySaturday": "Saturday",
+  "daySundayShort": "Su",
+  "daySunday": "Sunday"
 }

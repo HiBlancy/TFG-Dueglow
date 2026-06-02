@@ -1225,4 +1225,92 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get tutorialDoneBody =>
       'Ya conoces lo esencial. Puedes volver a ver este tutorial cuando quieras desde el inicio de las preguntas frecuentes.';
+
+  @override
+  String homeExpiredProductsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Tienes $count productos caducados',
+      one: 'Tienes 1 producto caducado',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get productListHave => 'Tengo';
+
+  @override
+  String get productListWishlist => 'Deseados';
+
+  @override
+  String get productListUsed => 'Terminados';
+
+  @override
+  String get sortTooltip => 'Ordenar';
+
+  @override
+  String get sortRecent => 'Recientes';
+
+  @override
+  String get sortAlphabetical => 'A-Z';
+
+  @override
+  String get sortByExpiration => 'Caducidad';
+
+  @override
+  String get understood => 'Entendido';
+
+  @override
+  String get continueButton => 'Continuar';
+
+  @override
+  String get loginTagline => 'Tu rutina de belleza personalizada';
+
+  @override
+  String errorWithMessage(String message) {
+    return 'Error: $message';
+  }
+
+  @override
+  String get dayMondayShort => 'L';
+
+  @override
+  String get dayMonday => 'Lunes';
+
+  @override
+  String get dayTuesdayShort => 'M';
+
+  @override
+  String get dayTuesday => 'Martes';
+
+  @override
+  String get dayWednesdayShort => 'X';
+
+  @override
+  String get dayWednesday => 'Miércoles';
+
+  @override
+  String get dayThursdayShort => 'J';
+
+  @override
+  String get dayThursday => 'Jueves';
+
+  @override
+  String get dayFridayShort => 'V';
+
+  @override
+  String get dayFriday => 'Viernes';
+
+  @override
+  String get daySaturdayShort => 'S';
+
+  @override
+  String get daySaturday => 'Sábado';
+
+  @override
+  String get daySundayShort => 'D';
+
+  @override
+  String get daySunday => 'Domingo';
 }

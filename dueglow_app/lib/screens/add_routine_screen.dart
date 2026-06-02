@@ -7,6 +7,7 @@ import '../widgets/custom_button.dart';
 import '../widgets/custom_text_field.dart';
 import '../l10n/app_localizations.dart';
 import '../services/notifications_coordinator.dart';
+import '../utils/weekday_l10n.dart';
 
 class AddRoutineScreen extends StatefulWidget {
   const AddRoutineScreen({super.key});
@@ -23,16 +24,6 @@ class _AddRoutineScreenState extends State<AddRoutineScreen> {
   RoutineType _selectedType = RoutineType.morning;
   final Set<String> _selectedDays = {};
   bool _isLoading = false;
-
-  final List<Map<String, String>> _days = [
-    {'key': 'monday', 'short': 'L', 'long': 'Lunes'},
-    {'key': 'tuesday', 'short': 'M', 'long': 'Martes'},
-    {'key': 'wednesday', 'short': 'X', 'long': 'Miércoles'},
-    {'key': 'thursday', 'short': 'J', 'long': 'Jueves'},
-    {'key': 'friday', 'short': 'V', 'long': 'Viernes'},
-    {'key': 'saturday', 'short': 'S', 'long': 'Sábado'},
-    {'key': 'sunday', 'short': 'D', 'long': 'Domingo'},
-  ];
 
   @override
   void dispose() {
@@ -52,10 +43,10 @@ class _AddRoutineScreenState extends State<AddRoutineScreen> {
 
   void _selectAll() {
     setState(() {
-      if (_selectedDays.length == _days.length) {
+      if (_selectedDays.length == weekdayKeys.length) {
         _selectedDays.clear();
       } else {
-        _selectedDays.addAll(_days.map((d) => d['key']!));
+        _selectedDays.addAll(weekdayKeys);
       }
     });
   }
@@ -196,7 +187,7 @@ class _AddRoutineScreenState extends State<AddRoutineScreen> {
                   GestureDetector(
                     onTap: _selectAll,
                     child: Text(
-                      _selectedDays.length == _days.length ? AppLocalizations.of(context)!.none : AppLocalizations.of(context)!.all,
+                      _selectedDays.length == weekdayKeys.length ? AppLocalizations.of(context)!.none : AppLocalizations.of(context)!.all,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -215,9 +206,9 @@ class _AddRoutineScreenState extends State<AddRoutineScreen> {
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: _days.map((day) {
-                    final key = day['key']!;
-                    final short = day['short']!;
+                  children: weekdayKeys.map((key) {
+                    final l10n = AppLocalizations.of(context)!;
+                    final short = weekdayShortLabel(l10n, key);
                     final isSelected = _selectedDays.contains(key);
 
                     return GestureDetector(
@@ -268,7 +259,12 @@ class _AddRoutineScreenState extends State<AddRoutineScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: Text(
                     _selectedDays
-                        .map((key) => _days.firstWhere((d) => d['key'] == key)['long'])
+                        .map(
+                          (key) => weekdayLongLabel(
+                            AppLocalizations.of(context)!,
+                            key,
+                          ),
+                        )
                         .join(', '),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.primary.withValues(alpha: 0.8),

@@ -1228,4 +1228,94 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get tutorialDoneBody =>
       'Вы знаете основы. Обучение можно повторить в начале раздела FAQ.';
+
+  @override
+  String homeExpiredProductsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'У вас $count просроченных продукта',
+      many: 'У вас $count просроченных продуктов',
+      few: 'У вас $count просроченных продукта',
+      one: 'У вас 1 просроченный продукт',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get productListHave => 'Есть';
+
+  @override
+  String get productListWishlist => 'Желаемое';
+
+  @override
+  String get productListUsed => 'Завершённые';
+
+  @override
+  String get sortTooltip => 'Сортировка';
+
+  @override
+  String get sortRecent => 'Недавние';
+
+  @override
+  String get sortAlphabetical => 'А-Я';
+
+  @override
+  String get sortByExpiration => 'Срок годности';
+
+  @override
+  String get understood => 'Понятно';
+
+  @override
+  String get continueButton => 'Продолжить';
+
+  @override
+  String get loginTagline => 'Ваша персональная бьюти-рутина';
+
+  @override
+  String errorWithMessage(String message) {
+    return 'Ошибка: $message';
+  }
+
+  @override
+  String get dayMondayShort => 'Пн';
+
+  @override
+  String get dayMonday => 'Понедельник';
+
+  @override
+  String get dayTuesdayShort => 'Вт';
+
+  @override
+  String get dayTuesday => 'Вторник';
+
+  @override
+  String get dayWednesdayShort => 'Ср';
+
+  @override
+  String get dayWednesday => 'Среда';
+
+  @override
+  String get dayThursdayShort => 'Чт';
+
+  @override
+  String get dayThursday => 'Четверг';
+
+  @override
+  String get dayFridayShort => 'Пт';
+
+  @override
+  String get dayFriday => 'Пятница';
+
+  @override
+  String get daySaturdayShort => 'Сб';
+
+  @override
+  String get daySaturday => 'Суббота';
+
+  @override
+  String get daySundayShort => 'Вс';
+
+  @override
+  String get daySunday => 'Воскресенье';
 }

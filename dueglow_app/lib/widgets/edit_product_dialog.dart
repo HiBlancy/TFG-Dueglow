@@ -715,7 +715,7 @@ class _EditProductDialogState extends State<EditProductDialog> {
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            type.label,
+                            type.localizedLabel(AppLocalizations.of(context)!),
                             style: TextStyle(
                               color: isSelected ? Colors.white : type.color,
                               fontWeight: isSelected

@@ -1222,4 +1222,92 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get tutorialDoneBody =>
       'You know the essentials. You can replay this tutorial anytime from the top of the FAQs screen.';
+
+  @override
+  String homeExpiredProductsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'You have $count expired products',
+      one: 'You have 1 expired product',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get productListHave => 'I have';
+
+  @override
+  String get productListWishlist => 'Wishlist';
+
+  @override
+  String get productListUsed => 'Finished';
+
+  @override
+  String get sortTooltip => 'Sort';
+
+  @override
+  String get sortRecent => 'Recent';
+
+  @override
+  String get sortAlphabetical => 'A-Z';
+
+  @override
+  String get sortByExpiration => 'Expiration';
+
+  @override
+  String get understood => 'Got it';
+
+  @override
+  String get continueButton => 'Continue';
+
+  @override
+  String get loginTagline => 'Your personalized beauty routine';
+
+  @override
+  String errorWithMessage(String message) {
+    return 'Error: $message';
+  }
+
+  @override
+  String get dayMondayShort => 'Mo';
+
+  @override
+  String get dayMonday => 'Monday';
+
+  @override
+  String get dayTuesdayShort => 'Tu';
+
+  @override
+  String get dayTuesday => 'Tuesday';
+
+  @override
+  String get dayWednesdayShort => 'We';
+
+  @override
+  String get dayWednesday => 'Wednesday';
+
+  @override
+  String get dayThursdayShort => 'Th';
+
+  @override
+  String get dayThursday => 'Thursday';
+
+  @override
+  String get dayFridayShort => 'Fr';
+
+  @override
+  String get dayFriday => 'Friday';
+
+  @override
+  String get daySaturdayShort => 'Sa';
+
+  @override
+  String get daySaturday => 'Saturday';
+
+  @override
+  String get daySundayShort => 'Su';
+
+  @override
+  String get daySunday => 'Sunday';
 }

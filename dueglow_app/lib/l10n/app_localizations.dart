@@ -2343,6 +2343,162 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Ya conoces lo esencial. Puedes volver a ver este tutorial cuando quieras desde el inicio de las preguntas frecuentes.'**
   String get tutorialDoneBody;
+
+  /// No description provided for @homeExpiredProductsCount.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{Tienes 1 producto caducado} other{Tienes {count} productos caducados}}'**
+  String homeExpiredProductsCount(int count);
+
+  /// No description provided for @productListHave.
+  ///
+  /// In es, this message translates to:
+  /// **'Tengo'**
+  String get productListHave;
+
+  /// No description provided for @productListWishlist.
+  ///
+  /// In es, this message translates to:
+  /// **'Deseados'**
+  String get productListWishlist;
+
+  /// No description provided for @productListUsed.
+  ///
+  /// In es, this message translates to:
+  /// **'Terminados'**
+  String get productListUsed;
+
+  /// No description provided for @sortTooltip.
+  ///
+  /// In es, this message translates to:
+  /// **'Ordenar'**
+  String get sortTooltip;
+
+  /// No description provided for @sortRecent.
+  ///
+  /// In es, this message translates to:
+  /// **'Recientes'**
+  String get sortRecent;
+
+  /// No description provided for @sortAlphabetical.
+  ///
+  /// In es, this message translates to:
+  /// **'A-Z'**
+  String get sortAlphabetical;
+
+  /// No description provided for @sortByExpiration.
+  ///
+  /// In es, this message translates to:
+  /// **'Caducidad'**
+  String get sortByExpiration;
+
+  /// No description provided for @understood.
+  ///
+  /// In es, this message translates to:
+  /// **'Entendido'**
+  String get understood;
+
+  /// No description provided for @continueButton.
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar'**
+  String get continueButton;
+
+  /// No description provided for @loginTagline.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu rutina de belleza personalizada'**
+  String get loginTagline;
+
+  /// No description provided for @errorWithMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'Error: {message}'**
+  String errorWithMessage(String message);
+
+  /// No description provided for @dayMondayShort.
+  ///
+  /// In es, this message translates to:
+  /// **'L'**
+  String get dayMondayShort;
+
+  /// No description provided for @dayMonday.
+  ///
+  /// In es, this message translates to:
+  /// **'Lunes'**
+  String get dayMonday;
+
+  /// No description provided for @dayTuesdayShort.
+  ///
+  /// In es, this message translates to:
+  /// **'M'**
+  String get dayTuesdayShort;
+
+  /// No description provided for @dayTuesday.
+  ///
+  /// In es, this message translates to:
+  /// **'Martes'**
+  String get dayTuesday;
+
+  /// No description provided for @dayWednesdayShort.
+  ///
+  /// In es, this message translates to:
+  /// **'X'**
+  String get dayWednesdayShort;
+
+  /// No description provided for @dayWednesday.
+  ///
+  /// In es, this message translates to:
+  /// **'Miércoles'**
+  String get dayWednesday;
+
+  /// No description provided for @dayThursdayShort.
+  ///
+  /// In es, this message translates to:
+  /// **'J'**
+  String get dayThursdayShort;
+
+  /// No description provided for @dayThursday.
+  ///
+  /// In es, this message translates to:
+  /// **'Jueves'**
+  String get dayThursday;
+
+  /// No description provided for @dayFridayShort.
+  ///
+  /// In es, this message translates to:
+  /// **'V'**
+  String get dayFridayShort;
+
+  /// No description provided for @dayFriday.
+  ///
+  /// In es, this message translates to:
+  /// **'Viernes'**
+  String get dayFriday;
+
+  /// No description provided for @daySaturdayShort.
+  ///
+  /// In es, this message translates to:
+  /// **'S'**
+  String get daySaturdayShort;
+
+  /// No description provided for @daySaturday.
+  ///
+  /// In es, this message translates to:
+  /// **'Sábado'**
+  String get daySaturday;
+
+  /// No description provided for @daySundayShort.
+  ///
+  /// In es, this message translates to:
+  /// **'D'**
+  String get daySundayShort;
+
+  /// No description provided for @daySunday.
+  ///
+  /// In es, this message translates to:
+  /// **'Domingo'**
+  String get daySunday;
 }
 
 class _AppLocalizationsDelegate

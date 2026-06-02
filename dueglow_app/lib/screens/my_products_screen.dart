@@ -119,7 +119,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
       }
     } catch (e) {
       setState(() {
-        _error = 'Error: $e';
+        _error = AppLocalizations.of(context)!.errorWithMessage('$e');
         _isLoading = false;
         _isMoreLoading = false;
       });
@@ -284,13 +284,14 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
   }
 
   String _sortOptionLabel(ProductSortOption option) {
+    final l10n = AppLocalizations.of(context)!;
     switch (option) {
       case ProductSortOption.addedNewest:
-        return 'Recientes';
+        return l10n.sortRecent;
       case ProductSortOption.alphabetical:
-        return 'A-Z';
+        return l10n.sortAlphabetical;
       case ProductSortOption.expirationSoonest:
-        return 'Caducidad';
+        return l10n.sortByExpiration;
     }
   }
 
@@ -350,7 +351,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = 'Error: $e';
+        _error = AppLocalizations.of(context)!.errorWithMessage('$e');
         _isLoading = false;
         _isMoreLoading = false;
       });
@@ -415,9 +416,9 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
     final l10n = AppLocalizations.of(context)!;
     return _byListType<String>(
       allValue: l10n.allProducts,
-      haveValue: 'Tengo',
-      wishlistValue: 'Deseados',
-      usedValue: 'Terminados',
+      haveValue: l10n.productListHave,
+      wishlistValue: l10n.productListWishlist,
+      usedValue: l10n.productListUsed,
     );
   }
 
@@ -606,7 +607,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
             ),
             const SizedBox(width: 6),
             Text(
-              type.label,
+              type.localizedLabel(AppLocalizations.of(context)!),
               style: TextStyle(
                 color: isSelected ? Colors.white : type.color,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
@@ -892,7 +893,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
           ),
           const SizedBox(width: 8),
           PopupMenuButton<ProductSortOption>(
-            tooltip: 'Ordenar',
+            tooltip: AppLocalizations.of(context)!.sortTooltip,
             onSelected: (option) {
               setState(() {
                 _sortOption = option;

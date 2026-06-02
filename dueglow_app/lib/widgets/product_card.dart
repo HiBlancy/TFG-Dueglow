@@ -102,7 +102,7 @@ class _ProductCardState extends State<ProductCard> with SingleTickerProviderStat
                       Text(
                         (widget.product.brand != null && widget.product.brand!.isNotEmpty)
                             ? widget.product.brand!
-                            : 'Sin marca',
+                            : AppLocalizations.of(context)!.noBrand,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                         ),

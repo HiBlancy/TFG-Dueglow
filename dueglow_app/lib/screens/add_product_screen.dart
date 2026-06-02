@@ -624,6 +624,40 @@ class _AddProductScreenState extends State<AddProductScreen> {
   }
 
 
+  TextStyle _paoSectionTitleStyle(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    return TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      color: isDark
+          ? theme.colorScheme.onSurface.withValues(alpha: 0.95)
+          : theme.colorScheme.onSurface.withValues(alpha: 0.88),
+    );
+  }
+
+  TextStyle _paoHelperPrimaryStyle(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    return TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      height: 1.3,
+      color: isDark
+          ? theme.colorScheme.onSurface.withValues(alpha: 0.92)
+          : theme.colorScheme.onSurface.withValues(alpha: 0.86),
+    );
+  }
+
+  TextStyle _paoHelperSecondaryStyle(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    return TextStyle(
+      fontSize: 13,
+      height: 1.35,
+      color: isDark
+          ? theme.colorScheme.onSurface.withValues(alpha: 0.82)
+          : theme.colorScheme.onSurface.withValues(alpha: 0.76),
+    );
+  }
+
   Widget _buildPaoSelector(ThemeData theme) {
 
     return Column(
@@ -631,15 +665,11 @@ class _AddProductScreenState extends State<AddProductScreen> {
       children: [
         Row(
           children: [
-            Icon(Icons.timer_outlined, size: 18, color: theme.colorScheme.primary),
+            Icon(Icons.timer_outlined, size: 20, color: theme.colorScheme.primary),
             const SizedBox(width: 8),
             Text(
               AppLocalizations.of(context)!.paoDuration,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-              ),
+              style: _paoSectionTitleStyle(theme),
             ),
           ],
         ),
@@ -691,18 +721,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
                       children: [
                         Text(
                           AppLocalizations.of(context)!.periodAfterOpening,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                          ),
+                          style: _paoHelperPrimaryStyle(theme),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 6),
                         Text(
                           AppLocalizations.of(context)!.findOpenJarIcon,
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                          ),
+                          style: _paoHelperSecondaryStyle(theme),
                         ),
                       ],
                     ),
@@ -763,7 +787,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 controller: _paoController,
                 decoration: InputDecoration(
                   hintText: AppLocalizations.of(context)!.customPaoHint,
-                  hintStyle: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
+                  hintStyle: _paoHelperSecondaryStyle(theme),
                   isDense: true,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   border: OutlineInputBorder(

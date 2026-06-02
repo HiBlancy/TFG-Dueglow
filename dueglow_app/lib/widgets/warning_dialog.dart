@@ -1,16 +1,20 @@
 
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 
 class WarningDialog {
   static Future<bool> show({
     required BuildContext context,
     required String title,
     required String content,
-    String confirmText = 'Continuar',
-    String cancelText = 'Cancelar',
+    String? confirmText,
+    String? cancelText,
     bool isDanger = false,
   }) async {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    final resolvedConfirm = confirmText ?? l10n.continueButton;
+    final resolvedCancel = cancelText ?? l10n.cancel;
     final subtleText = theme.colorScheme.onSurface.withValues(alpha: 0.7);
 
     final result = await showDialog<bool>(
@@ -49,7 +53,7 @@ class WarningDialog {
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text(
-              cancelText,
+              resolvedCancel,
 
               style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
             ),
@@ -68,7 +72,7 @@ class WarningDialog {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: Text(confirmText),
+            child: Text(resolvedConfirm),
           ),
         ],
       ),
@@ -81,6 +85,7 @@ class WarningDialog {
     required String title,
     required String content,
   }) async {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final subtleText = theme.colorScheme.onSurface.withValues(alpha: 0.7);
 
@@ -125,7 +130,7 @@ class WarningDialog {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text('Entendido'),
+            child: Text(l10n.understood),
           ),
         ],
       ),

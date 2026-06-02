@@ -545,5 +545,45 @@
   "tutorialDrawerTitle": "Menú lateral",
   "tutorialDrawerBody": "Pulsa el icono de menú (☰) arriba a la derecha para acceder a configuración, editar perfil, preguntas frecuentes y cerrar sesión.",
   "tutorialDoneTitle": "¡Listo!",
-  "tutorialDoneBody": "Ya conoces lo esencial. Puedes volver a ver este tutorial cuando quieras desde el inicio de las preguntas frecuentes."
+  "tutorialDoneBody": "Ya conoces lo esencial. Puedes volver a ver este tutorial cuando quieras desde el inicio de las preguntas frecuentes.",
+  "homeExpiredProductsCount": "{count, plural, =1{Tienes 1 producto caducado} other{Tienes {count} productos caducados}}",
+  "@homeExpiredProductsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productListHave": "Tengo",
+  "productListWishlist": "Deseados",
+  "productListUsed": "Terminados",
+  "sortTooltip": "Ordenar",
+  "sortRecent": "Recientes",
+  "sortAlphabetical": "A-Z",
+  "sortByExpiration": "Caducidad",
+  "understood": "Entendido",
+  "continueButton": "Continuar",
+  "loginTagline": "Tu rutina de belleza personalizada",
+  "errorWithMessage": "Error: {message}",
+  "@errorWithMessage": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "dayMondayShort": "L",
+  "dayMonday": "Lunes",
+  "dayTuesdayShort": "M",
+  "dayTuesday": "Martes",
+  "dayWednesdayShort": "X",
+  "dayWednesday": "Miércoles",
+  "dayThursdayShort": "J",
+  "dayThursday": "Jueves",
+  "dayFridayShort": "V",
+  "dayFriday": "Viernes",
+  "daySaturdayShort": "S",
+  "daySaturday": "Sábado",
+  "daySundayShort": "D",
+  "daySunday": "Domingo"
 }

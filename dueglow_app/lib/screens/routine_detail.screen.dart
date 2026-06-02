@@ -11,6 +11,7 @@ import '../widgets/custom_button.dart';
 import '../widgets/custom_text_field.dart';
 import '../l10n/app_localizations.dart';
 import '../services/notifications_coordinator.dart';
+import '../utils/weekday_l10n.dart';
 import 'product_screen.dart';
 
 class RoutineDetailScreen extends StatefulWidget {
@@ -34,16 +35,6 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
   late TextEditingController _nameController;
   RoutineType _editingType = RoutineType.morning;
   Set<String> _editingDays = {};
-
-  final List<Map<String, String>> _allDays = [
-    {'key': 'monday', 'short': 'L', 'long': 'Lunes'},
-    {'key': 'tuesday', 'short': 'M', 'long': 'Martes'},
-    {'key': 'wednesday', 'short': 'X', 'long': 'Miércoles'},
-    {'key': 'thursday', 'short': 'J', 'long': 'Jueves'},
-    {'key': 'friday', 'short': 'V', 'long': 'Viernes'},
-    {'key': 'saturday', 'short': 'S', 'long': 'Sábado'},
-    {'key': 'sunday', 'short': 'D', 'long': 'Domingo'},
-  ];
 
   @override
   void initState() {
@@ -618,8 +609,10 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
                                       const SizedBox(width: 6),
                                       Text(
                                         isMorning
-                                            ? 'Rutina de mañana'
-                                            : 'Rutina de noche',
+                                            ? AppLocalizations.of(context)!
+                                                  .morningRoutineLabel
+                                            : AppLocalizations.of(context)!
+                                                  .nightRoutineLabel,
                                         style: TextStyle(
                                           fontWeight: FontWeight.w600,
                                           fontSize: 13,
@@ -635,10 +628,11 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
 
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: _allDays.map((day) {
+                              children: weekdayKeys.map((dayKey) {
                                 final isActive = _routine.days.contains(
-                                  day['key'],
+                                  dayKey,
                                 );
+                                final l10n = AppLocalizations.of(context)!;
                                 return Container(
                                   width: 40,
                                   height: 40,
@@ -658,7 +652,7 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
                                     shape: BoxShape.circle,
                                   ),
                                   child: Text(
-                                    day['short']!,
+                                    weekdayShortLabel(l10n, dayKey),
                                     style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.bold,
@@ -737,17 +731,15 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
                                   onTap: () {
                                     setState(() {
                                       if (_editingDays.length ==
-                                          _allDays.length) {
+                                          weekdayKeys.length) {
                                         _editingDays.clear();
                                       } else {
-                                        _editingDays.addAll(
-                                          _allDays.map((d) => d['key']!),
-                                        );
+                                        _editingDays.addAll(weekdayKeys);
                                       }
                                     });
                                   },
                                   child: Text(
-                                    _editingDays.length == _allDays.length
+                                    _editingDays.length == weekdayKeys.length
                                         ? AppLocalizations.of(context)!.none
                                         : AppLocalizations.of(context)!.all,
                                     style: TextStyle(
@@ -772,9 +764,9 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceAround,
-                                children: _allDays.map((day) {
-                                  final key = day['key']!;
-                                  final short = day['short']!;
+                                children: weekdayKeys.map((key) {
+                                  final l10n = AppLocalizations.of(context)!;
+                                  final short = weekdayShortLabel(l10n, key);
                                   final isSelected = _editingDays.contains(key);
 
                                   return GestureDetector(

@@ -197,7 +197,7 @@ class _ProductScreenState extends State<ProductScreen> {
                 child: ListTile(
                   leading: Icon(type.icon, color: type.color, size: 24),
                   title: Text(
-                    type.label,
+                    type.localizedLabel(AppLocalizations.of(context)!),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: isCurrentType
                           ? FontWeight.bold
@@ -244,7 +244,9 @@ class _ProductScreenState extends State<ProductScreen> {
 
       await _executeAction(
         action: () => _productService.updateProduct(_currentProduct.id!, updateData),
-        successMessage: AppLocalizations.of(context)!.productMovedToList(newListType.label),
+        successMessage: AppLocalizations.of(context)!.productMovedToList(
+          newListType.localizedLabel(AppLocalizations.of(context)!),
+        ),
         loadingKey: 'changingList',
       );
     }
@@ -893,7 +895,9 @@ class _ProductScreenState extends State<ProductScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  currentListType.label,
+                  currentListType.localizedLabel(
+                    AppLocalizations.of(context)!,
+                  ),
                   style: theme.textTheme.titleMedium?.copyWith(
                     color: currentListType.color,
                     fontWeight: FontWeight.bold,
