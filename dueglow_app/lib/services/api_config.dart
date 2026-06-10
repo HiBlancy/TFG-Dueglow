@@ -19,4 +19,12 @@ class ApiConfig {
   static String getCurrentMonthStatsUrl() => '$baseUrl/products/stats/current-month';
 
   static String getRoutinesUrl() => '$baseUrl/routines';
+
+  /*
+  class SupabaseTables {
+  static const String users = 'users';
+  static const String products = 'products';
+  static const String routines = 'routines';
+  static const String routineProducts = 'routine_products'; // si usas relación
+} */
 }

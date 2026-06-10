@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/auth_service.dart';
 import '../constants/app_constants.dart';
 import '../widgets/custom_text_field.dart';
@@ -37,6 +38,35 @@ class _LoginScreenState extends State<LoginScreen> {
     _passwordController.dispose();
     super.dispose();
   }
+
+  Future<void> _testSupabaseAndNavigate() async {
+  try {
+    final supabase = Supabase.instance.client;
+    // Solo verificamos que el cliente existe, sin hacer consultas a tablas
+    final session = supabase.auth.currentSession;
+    print('✅ Cliente Supabase inicializado. Sesión: $session');
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('✅ Conexión a Supabase exitosa'),
+        backgroundColor: Colors.green,
+        duration: Duration(seconds: 1),
+      ),
+    );
+    await Future.delayed(const Duration(seconds: 1));
+    if (mounted) {
+      Navigator.pushNamed(context, '/register');
+    }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('❌ Error de conexión: ${e.toString()}'),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 4),
+      ),
+    );
+  }
+}
 
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
@@ -332,7 +362,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
         GestureDetector(
-          onTap: () => Navigator.pushNamed(context, '/register'),
+          onTap: () => _testSupabaseAndNavigate(),
           child: Text(
             AppLocalizations.of(context)!.createOne,
             style: theme.textTheme.bodyLarge?.copyWith(
@@ -344,6 +374,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ],
     );
+    
   }
 
   Widget _buildSocialLogins(ThemeData theme) {

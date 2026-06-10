@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../constants/app_constants.dart';
 import 'api_config.dart';
 import 'notification_service.dart';
@@ -10,9 +12,10 @@ import 'notification_service.dart';
 class AuthService {
   static const String _tokenKey = 'auth_token';
 
+  final supabase = Supabase.instance.client;
+
   Future<SharedPreferences> get _prefs async =>
       await SharedPreferences.getInstance();
-
 
   Future<void> saveSession(String token, Map<String, dynamic> userData) async {
     final prefs = await _prefs;
@@ -32,7 +35,6 @@ class AuthService {
       '✅ Sesión guardada - Email: ${userData['email']}, Name: ${userData['name']}',
     );
   }
-
 
   Future<String?> getToken() async {
     final prefs = await _prefs;
@@ -54,7 +56,10 @@ class AuthService {
 
       final exp = json['exp'];
       if (exp is! num) return null;
-      return DateTime.fromMillisecondsSinceEpoch(exp.toInt() * 1000, isUtc: true);
+      return DateTime.fromMillisecondsSinceEpoch(
+        exp.toInt() * 1000,
+        isUtc: true,
+      );
     } catch (_) {
       return null;
     }
@@ -69,13 +74,11 @@ class AuthService {
     return DateTime.now().toUtc().isBefore(expiryUtc.subtract(clockSkew));
   }
 
-
   Future<String?> getUserName() async {
     final prefs = await _prefs;
     final name = prefs.getString(AppConstants.prefUserName);
     return name;
   }
-
 
   Future<String?> getUserEmail() async {
     final prefs = await _prefs;
@@ -83,30 +86,25 @@ class AuthService {
     return email;
   }
 
-
   Future<String?> getUserId() async {
     final prefs = await _prefs;
     return prefs.getString(AppConstants.prefUserId);
   }
-
 
   Future<String?> getUserPhone() async {
     final prefs = await _prefs;
     return prefs.getString(AppConstants.prefUserPhone);
   }
 
-
   Future<String?> getUserBirthDate() async {
     final prefs = await _prefs;
     return prefs.getString(AppConstants.prefUserBD);
   }
 
-
   Future<String?> getUserProfileImage() async {
     final prefs = await _prefs;
     return prefs.getString(AppConstants.prefUserProfileImage);
   }
-
 
   Future<bool> isLoggedIn() async {
     final prefs = await _prefs;
@@ -116,115 +114,108 @@ class AuthService {
     return isLoggedIn;
   }
 
-
+  // Register con Supabase
   Future<Map<String, dynamic>?> register(
     String email,
     String password,
     String name,
   ) async {
     try {
-      final url = Uri.parse(ApiConfig.getRegisterUrl());
+      final res = await supabase.auth.signUp(
+        email: email.trim(),
+        password: password,
+        data: {'name': name},
+      );
+      if (res.user == null) return null;
 
-      final cleanPassword = password;
+      final insertResult = await supabase.from('profiles').insert({
+        'id': res.user!.id,
+        'name': name,
+        'email': email.trim(),
+      }).select();
 
-      final response = await http
-          .post(
-            url,
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({
-              'name': name,
-              'email': email,
-              'password': cleanPassword,
-            }),
-          )
-          .timeout(const Duration(seconds: 10));
+      final profile = insertResult.first;
+      final userData = {
+        '_id': res.user!.id,
+        'email': email.trim(),
+        'name': name,
+        'phone': profile['phone'] ?? '',
+        'birthDate': profile['birth_date'] ?? '',
+        'profileImage': profile['profile_image'] ?? '',
+      };
+      final session = supabase.auth.currentSession;
+      final token = session?.accessToken ?? '';
+      await saveSession(token, userData);
 
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-
-        if (data['status'] == true && data['data'] != null) {
-          final authData = data['data'];
-          await saveSession(authData['token'], authData['user']);
-          return authData;
-        }
-      }
-
-      return null;
+      return {'token': token, 'user': userData};
     } catch (e) {
+      print('Error en register: $e');
       return null;
     }
   }
 
+  // Login con Supabase
   Future<Map<String, dynamic>?> login(String email, String password) async {
     try {
-      final url = Uri.parse(ApiConfig.getLoginUrl());
+      final res = await supabase.auth.signInWithPassword(
+        email: email.trim(),
+        password: password,
+      );
+      if (res.user == null) return null;
 
-      final response = await http
-          .post(
-            url,
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            body: jsonEncode({'email': email.trim(), 'password': password}),
-          )
-          .timeout(const Duration(seconds: 10));
+      final profileData = await supabase
+          .from('profiles')
+          .select()
+          .eq('id', res.user!.id)
+          .maybeSingle();
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = jsonDecode(response.body);
-        print('📦 Parsed data: $data');
+      final userData = {
+        '_id': res.user!.id,
+        'email': res.user!.email ?? email.trim(),
+        'name': profileData?['name'] ?? res.user!.userMetadata?['name'] ?? '',
+        'phone': profileData?['phone'] ?? '',
+        'birthDate': profileData?['birth_date'] ?? '',
+        'profileImage': profileData?['profile_image'] ?? '',
+      };
+      final session = supabase.auth.currentSession;
+      final token = session?.accessToken ?? '';
+      await saveSession(token, userData);
 
-        if (data['status'] == true && data['data'] != null) {
-          final authData = data['data'];
-          await saveSession(authData['token'], authData['user']);
-          return authData;
-        } else {
-          print('❌ Status false o data null');
-          return null;
-        }
-      } else {
-        print('❌ Status code no es 200/201: ${response.statusCode}');
-        print('❌ Response: ${response.body}');
-        return null;
-      }
+      return {'token': token, 'user': userData};
     } catch (e) {
-      print('❌ Excepción en login: $e');
+      print('Error en login: $e');
       return null;
     }
   }
 
-
   Future<Map<String, dynamic>?> getProfile() async {
-    final token = await getToken();
-    if (token == null) return null;
+    final session = supabase.auth.currentSession;
+    if (session == null) return null;
 
     try {
-      // API call
-      final response = await http.get(
-        Uri.parse(ApiConfig.getProfileUrl()),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-          'x-token': token,
-        },
-      );
+      final profileData = await supabase
+          .from('profiles')
+          .select()
+          .eq('id', session.user.id)
+          .maybeSingle();
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data['status'] == true && data['data'] != null) {
+      if (profileData == null) return null;
 
-          final userData = data['data'];
-          await saveSession(token, userData);
-          return userData;
-        }
-      }
-      return null;
+      final userData = {
+        '_id': session.user.id,
+        'email': session.user.email ?? '',
+        'name': profileData['name'] ?? '',
+        'phone': profileData['phone'] ?? '',
+        'birthDate': profileData['birth_date'] ?? '',
+        'profileImage': profileData['profile_image'] ?? '',
+      };
+      await saveSession(session.accessToken, userData);
+      return userData;
     } catch (e) {
       print('❌ Error al obtener perfil: $e');
       return null;
     }
   }
-
 
   Future<Map<String, dynamic>?> updateUser({
     String? name,
@@ -233,65 +224,48 @@ class AuthService {
     String? password,
     String? profileImage,
   }) async {
-    final token = await getToken();
-    if (token == null) return null;
+    final session = supabase.auth.currentSession;
+    if (session == null) return null;
 
     try {
-      final url = Uri.parse(ApiConfig.getProfileUrl());
-
       final Map<String, dynamic> updateData = {};
       if (name != null && name.isNotEmpty) updateData['name'] = name;
       if (phone != null && phone.isNotEmpty) updateData['phone'] = phone;
       if (birthDate != null && birthDate.isNotEmpty)
-        updateData['birthDate'] = birthDate;
-      if (password != null && password.isNotEmpty)
-        updateData['password'] = password;
+        updateData['birth_date'] = birthDate;
       if (profileImage != null && profileImage.isNotEmpty)
-        updateData['profileImage'] = profileImage;
+        updateData['profile_image'] = profileImage;
 
-      // API call
-      final response = await http.patch(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode(updateData),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data['status'] == true && data['data'] != null) {
-          final updatedUser = data['data'];
-          final prefs = await _prefs;
-
-
-          if (updatedUser['name'] != null) {
-            await prefs.setString(
-              AppConstants.prefUserName,
-              updatedUser['name'],
-            );
-          }
-          if (updatedUser['phone'] != null) {
-            await prefs.setString(
-              AppConstants.prefUserPhone,
-              updatedUser['phone'],
-            );
-          }
-          if (updatedUser['birthDate'] != null) {
-            await prefs.setString(
-              AppConstants.prefUserBD,
-              updatedUser['birthDate'],
-            );
-          }
-
-          print('✅ Usuario actualizado correctamente');
-          return updatedUser;
-        }
+      // Actualizar perfil en tabla profiles
+      if (updateData.isNotEmpty) {
+        await supabase
+            .from('profiles')
+            .update(updateData)
+            .eq('id', session.user.id);
       }
 
-      print('❌ Error al actualizar: ${response.body}');
-      return null;
+      // Si se proporciona una nueva contraseña, actualizarla en auth
+      if (password != null && password.isNotEmpty) {
+        await supabase.auth.updateUser(UserAttributes(password: password));
+      }
+
+      // Obtener los datos actualizados
+      final updatedProfile = await supabase
+          .from('profiles')
+          .select()
+          .eq('id', session.user.id)
+          .single();
+
+      final userData = {
+        '_id': session.user.id,
+        'email': session.user.email ?? '',
+        'name': updatedProfile['name'] ?? '',
+        'phone': updatedProfile['phone'] ?? '',
+        'birthDate': updatedProfile['birth_date'] ?? '',
+        'profileImage': updatedProfile['profile_image'] ?? '',
+      };
+      await saveSession(session.accessToken, userData);
+      return userData;
     } catch (e) {
       print('❌ Error al actualizar usuario: $e');
       return null;
@@ -299,150 +273,137 @@ class AuthService {
   }
 
   Future<bool> deleteAccount() async {
-    final token = await getToken();
-    if (token == null) return false;
-
-    try {
-      final response = await http
-          .delete(
-            Uri.parse(ApiConfig.getDeleteAccountUrl()),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-              'Authorization': 'Bearer $token',
-            },
-          )
-          .timeout(const Duration(seconds: 20));
-
-      if (response.statusCode == 204) {
-        await logout();
-        return true;
-      }
-
-      if (response.statusCode == 200) {
-        if (response.body.isEmpty || response.body.trim().isEmpty) {
-          await logout();
-          return true;
-        }
-        final data = jsonDecode(response.body);
-        if (data is Map<String, dynamic> && data['status'] == true) {
-          await logout();
-          return true;
-        }
-      }
-
-      print('❌ Borrar cuenta: ${response.statusCode} ${response.body}');
-      return false;
-    } catch (e) {
-      print('❌ Error al borrar cuenta: $e');
-      return false;
-    }
-  }
-
-
-  Future<Map<String, dynamic>?> uploadProfileImage(File imageFile) async {
-  final token = await getToken();
-  if (token == null) return null;
+  final session = supabase.auth.currentSession;
+  if (session == null) return false;
 
   try {
-    final url = Uri.parse(ApiConfig.getUploadProfileImageUrl());
+    // Cambia la URL por la que te proporcionó Supabase al desplegar la Edge Function
+    final String functionUrl = 'https://ycbiqgjzcpvvqieffmel.supabase.co/functions/v1/smart-handler';
 
-
-    final bytes = await imageFile.readAsBytes();
-
-
-    String mimeType = _getMimeType(imageFile.path);
-
-    final request = http.MultipartRequest('PATCH', url)
-      ..headers['Authorization'] = 'Bearer $token'
-      ..files.add(
-        http.MultipartFile.fromBytes(
-          'profileImage',
-          bytes,
-          filename: 'profile_${DateTime.now().millisecondsSinceEpoch}.jpg',
-          contentType: MediaType('image', 'jpeg'),
-        ),
-      );
-
-    print('📤 Subiendo imagen de perfil (MIME: $mimeType)');
-    // API call
-    final streamedResponse = await request.send();
-    final response = await http.Response.fromStream(streamedResponse);
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['status'] == true && data['data'] != null) {
-        final updatedUser = data['data'];
-        final prefs = await _prefs;
-        if (updatedUser['profileImage'] != null) {
-          await prefs.setString(AppConstants.prefUserProfileImage, updatedUser['profileImage']);
-        }
-        print('✅ Imagen de perfil actualizada correctamente');
-        return updatedUser;
-      }
-    } else {
-      print('❌ Error al subir imagen: ${response.statusCode}');
-      print('❌ Response: ${response.body}');
-    }
-    return null;
-  } catch (e) {
-    print('❌ Error al subir imagen: $e');
-    return null;
-  }
-}
-
-
-String _getMimeType(String path) {
-  final ext = path.split('.').last.toLowerCase();
-  switch (ext) {
-    case 'jpg': case 'jpeg': return 'image/jpeg';
-    case 'png': return 'image/png';
-    case 'webp': return 'image/webp';
-    case 'heic': return 'image/heic';
-    default: return 'application/octet-stream';
-  }
-}
-
-  Future<Map<String, dynamic>?> deleteProfileImage() async {
-  final token = await getToken();
-  if (token == null) return null;
-
-  try {
-    // API call
-    final response = await http.delete(
-      Uri.parse(ApiConfig.getDeleteProfileImageUrl()),
+    final response = await http.post(
+      Uri.parse(functionUrl),
       headers: {
+        'Authorization': 'Bearer ${session.accessToken}',
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
       },
     );
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['status'] == true && data['data'] != null) {
-        final updatedUser = data['data'];
-
-
-        final prefs = await _prefs;
-        await prefs.remove(AppConstants.prefUserProfileImage);
-
-        print('✅ Imagen de perfil eliminada correctamente');
-        return updatedUser;
-      }
-    } else if (response.statusCode == 404) {
-      print('⚠️ Endpoint para eliminar imagen no encontrado. Asegúrate de que el backend esté actualizado.');
+      await logout();
+      return true;
+    } else {
+      print('❌ Error al borrar cuenta: ${response.body}');
+      return false;
     }
-
-    print('❌ Error al eliminar imagen: ${response.statusCode}');
-    return null;
   } catch (e) {
-    print('❌ Error al eliminar imagen: $e');
-    return null;
+    print('❌ Error al borrar cuenta: $e');
+    return false;
   }
 }
 
+  Future<Map<String, dynamic>?> uploadProfileImage(File imageFile) async {
+    final session = supabase.auth.currentSession;
+    if (session == null) return null;
+
+    try {
+      // Generar nombre único
+      final fileExt = imageFile.path.split('.').last;
+      final fileName =
+          '${session.user.id}_${DateTime.now().millisecondsSinceEpoch}.$fileExt';
+      final filePath = 'avatars/$fileName';
+
+      // Subir a Storage
+      await supabase.storage
+          .from('avatars')
+          .upload(
+            fileName,
+            imageFile,
+            fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
+          );
+
+      // Obtener URL pública
+      final imageUrl = supabase.storage.from('avatars').getPublicUrl(fileName);
+
+      // Actualizar campo profile_image en tabla profiles
+      await supabase
+          .from('profiles')
+          .update({'profile_image': imageUrl})
+          .eq('id', session.user.id);
+
+      // Obtener perfil actualizado
+      final updatedProfile = await supabase
+          .from('profiles')
+          .select()
+          .eq('id', session.user.id)
+          .single();
+
+      final userData = {
+        '_id': session.user.id,
+        'email': session.user.email ?? '',
+        'name': updatedProfile['name'] ?? '',
+        'phone': updatedProfile['phone'] ?? '',
+        'birthDate': updatedProfile['birth_date'] ?? '',
+        'profileImage': updatedProfile['profile_image'] ?? '',
+      };
+      await saveSession(session.accessToken, userData);
+      return userData;
+    } catch (e) {
+      print('❌ Error al subir imagen: $e');
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> deleteProfileImage() async {
+    final session = supabase.auth.currentSession;
+    if (session == null) return null;
+
+    try {
+      // Obtener la URL actual de la imagen
+      final currentProfile = await supabase
+          .from('profiles')
+          .select('profile_image')
+          .eq('id', session.user.id)
+          .single();
+
+      final oldImageUrl = currentProfile['profile_image'] as String?;
+      if (oldImageUrl != null && oldImageUrl.isNotEmpty) {
+        // Extraer el nombre del archivo de la URL pública (asumiendo formato estándar)
+        final fileName = oldImageUrl.split('/').last;
+        // Eliminar del storage
+        await supabase.storage.from('avatars').remove([fileName]);
+      }
+
+      // Limpiar el campo profile_image en la tabla
+      await supabase
+          .from('profiles')
+          .update({'profile_image': null})
+          .eq('id', session.user.id);
+
+      // Obtener perfil actualizado
+      final updatedProfile = await supabase
+          .from('profiles')
+          .select()
+          .eq('id', session.user.id)
+          .single();
+
+      final userData = {
+        '_id': session.user.id,
+        'email': session.user.email ?? '',
+        'name': updatedProfile['name'] ?? '',
+        'phone': updatedProfile['phone'] ?? '',
+        'birthDate': updatedProfile['birth_date'] ?? '',
+        'profileImage': updatedProfile['profile_image'] ?? '',
+      };
+      await saveSession(session.accessToken, userData);
+      return userData;
+    } catch (e) {
+      print('❌ Error al eliminar imagen: $e');
+      return null;
+    }
+  }
 
   Future<void> logout() async {
+    await supabase.auth.signOut();
     await NotificationService.instance.cancelAll();
     final prefs = await _prefs;
     await prefs.remove(_tokenKey);
@@ -456,5 +417,3 @@ String _getMimeType(String path) {
     print('👋 Sesión cerrada');
   }
 }
-
-

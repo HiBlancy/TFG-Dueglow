@@ -4,6 +4,7 @@ import 'package:dueglow/screens/scan_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'providers/theme_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/notification_preferences_provider.dart';
@@ -23,6 +24,14 @@ import 'screens/auth_gate_screen.dart';
 import 'models/tutorial_launch.dart';
 
 Future<void> main() async {
+
+  await Supabase.initialize(
+    url: 'https://ycbiqgjzcpvvqieffmel.supabase.co',
+    anonKey: 'sb_publishable_dk1m8nOrLfi1Pf19eZ8pOw_pKyWq_8X',
+  );
+
+  print('✅ Supabase inicializado correctamente');
+  
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService.instance.initialize();
   final initialTheme = await ThemeProvider.readInitialThemeMode();
@@ -41,6 +50,30 @@ Future<void> main() async {
     ),
   );
 }
+
+/* Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Inicializar Supabase
+  await Supabase.initialize(
+    url: 'https://ycbiqgjzcpvvqieffmel.supabase.co',
+    anonKey: 'sb_publishable_dk1m8nOrLfi1Pf19eZ8pOw_pKyWq_8X',
+  );
+
+  await NotificationService.instance.initialize();
+  final initialTheme = await ThemeProvider.readInitialThemeMode();
+  
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider(initial: initialTheme)),
+        ChangeNotifierProvider(create: (_) => LocaleProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationPreferencesProvider()..load()),
+      ],
+      child: const MyApp(),
+    ),
+  );
+} */
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
